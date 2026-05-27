@@ -89,6 +89,10 @@
         <layoutColumns>
             <layoutItems>
                 <behavior>Edit</behavior>
+                <field>Unit_Testing_Complete__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
                 <field>Unit_Test_Sheet_Complete__c</field>
             </layoutItems>
             <layoutItems>

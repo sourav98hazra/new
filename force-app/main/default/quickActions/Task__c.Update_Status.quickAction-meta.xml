@@ -24,11 +24,6 @@
                 <field>Task_Progress__c</field>
                 <uiBehavior>Readonly</uiBehavior>
             </quickActionLayoutItems>
-            <quickActionLayoutItems>
-                <emptySpace>false</emptySpace>
-                <field>Checklist_Complete__c</field>
-                <uiBehavior>Readonly</uiBehavior>
-            </quickActionLayoutItems>
         </quickActionLayoutColumns>
     </quickActionLayout>
     <type>Update</type>

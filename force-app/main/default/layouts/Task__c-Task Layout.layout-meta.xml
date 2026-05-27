@@ -65,10 +65,6 @@
         <layoutColumns>
             <layoutItems>
                 <behavior>Readonly</behavior>
-                <field>Checklist_Complete__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Readonly</behavior>
                 <field>Is_Overdue__c</field>
             </layoutItems>
         </layoutColumns>
@@ -121,12 +117,6 @@
         <relatedList>Daily_Progress__c.Task__c</relatedList>
     </relatedLists>
     <relatedLists>
-        <fields>NAME</fields>
-        <fields>Description__c</fields>
-        <fields>Is_Completed__c</fields>
-        <fields>Sequence__c</fields>
-        <relatedList>Task_Checklist_Item__c.Task__c</relatedList>
-    </relatedLists>
     <platformActionList>
         <actionListContext>Record</actionListContext>
         <platformActionListItems>

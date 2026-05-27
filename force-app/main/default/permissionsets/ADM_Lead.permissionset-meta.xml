@@ -78,15 +78,6 @@
     </objectPermissions>
     
     <!-- Task Checklist Item Object Permissions -->
-    <objectPermissions>
-        <allowCreate>true</allowCreate>
-        <allowDelete>true</allowDelete>
-        <allowEdit>true</allowEdit>
-        <allowRead>true</allowRead>
-        <modifyAllRecords>true</modifyAllRecords>
-        <object>Task_Checklist_Item__c</object>
-        <viewAllRecords>true</viewAllRecords>
-    </objectPermissions>
     
     <!-- Task Dependency Object Permissions -->
     <objectPermissions>
@@ -262,11 +253,6 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <editable>false</editable>
-        <field>Task__c.Checklist_Complete__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
         <editable>true</editable>
         <field>Task__c.Description__c</field>
         <readable>true</readable>
@@ -299,31 +285,6 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Task__c.Task_Type__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Task_Checklist_Item__c.Completed_By__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Task_Checklist_Item__c.Completed_Date__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Task_Checklist_Item__c.Description__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Task_Checklist_Item__c.Is_Completed__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Task_Checklist_Item__c.Sequence__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

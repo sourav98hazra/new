@@ -8,7 +8,6 @@
         <members>User_Story__c</members>
         <members>Task__c</members>
         <members>Daily_Progress__c</members>
-        <members>Task_Checklist_Item__c</members>
         <members>Task_Dependency__c</members>
         <name>CustomObject</name>
     </types>
@@ -53,6 +52,7 @@
         <members>User_Story__c.QA_Notes__c</members>
         <members>User_Story__c.Rejection_Reason__c</members>
         <members>User_Story__c.Pending_Reason__c</members>
+        <members>User_Story__c.Unit_Testing_Complete__c</members>
         <members>User_Story__c.Unit_Test_Sheet_Complete__c</members>
         <members>User_Story__c.Manual_Deployment_Steps_Complete__c</members>
         <members>User_Story__c.Business_Dependency_Complete__c</members>
@@ -70,7 +70,6 @@
         <members>Task__c.Assigned_To__c</members>
         <members>Task__c.Due_Date__c</members>
         <members>Task__c.Description__c</members>
-        <members>Task__c.Checklist_Complete__c</members>
         <members>Task__c.Blocked_Reason__c</members>
         <members>Task__c.Is_Overdue__c</members>
         <members>Daily_Progress__c.Task__c</members>
@@ -79,12 +78,6 @@
         <members>Daily_Progress__c.Progress_Percentage__c</members>
         <members>Daily_Progress__c.Notes__c</members>
         <members>Daily_Progress__c.Developer__c</members>
-        <members>Task_Checklist_Item__c.Task__c</members>
-        <members>Task_Checklist_Item__c.Is_Completed__c</members>
-        <members>Task_Checklist_Item__c.Description__c</members>
-        <members>Task_Checklist_Item__c.Completed_Date__c</members>
-        <members>Task_Checklist_Item__c.Completed_By__c</members>
-        <members>Task_Checklist_Item__c.Sequence__c</members>
         <members>Task_Dependency__c.Predecessor_Task__c</members>
         <members>Task_Dependency__c.Successor_Task__c</members>
         <members>Task_Dependency__c.Dependency_Type__c</members>
@@ -97,15 +90,13 @@
     <types>
         <members>ProgressCalculationService</members>
         <members>ProgressCalculationServiceTest</members>
-        <members>ChecklistService</members>
-        <members>ChecklistServiceTest</members>
         <members>StatusManagementService</members>
         <members>StatusManagementServiceTest</members>
         <members>NotificationService</members>
         <members>NotificationServiceTest</members>
+        <members>FormalitiesService</members>
         <members>DailyProgressController</members>
         <members>SprintDashboardController</members>
-        <members>ChecklistManagerController</members>
         <members>DailyNotificationScheduler</members>
         <members>DailyNotificationSchedulerTest</members>
         <members>TriggerTestHelper</members>
@@ -117,7 +108,7 @@
     <types>
         <members>DailyProgressTrigger</members>
         <members>TaskTrigger</members>
-        <members>TaskChecklistItemTrigger</members>
+        <members>ActivityTaskTrigger</members>
         <members>UserStoryTrigger</members>
         <members>FeatureTrigger</members>
         <members>SprintTrigger</members>
@@ -137,8 +128,8 @@
         <members>User_Story__c.Checklist_Required_Before_QA</members>
         <members>User_Story__c.Checklist_Required_Before_SIT</members>
         <members>User_Story__c.Formalities_Required_Before_SIT_Ready</members>
+        <members>User_Story__c.Unit_Testing_Required_Before_Dev_Completed</members>
         <members>Task__c.Progress_Cannot_Exceed_100</members>
-        <members>Task__c.Checklist_Required_Before_Complete</members>
         <members>Task__c.Cannot_Complete_Blocked_Task</members>
         <members>Daily_Progress__c.Hours_Worked_Must_Be_Valid</members>
         <members>Daily_Progress__c.Cannot_Edit_Historical_Progress</members>
@@ -151,12 +142,9 @@
     <types>
         <members>dailyProgressModal</members>
         <members>sprintDashboard</members>
-        <members>checklistManager</members>
         <members>developerProcessGuide</members>
         <name>LightningComponentBundle</name>
     </types>
-
-
 
     <!-- Permission Sets -->
     <types>
@@ -184,7 +172,6 @@
         <members>User_Story__c-User Story Layout</members>
         <members>Task__c-Task Layout</members>
         <members>Daily_Progress__c-Daily Progress Layout</members>
-        <members>Task_Checklist_Item__c-Task Checklist Item Layout</members>
         <members>Task_Dependency__c-Task Dependency Layout</members>
         <name>Layout</name>
     </types>
@@ -239,7 +226,6 @@
     <!-- Flows -->
     <types>
         <members>Update_Task_Status</members>
-        <members>Complete_Task_Checklist</members>
         <name>Flow</name>
     </types>
 
@@ -247,7 +233,6 @@
     <types>
         <members>ADM_Home_Page</members>
         <members>ADM_Sprint_Record_Page</members>
-        <members>ADM_Task_Record_Page</members>
         <name>FlexiPage</name>
     </types>
 

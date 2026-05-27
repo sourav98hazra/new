@@ -9,7 +9,7 @@ export default class DeveloperProcessGuide extends LightningElement {
             id: 1,
             number: '1',
             title: 'Pick Up a Task',
-            description: 'Select a task assigned to you from the User Story. Review the task description and checklist items.',
+            description: 'Select a task assigned to you from the User Story. Review the task description and set status to In Progress.',
             icon: 'standard:task',
             phase: 'development'
         },
@@ -17,7 +17,7 @@ export default class DeveloperProcessGuide extends LightningElement {
             id: 2,
             number: '2',
             title: 'Set Status to "In Progress"',
-            description: 'Use the Update Status quick action to move the task to In Progress. This signals to your team that work has begun.',
+            description: 'Use the Update Status quick action to move the task to In Progress. A Unit Testing activity is auto-created on the Story.',
             icon: 'standard:activations',
             phase: 'development'
         },
@@ -32,8 +32,8 @@ export default class DeveloperProcessGuide extends LightningElement {
         {
             id: 4,
             number: '4',
-            title: 'Complete All Checklist Items',
-            description: 'Use the Complete Checklist action to mark each item done. All items must be completed before the task can be marked Completed.',
+            title: 'Complete Unit Testing',
+            description: 'Complete unit testing for the story. Close the "Unit Testing" Activity Task OR tick "Unit Testing Complete" on the story. Both sync automatically.',
             icon: 'standard:task2',
             phase: 'development'
         },
@@ -41,7 +41,7 @@ export default class DeveloperProcessGuide extends LightningElement {
             id: 5,
             number: '5',
             title: 'Mark Task as "Completed"',
-            description: 'Once all checklist items are done, update the task status to Completed. This requires 100% checklist completion.',
+            description: 'Update the task status to Completed using the Update Status button. Log final daily progress if needed.',
             icon: 'standard:approval',
             phase: 'development'
         },
@@ -49,23 +49,31 @@ export default class DeveloperProcessGuide extends LightningElement {
             id: 6,
             number: '6',
             title: 'All Tasks Done - Story to "Dev Completed"',
-            description: 'When all tasks in a User Story are completed, the story automatically moves to Dev Completed status.',
+            description: 'When all tasks are completed AND Unit Testing is done, the story can move to Dev Completed. Unit Testing Complete checkbox is required.',
             icon: 'standard:code_set',
             phase: 'formalities'
         },
         {
             id: 7,
             number: '7',
-            title: 'Complete Pre-SIT Formalities',
-            description: 'Complete all 5 formalities: Unit Test Sheet, Manual Deployment Steps, Business Dependency, AC Update, and Peer Review.',
-            icon: 'standard:document',
+            title: 'Activity Tasks Auto-Created for Formalities',
+            description: 'When story reaches Dev Completed, Activity Tasks are automatically created for each incomplete formality (Unit Test Sheet, Deployment Steps, Business Dependency, AC Update, Peer Review).',
+            icon: 'standard:task',
             phase: 'formalities'
         },
         {
             id: 8,
             number: '8',
-            title: 'Story Moves to "Completed - SIT Ready"',
-            description: 'Once all 5 formalities are checked off, the story can advance to Completed - SIT Ready status.',
+            title: 'Complete Formalities (Activity Tasks)',
+            description: 'Close each formality Activity Task as you complete them. Closing a task auto-ticks the checkbox on the story. Ticking the checkbox auto-closes the task. Story moves to "Formalities InProgress" as you progress.',
+            icon: 'standard:document',
+            phase: 'formalities'
+        },
+        {
+            id: 9,
+            number: '9',
+            title: 'Story Auto-Moves to "Completed - SIT Ready"',
+            description: 'Once all 5 formality Activity Tasks are closed (or checkboxes ticked), the story automatically advances to Completed - SIT Ready. No manual status change needed.',
             icon: 'standard:partners',
             phase: 'formalities'
         },
@@ -148,7 +156,7 @@ export default class DeveloperProcessGuide extends LightningElement {
             id: 5,
             number: '5',
             title: 'Break Stories into Tasks',
-            description: 'Create Tasks under each story. Add checklist items and set task dependencies. Assign to developers with due dates.',
+            description: 'Create Tasks under each story. Set task types, estimated hours, and assign to developers with due dates. Task dependencies can be added as needed.',
             icon: 'standard:task',
             phase: 'planning'
         },

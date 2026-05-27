@@ -1,57 +1,85 @@
 /**
  * @description Trigger for User_Story__c object
- * Handles story progress updates and feature status updates
+ * Handles story progress updates, feature status updates,
+ * formality Activity Task auto-creation and bi-directional sync
  */
 trigger UserStoryTrigger on User_Story__c (after insert, after update, after delete) {
     Set<Id> featureIds = new Set<Id>();
-    Set<Id> sprintIds = new Set<Id>();
-    
+    Set<Id> sprintIds  = new Set<Id>();
+
     if (Trigger.isInsert || Trigger.isUpdate) {
+
+        // Stories that just moved to "Dev In Progress" - create Unit Testing activity
+        List<User_Story__c> movedToDevInProgress = new List<User_Story__c>();
+
+        // Stories that just moved to "Dev Completed" - create formality activities
+        List<User_Story__c> movedToDevCompleted = new List<User_Story__c>();
+
         for (User_Story__c story : Trigger.new) {
-            if (story.Feature__c != null) {
-                featureIds.add(story.Feature__c);
-            }
+            if (story.Feature__c != null) featureIds.add(story.Feature__c);
             sprintIds.add(story.Sprint__c);
-            
-            // Check for old feature if updated
+
             if (Trigger.isUpdate) {
                 User_Story__c oldStory = Trigger.oldMap.get(story.Id);
+
+                // Track moved sprint/feature
                 if (oldStory.Feature__c != null && oldStory.Feature__c != story.Feature__c) {
                     featureIds.add(oldStory.Feature__c);
                 }
                 if (oldStory.Sprint__c != story.Sprint__c) {
                     sprintIds.add(oldStory.Sprint__c);
                 }
-                
-                // Send notification when story becomes Ready for QA
-                if (story.Status__c == 'Ready for QA' && oldStory.Status__c != 'Ready for QA') {
-                    NotificationService.notifyStoryReadyForQA(story.Id);
+
+                // Detect status transitions
+                if (story.Status__c != oldStory.Status__c) {
+
+                    // Dev In Progress - create Unit Testing Activity Task
+                    if (story.Status__c == 'Dev In Progress') {
+                        movedToDevInProgress.add(story);
+                    }
+
+                    // Dev Completed - create formality Activity Tasks
+                    if (story.Status__c == 'Dev Completed') {
+                        movedToDevCompleted.add(story);
+                    }
+
+                    // Sent to QA notification
+                    if (story.Status__c == 'Sent to QA') {
+                        NotificationService.notifyStoryReadyForQA(story.Id);
+                    }
+
+                    // Rejected notification
+                    if (story.Status__c == 'Rejected' && story.Rejection_Reason__c != null) {
+                        NotificationService.notifyStoryRejected(story.Id, story.Rejection_Reason__c);
+                    }
                 }
-                
-                // Send notification when story is rejected
-                if (story.Status__c == 'Rejected' && oldStory.Status__c != 'Rejected' && story.Rejection_Reason__c != null) {
-                    NotificationService.notifyStoryRejected(story.Id, story.Rejection_Reason__c);
-                }
+
+                // Bi-directional sync: checkbox ticked -> close Activity Task + auto-advance status
+                FormalitiesService.syncCheckboxToActivityTask(Trigger.new, Trigger.oldMap);
             }
         }
+
+        // Auto-create Activity Tasks
+        if (!movedToDevInProgress.isEmpty()) {
+            FormalitiesService.createUnitTestingActivityIfNeeded(movedToDevInProgress);
+        }
+        if (!movedToDevCompleted.isEmpty()) {
+            FormalitiesService.createFormalityActivitiesIfNeeded(movedToDevCompleted);
+        }
     }
-    
+
     if (Trigger.isDelete) {
         for (User_Story__c story : Trigger.old) {
-            if (story.Feature__c != null) {
-                featureIds.add(story.Feature__c);
-            }
+            if (story.Feature__c != null) featureIds.add(story.Feature__c);
             sprintIds.add(story.Sprint__c);
         }
     }
-    
-    // Update feature status
+
     if (!featureIds.isEmpty()) {
         StatusManagementService.updateFeatureStatus(featureIds);
         ProgressCalculationService.calculateFeatureProgress(featureIds);
     }
-    
-    // Update sprint progress
+
     if (!sprintIds.isEmpty()) {
         ProgressCalculationService.calculateSprintProgress(sprintIds);
     }

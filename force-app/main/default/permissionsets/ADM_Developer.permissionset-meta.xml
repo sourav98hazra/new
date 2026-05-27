@@ -72,15 +72,6 @@
     </objectPermissions>
     
     <!-- Task Checklist Item Object Permissions - Edit checklist for assigned tasks -->
-    <objectPermissions>
-        <allowCreate>false</allowCreate>
-        <allowDelete>false</allowDelete>
-        <allowEdit>true</allowEdit>
-        <allowRead>true</allowRead>
-        <modifyAllRecords>false</modifyAllRecords>
-        <object>Task_Checklist_Item__c</object>
-        <viewAllRecords>true</viewAllRecords>
-    </objectPermissions>
     
     <!-- Task Dependency Object Permissions - Read Only -->
     <objectPermissions>
@@ -248,11 +239,6 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <editable>false</editable>
-        <field>Task__c.Checklist_Complete__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
         <editable>true</editable>
         <field>Task__c.Description__c</field>
         <readable>true</readable>
@@ -285,31 +271,6 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Task__c.Task_Type__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Task_Checklist_Item__c.Completed_By__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Task_Checklist_Item__c.Completed_Date__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Task_Checklist_Item__c.Description__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Task_Checklist_Item__c.Is_Completed__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Task_Checklist_Item__c.Sequence__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

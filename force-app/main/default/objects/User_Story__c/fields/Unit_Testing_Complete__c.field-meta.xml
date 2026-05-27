@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Checklist_Complete__c</fullName>
+    <fullName>Unit_Testing_Complete__c</fullName>
     <defaultValue>false</defaultValue>
-    <description>Indicates if all checklist items are completed</description>
-    <label>Checklist Complete</label>
+    <description>Developer must complete unit testing before story can move to Dev Completed</description>
+    <label>Unit Testing Complete</label>
     <trackHistory>false</trackHistory>
     <type>Checkbox</type>
 </CustomField>
