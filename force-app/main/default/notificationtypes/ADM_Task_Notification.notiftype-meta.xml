@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomNotificationType xmlns="http://soap.sforce.com/2006/04/metadata">
-    <customNotifTypeName>ADM Task Notification</customNotifTypeName>
+    <customNotifTypeName>ADM_Task_Notification</customNotifTypeName>
+    <masterLabel>ADM Task Notification</masterLabel>
     <description>Notification type for Agile Delivery Management task and story updates</description>
     <desktop>true</desktop>
     <mobile>true</mobile>

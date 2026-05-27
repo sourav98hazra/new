@@ -186,28 +186,6 @@
         <name>Layout</name>
     </types>
 
-    <!-- Reports -->
-    <types>
-        <members>ADM_Reports</members>
-        <members>ADM_Reports/Developer_Productivity_Report</members>
-        <members>ADM_Reports/Sprint_Velocity_Report</members>
-        <members>ADM_Reports/Overdue_Tasks_Report</members>
-        <members>ADM_Reports/Sprint_Burndown_Report</members>
-        <members>ADM_Reports/QA_Bottleneck_Report</members>
-        <members>ADM_Reports/Project_Health_Report</members>
-        <members>ADM_Reports/Sprint_Story_Status_Report</members>
-        <name>Report</name>
-    </types>
-
-    <!-- Dashboards -->
-    <types>
-        <members>ADM_Dashboards</members>
-        <members>ADM_Dashboards/Developer_Dashboard</members>
-        <members>ADM_Dashboards/Lead_Dashboard</members>
-        <members>ADM_Dashboards/Manager_Dashboard</members>
-        <name>Dashboard</name>
-    </types>
-
     <!-- Custom Notification Types -->
     <types>
         <members>ADM_Task_Notification</members>
