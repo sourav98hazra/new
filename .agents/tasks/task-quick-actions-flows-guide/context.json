@@ -1,0 +1,28 @@
+{
+  "project_type": "Salesforce DX (SFDX) Agile Delivery Management App",
+  "language": "Apex, JavaScript (LWC), XML (Metadata)",
+  "build_system": "Salesforce DX (sfdx-project.json). No local build/test possible without sf CLI connected to an org.",
+  "test_framework": "Apex test classes (e.g., ChecklistServiceTest.cls). No local test runner available.",
+  "build_command": "N/A - Salesforce metadata project, validated by XML structure correctness",
+  "test_command": "N/A - No local test execution; validation is structural (well-formed XML, correct metadata format)",
+  "verification_instructions": "Verify all XML files are well-formed, all metadata references match existing objects/fields, and package.xml includes all new components.",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "No local setup needed. This is a metadata-only Salesforce project deployed via package.xml.",
+  "environment_constraints": "No Salesforce CLI (sf/sfdx) available. No org connection. Validation limited to file structure and XML correctness. No Docker needed.",
+  "contribution_requirements": "API version 60.0 for all metadata. Follow existing naming patterns. Update package.xml with all new components.",
+  "key_patterns": "Quick Actions go in force-app/main/default/quickActions/ as .quickAction-meta.xml files. Flows go in force-app/main/default/flows/ as .flow-meta.xml files. LWCs go in force-app/main/default/lwc/<componentName>/ with .html, .js, .js-meta.xml, and optional .css files. Layouts use the existing pattern in force-app/main/default/layouts/.",
+  "relevant_files": [
+    "force-app/main/default/layouts/Task__c-Task Layout.layout-meta.xml",
+    "force-app/main/default/layouts/User_Story__c-User Story Layout.layout-meta.xml",
+    "force-app/main/default/layouts/Project__c-Project Layout.layout-meta.xml",
+    "force-app/main/default/layouts/Sprint__c-Sprint Layout.layout-meta.xml",
+    "force-app/main/default/layouts/Daily_Progress__c-Daily Progress Layout.layout-meta.xml",
+    "force-app/main/default/lwc/checklistManager/checklistManager.js-meta.xml",
+    "force-app/main/default/lwc/sprintDashboard/sprintDashboard.js-meta.xml",
+    "force-app/main/default/objects/Task__c/fields/Status__c.field-meta.xml",
+    "force-app/main/default/objects/User_Story__c/fields/Status__c.field-meta.xml",
+    "force-app/main/default/objects/Task_Checklist_Item__c/fields/Is_Completed__c.field-meta.xml",
+    "package.xml"
+  ],
+  "directory_structure": "force-app/main/default/ contains: applications/, classes/, customPermissions/, email/, layouts/, lwc/, notificationtypes/, objects/ (with 8 custom objects), permissionsets/, tabs/, triggers/. No quickActions/ or flows/ directories yet - they must be created."
+}

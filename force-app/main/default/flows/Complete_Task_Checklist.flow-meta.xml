@@ -91,6 +91,12 @@
                     <stringValue>Id</stringValue>
                 </value>
             </inputParameters>
+            <inputParameters>
+                <name>selectionMode</name>
+                <value>
+                    <stringValue>None</stringValue>
+                </value>
+            </inputParameters>
             <isRequired>false</isRequired>
             <outputParameters>
                 <assignToReference>UpdatedItems</assignToReference>

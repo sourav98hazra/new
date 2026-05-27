@@ -37,6 +37,6 @@
         </quickActionLayoutColumns>
     </quickActionLayout>
     <targetObject>Sprint__c</targetObject>
-    <targetParentField>Sprint__c.Project__c</targetParentField>
+    <targetParentField>Project__c</targetParentField>
     <type>Create</type>
 </QuickAction>

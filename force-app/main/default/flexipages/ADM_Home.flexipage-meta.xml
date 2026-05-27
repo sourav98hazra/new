@@ -11,5 +11,8 @@
         <type>Region</type>
     </flexiPageRegions>
     <masterLabel>ADM Home</masterLabel>
+    <template>
+        <name>flexipage:defaultHomeTemplate</name>
+    </template>
     <type>HomePage</type>
 </FlexiPage>

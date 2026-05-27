@@ -52,6 +52,6 @@
         </quickActionLayoutColumns>
     </quickActionLayout>
     <targetObject>User_Story__c</targetObject>
-    <targetParentField>User_Story__c.Sprint__c</targetParentField>
+    <targetParentField>Sprint__c</targetParentField>
     <type>Create</type>
 </QuickAction>

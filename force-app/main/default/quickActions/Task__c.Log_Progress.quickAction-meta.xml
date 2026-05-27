@@ -32,6 +32,6 @@
         </quickActionLayoutColumns>
     </quickActionLayout>
     <targetObject>Daily_Progress__c</targetObject>
-    <targetParentField>Daily_Progress__c.Task__c</targetParentField>
+    <targetParentField>Task__c</targetParentField>
     <type>Create</type>
 </QuickAction>

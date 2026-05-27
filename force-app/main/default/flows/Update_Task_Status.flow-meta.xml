@@ -81,6 +81,14 @@
         <label>Update Task</label>
         <locationX>176</locationX>
         <locationY>350</locationY>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>recordId</elementReference>
+            </value>
+        </filters>
         <inputAssignments>
             <field>Status__c</field>
             <value>
@@ -93,7 +101,7 @@
                 <elementReference>Status_Screen.BlockedReason</elementReference>
             </value>
         </inputAssignments>
-        <inputReference>Get_Task</inputReference>
+        <object>Task__c</object>
     </recordUpdates>
     <screens>
         <name>Status_Screen</name>

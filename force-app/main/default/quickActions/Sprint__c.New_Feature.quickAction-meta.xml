@@ -32,6 +32,6 @@
         </quickActionLayoutColumns>
     </quickActionLayout>
     <targetObject>Feature__c</targetObject>
-    <targetParentField>Feature__c.Sprint__c</targetParentField>
+    <targetParentField>Sprint__c</targetParentField>
     <type>Create</type>
 </QuickAction>
