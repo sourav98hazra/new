@@ -4,9 +4,7 @@
         <headerColor>#1B5297</headerColor>
     </brand>
     <description>Agile Delivery Management System - Track Projects, Sprints, Features, User Stories, Tasks, and Daily Progress with automated calculations, notifications, and QA/SIT lifecycle management.</description>
-    <formFactors>
-        <formFactor>Large</formFactor>
-    </formFactors>
+    <formFactors>Large</formFactors>
     <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
     <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
     <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
