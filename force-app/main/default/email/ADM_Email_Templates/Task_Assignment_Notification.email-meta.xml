@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Email template for task assignment notifications</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Task Assignment Notification</name>
+    <style>none</style>
+    <subject>New Task Assigned: {!Task__c.Task_Title__c}</subject>
+    <textOnly>true</textOnly>
+    <type>text</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

@@ -1,0 +1,18 @@
+Hi {!User.FirstName},
+
+You have overdue tasks that need your attention:
+
+{!Task__c.Task_Title__c}
+Story: {!Task__c.User_Story__r.Story_Title__c}
+Due Date: {!Task__c.Due_Date__c}
+Status: {!Task__c.Status__c}
+
+Please review this task and either:
+- Update the progress if work is ongoing
+- Adjust the due date if needed
+- Mark as blocked if there are impediments
+
+Keeping tasks up-to-date helps the team manage sprint commitments effectively.
+
+Best regards,
+Agile Delivery Management System

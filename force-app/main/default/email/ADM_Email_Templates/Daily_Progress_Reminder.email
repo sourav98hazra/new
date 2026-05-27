@@ -1,0 +1,17 @@
+Hi {!User.FirstName},
+
+This is a friendly reminder to log your daily progress in the Agile Delivery Management system.
+
+You have active tasks that require progress updates. Please take a moment to:
+1. Log hours worked today
+2. Update progress percentage
+3. Add any notes or blockers
+
+Keeping your progress up-to-date helps the team stay informed and ensures accurate sprint tracking.
+
+Log your progress now: [Click here to open the Daily Progress Modal]
+
+Thank you for your diligence!
+
+Best regards,
+Agile Delivery Management System

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Feature__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <description>Feature this story belongs to</description>
+    <label>Feature</label>
+    <referenceTo>Feature__c</referenceTo>
+    <relationshipLabel>User Stories</relationshipLabel>
+    <relationshipName>User_Stories</relationshipName>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <type>Lookup</type>
+</CustomField>

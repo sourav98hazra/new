@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Business_Dependency_Complete__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Pre-SIT Formality: Business Dependency identified and documented</description>
+    <label>Business Dependency Complete</label>
+    <trackHistory>true</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Hours_Worked_Must_Be_Valid</fullName>
+    <active>true</active>
+    <description>Ensures hours worked is between 0 and 24</description>
+    <errorConditionFormula>OR(
+    Hours_Worked__c &lt; 0,
+    Hours_Worked__c &gt; 24
+)</errorConditionFormula>
+    <errorDisplayField>Hours_Worked__c</errorDisplayField>
+    <errorMessage>Hours worked must be between 0 and 24 hours per day.</errorMessage>
+</ValidationRule>

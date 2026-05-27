@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Cannot_Close_With_Incomplete_Stories</fullName>
+    <active>true</active>
+    <description>Prevents closing sprint if sprint progress is less than 100%</description>
+    <errorConditionFormula>AND(
+    ISPICKVAL(Status__c, "Closed"),
+    ISCHANGED(Status__c),
+    Sprint_Progress__c &lt; 100
+)</errorConditionFormula>
+    <errorDisplayField>Status__c</errorDisplayField>
+    <errorMessage>Sprint cannot be closed with incomplete stories. Current progress: {!Sprint_Progress__c}%. Please complete all stories or move them to another sprint.</errorMessage>
+</ValidationRule>

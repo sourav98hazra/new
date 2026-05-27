@@ -1,0 +1,73 @@
+<template>
+    <lightning-card title="Task Checklist" icon-name="standard:task2">
+        <div slot="actions">
+            <lightning-badge label={completedCount} class="slds-m-right_xx-small"></lightning-badge>
+            <span class="slds-text-body_small slds-text-color_weak">of {totalCount}</span>
+        </div>
+
+        <template if:true={isLoading}>
+            <div class="slds-p-around_medium">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+            <div class="slds-p-around_medium">
+                <!-- Progress Bar -->
+                <template if:true={hasItems}>
+                    <div class="slds-m-bottom_medium">
+                        <lightning-progress-bar value={progressPercentage} size="large"></lightning-progress-bar>
+                        <div class="slds-text-align_center slds-m-top_xx-small slds-text-body_small">
+                            {progressPercentage}% Complete
+                        </div>
+                    </div>
+
+                    <!-- Checklist Items -->
+                    <ul class="slds-has-dividers_bottom-space">
+                        <template for:each={checklistItems} for:item="item">
+                            <li key={item.Id} class="slds-item slds-p-vertical_small">
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <div class="slds-col slds-size_1-of-12">
+                                        <lightning-input
+                                            type="checkbox"
+                                            label=""
+                                            checked={item.checked}
+                                            data-id={item.Id}
+                                            onchange={handleCheckboxChange}
+                                            variant="label-hidden">
+                                        </lightning-input>
+                                    </div>
+                                    <div class="slds-col slds-size_11-of-12">
+                                        <div class={item.checked ? 'slds-text-color_weak' : ''}>
+                                            <strong>{item.Name}</strong>
+                                            <template if:true={item.Description__c}>
+                                                <p class="slds-text-body_small slds-m-top_xx-small">
+                                                    {item.Description__c}
+                                                </p>
+                                            </template>
+                                            <template if:true={item.checked}>
+                                                <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                                                    Completed by {item.Completed_By__r.Name} on {item.Completed_Date__c}
+                                                </p>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+
+                <!-- No Items Message -->
+                <template if:false={hasItems}>
+                    <div class="slds-text-align_center slds-p-vertical_large">
+                        <lightning-icon icon-name="utility:check" size="large" class="slds-m-bottom_small"></lightning-icon>
+                        <p class="slds-text-body_regular slds-text-color_weak">
+                            No checklist items for this task
+                        </p>
+                    </div>
+                </template>
+            </div>
+        </template>
+    </lightning-card>
+</template>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Cannot_Edit_Historical_Progress</fullName>
+    <active>true</active>
+    <description>Prevents developers from editing progress entries older than 2 days</description>
+    <errorConditionFormula>AND(
+    NOT(ISNEW()),
+    Progress_Date__c &lt; TODAY() - 2,
+    NOT($Permission.Edit_Historical_Progress)
+)</errorConditionFormula>
+    <errorMessage>You cannot edit progress entries older than 2 days. Please contact your team lead if corrections are needed.</errorMessage>
+</ValidationRule>

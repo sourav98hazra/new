@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Dependency_Type__c</fullName>
+    <description>Type of dependency relationship</description>
+    <label>Dependency Type</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Finish-to-Start</fullName>
+                <default>true</default>
+                <label>Finish-to-Start</label>
+            </value>
+            <value>
+                <fullName>Start-to-Start</fullName>
+                <default>false</default>
+                <label>Start-to-Start</label>
+            </value>
+            <value>
+                <fullName>Finish-to-Finish</fullName>
+                <default>false</default>
+                <label>Finish-to-Finish</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

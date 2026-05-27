@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Manual_Deployment_Steps_Complete__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Pre-SIT Formality: Manual Deployment Steps documented</description>
+    <label>Manual Deployment Steps Complete</label>
+    <trackHistory>true</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

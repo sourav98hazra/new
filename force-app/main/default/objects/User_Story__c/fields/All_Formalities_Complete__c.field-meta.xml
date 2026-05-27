@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>All_Formalities_Complete__c</fullName>
+    <description>Formula: TRUE if all pre-SIT formalities are complete</description>
+    <label>All Formalities Complete</label>
+    <formula>AND(
+    Unit_Test_Sheet_Complete__c,
+    Manual_Deployment_Steps_Complete__c,
+    Business_Dependency_Complete__c,
+    AC_Update_Complete__c,
+    Peer_Review_Complete__c
+)</formula>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

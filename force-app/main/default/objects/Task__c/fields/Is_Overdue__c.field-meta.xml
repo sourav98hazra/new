@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Overdue__c</fullName>
+    <description>Formula: TRUE if task is overdue</description>
+    <label>Is Overdue</label>
+    <formula>AND(
+    NOT(ISPICKVAL(Status__c, "Completed")),
+    Due_Date__c &lt; TODAY()
+)</formula>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

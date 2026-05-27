@@ -1,0 +1,17 @@
+Hi {!User.FirstName},
+
+You have been assigned to a new task in the Agile Delivery Management system:
+
+Task: {!Task__c.Task_Title__c}
+Story: {!Task__c.User_Story__r.Story_Title__c}
+Sprint: {!Task__c.User_Story__r.Sprint__r.Name}
+Due Date: {!Task__c.Due_Date__c}
+Priority: {!Task__c.Priority__c}
+
+Description:
+{!Task__c.Description__c}
+
+Please log in to Salesforce to view the full task details and start logging your progress.
+
+Best regards,
+Agile Delivery Management System

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Closed_Sprint_Cannot_Be_Modified</fullName>
+    <active>true</active>
+    <description>Prevents modification of closed sprint records</description>
+    <errorConditionFormula>AND(
+    ISCHANGED(Status__c) = FALSE,
+    ISPICKVAL(Status__c, "Closed"),
+    NOT($Permission.Modify_Closed_Sprints)
+)</errorConditionFormula>
+    <errorMessage>Closed sprints cannot be modified. Please contact your administrator if changes are required.</errorMessage>
+</ValidationRule>

@@ -1,0 +1,164 @@
+<template>
+    <lightning-card title="Sprint Dashboard" icon-name="custom:custom78">
+        <template if:true={isLoading}>
+            <div class="slds-p-around_medium">
+                <lightning-spinner alternative-text="Loading" size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template if:false={isLoading}>
+            <div class="slds-p-around_medium">
+                <!-- Sprint Header -->
+                <div class="slds-grid slds-gutters slds-m-bottom_medium">
+                    <div class="slds-col slds-size_1-of-1">
+                        <div class="slds-media slds-media_center">
+                            <div class="slds-media__body">
+                                <h2 class="slds-text-heading_medium">{sprintData.name}</h2>
+                                <p class="slds-text-body_small slds-text-color_weak">
+                                    {sprintData.startDate} - {sprintData.endDate}
+                                </p>
+                            </div>
+                            <div class="slds-no-flex">
+                                <lightning-badge label={sprintData.status} class={statusVariant}></lightning-badge>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Metrics -->
+                <div class="slds-grid slds-wrap slds-gutters_small">
+                    <!-- Progress Card -->
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-4">
+                        <article class="slds-card metric-card">
+                            <div class="slds-card__body slds-card__body_inner">
+                                <div class="slds-text-align_center">
+                                    <div class="metric-value slds-text-heading_large">
+                                        {progressPercentage}%
+                                    </div>
+                                    <div class="metric-label slds-text-body_small slds-text-color_weak">
+                                        Overall Progress
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+
+                    <!-- Days Remaining Card -->
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-4">
+                        <article class="slds-card metric-card">
+                            <div class="slds-card__body slds-card__body_inner">
+                                <div class="slds-text-align_center">
+                                    <div class="metric-value slds-text-heading_large">
+                                        {daysRemaining}
+                                    </div>
+                                    <div class="metric-label slds-text-body_small slds-text-color_weak">
+                                        Days Remaining
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+
+                    <!-- Story Points Card -->
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-4">
+                        <article class="slds-card metric-card">
+                            <div class="slds-card__body slds-card__body_inner">
+                                <div class="slds-text-align_center">
+                                    <div class="metric-value slds-text-heading_large">
+                                        {sprintData.completedStoryPoints}/{sprintData.totalStoryPoints}
+                                    </div>
+                                    <div class="metric-label slds-text-body_small slds-text-color_weak">
+                                        Story Points
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+
+                    <!-- Velocity Card -->
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-4">
+                        <article class="slds-card metric-card">
+                            <div class="slds-card__body slds-card__body_inner">
+                                <div class="slds-text-align_center">
+                                    <div class="metric-value slds-text-heading_large">
+                                        {sprintData.velocity}
+                                    </div>
+                                    <div class="metric-label slds-text-body_small slds-text-color_weak">
+                                        Velocity
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+
+                <!-- Story and Task Breakdown -->
+                <div class="slds-grid slds-wrap slds-gutters_small slds-m-top_medium">
+                    <!-- Stories -->
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <article class="slds-card">
+                            <div class="slds-card__header">
+                                <h3 class="slds-text-heading_small">User Stories</h3>
+                            </div>
+                            <div class="slds-card__body slds-card__body_inner">
+                                <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_x-small">
+                                    <div class="slds-col slds-size_1-of-2">Total</div>
+                                    <div class="slds-col slds-size_1-of-2 slds-text-align_right">
+                                        <strong>{totalStories}</strong>
+                                    </div>
+                                </div>
+                                <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_x-small">
+                                    <div class="slds-col slds-size_1-of-2">Completed</div>
+                                    <div class="slds-col slds-size_1-of-2 slds-text-align_right">
+                                        <span class="slds-text-color_success">{completedStories}</span>
+                                    </div>
+                                </div>
+                                <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_x-small">
+                                    <div class="slds-col slds-size_1-of-2">In Progress</div>
+                                    <div class="slds-col slds-size_1-of-2 slds-text-align_right">
+                                        <span class="slds-text-color_warning">{inProgressStories}</span>
+                                    </div>
+                                </div>
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <div class="slds-col slds-size_1-of-2">Not Started</div>
+                                    <div class="slds-col slds-size_1-of-2 slds-text-align_right">
+                                        {notStartedStories}
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+
+                    <!-- Tasks -->
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <article class="slds-card">
+                            <div class="slds-card__header">
+                                <h3 class="slds-text-heading_small">Tasks</h3>
+                            </div>
+                            <div class="slds-card__body slds-card__body_inner">
+                                <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_x-small">
+                                    <div class="slds-col slds-size_1-of-2">Total</div>
+                                    <div class="slds-col slds-size_1-of-2 slds-text-align_right">
+                                        <strong>{totalTasks}</strong>
+                                    </div>
+                                </div>
+                                <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_x-small">
+                                    <div class="slds-col slds-size_1-of-2">Completed</div>
+                                    <div class="slds-col slds-size_1-of-2 slds-text-align_right">
+                                        <span class="slds-text-color_success">{completedTasks}</span>
+                                    </div>
+                                </div>
+                                <div class="slds-grid slds-grid_vertical-align-center">
+                                    <div class="slds-col slds-size_1-of-2">Overdue</div>
+                                    <div class="slds-col slds-size_1-of-2 slds-text-align_right">
+                                        <span class="slds-text-color_error">{overdueTasks}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </lightning-card>
+</template>

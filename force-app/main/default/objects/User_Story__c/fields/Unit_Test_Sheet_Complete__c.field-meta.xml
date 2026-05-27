@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Unit_Test_Sheet_Complete__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Pre-SIT Formality: Unit Test Sheet completed</description>
+    <label>Unit Test Sheet Complete</label>
+    <trackHistory>true</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

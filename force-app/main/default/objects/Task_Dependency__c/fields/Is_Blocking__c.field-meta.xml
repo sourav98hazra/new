@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_Blocking__c</fullName>
+    <description>Formula: TRUE if predecessor task is incomplete and blocking successor</description>
+    <label>Is Blocking</label>
+    <formula>ISPICKVAL(Predecessor_Task__r.Status__c, "Completed") = FALSE</formula>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

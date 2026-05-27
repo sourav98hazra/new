@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomPermission xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Modify Closed Sprints</label>
+    <description>Allows users to modify closed sprint records (Admin only)</description>
+</CustomPermission>

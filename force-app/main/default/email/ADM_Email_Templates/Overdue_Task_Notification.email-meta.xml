@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <available>true</available>
+    <description>Notification for overdue tasks</description>
+    <encodingKey>UTF-8</encodingKey>
+    <name>Overdue Task Notification</name>
+    <style>none</style>
+    <subject>Action Required: You Have Overdue Tasks</subject>
+    <textOnly>true</textOnly>
+    <type>text</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Progress_Cannot_Exceed_100</fullName>
+    <active>true</active>
+    <description>Ensures feature progress percentage does not exceed 100%</description>
+    <errorConditionFormula>Feature_Progress__c &gt; 100</errorConditionFormula>
+    <errorDisplayField>Feature_Progress__c</errorDisplayField>
+    <errorMessage>Feature progress cannot exceed 100%. Please verify story progress calculations.</errorMessage>
+</ValidationRule>
