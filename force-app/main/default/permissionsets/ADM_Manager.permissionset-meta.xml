@@ -323,16 +323,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>false</editable>
-        <field>Task_Dependency__c.Predecessor_Task__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Task_Dependency__c.Successor_Task__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
         <field>User_Story__c.AC_Update_Complete__c</field>
         <readable>true</readable>
     </fieldPermissions>
