@@ -1,0 +1,6 @@
+Name,Sprint__c,Status__c,Priority__c,Description__c
+User Authentication Redesign,Sprint 2024-02,In Progress,Critical,Redesign login flow with biometric authentication and MFA support
+Dashboard & Account Overview,Sprint 2024-02,In Progress,High,New dashboard with account balances and recent transactions widget
+Payment Module,Sprint 2024-03,Not Started,High,P2P payments and bill pay integration with real-time notifications
+API Routing Engine,Sprint API-01,In Progress,Critical,Core routing engine for API gateway with load balancing
+Portal User Management,Sprint CP-01,Not Started,Medium,Self-service user registration and profile management for customer portal

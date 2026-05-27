@@ -1,0 +1,6 @@
+Name,Project__c,Status__c,Start_Date__c,End_Date__c,Sprint_Goal__c
+Sprint 2024-01,Mobile Banking App Redesign,Closed,2024-01-15,2024-01-29,Complete authentication module redesign and initial UI prototyping
+Sprint 2024-02,Mobile Banking App Redesign,Active,2024-01-30,2024-02-13,Implement new dashboard and account overview screens
+Sprint 2024-03,Mobile Banking App Redesign,Planning,2024-02-14,2024-02-28,Payment module integration and transaction history
+Sprint CP-01,Customer Portal Migration,Planning,2024-03-01,2024-03-15,Set up project foundation and define migration strategy
+Sprint API-01,API Gateway Implementation,Active,2024-02-01,2024-02-15,Design API gateway architecture and implement core routing

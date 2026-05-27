@@ -1,0 +1,4 @@
+Name,Status__c,Start_Date__c,End_Date__c,Description__c,Project_Manager__c
+Mobile Banking App Redesign,Active,2024-01-15,2024-06-30,Complete redesign of mobile banking application with new UI/UX and enhanced security features,Sarah Johnson
+Customer Portal Migration,Planning,2024-03-01,2024-09-30,Migrate legacy customer portal to Lightning Experience with self-service capabilities,Michael Chen
+API Gateway Implementation,Active,2024-02-01,2024-05-31,Implement centralized API gateway for microservices architecture,Sarah Johnson
