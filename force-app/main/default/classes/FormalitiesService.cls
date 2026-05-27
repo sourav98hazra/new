@@ -10,7 +10,11 @@
  * - When all formalities complete -> auto-move story to "Completed - SIT Ready"
  * - When some (not all) formalities complete -> auto-move story to "Formalities InProgress"
  */
-public with sharing class FormalitiesService {
+// without sharing is required because:
+// 1. ActivityTaskTrigger fires when ANY user completes a task (may not own the User Story)
+// 2. Developers can complete Activity Tasks they don't own (assigned to them, owned by lead)
+// 3. The checkbox and status updates must propagate regardless of record ownership
+public without sharing class FormalitiesService {
 
     // Maps each formality subject prefix to the checkbox field API name
     public static final Map<String, String> FORMALITY_SUBJECT_TO_FIELD = new Map<String, String>{
@@ -124,10 +128,22 @@ public with sharing class FormalitiesService {
         Set<Id> storyIds = new Set<Id>();
         Map<Id, Map<String, Boolean>> storyFieldUpdates = new Map<Id, Map<String, Boolean>>();
 
+        // Get all User Story IDs from WhatId - use ID prefix check (User_Story__c starts with 'a0' or varies)
+        // Safer: query to confirm WhatId is User_Story__c since getSObjectType on polymorphic can fail
+        Set<Id> whatIds = new Set<Id>();
+        for (Task t : completedTasks) {
+            if (t.WhatId != null) whatIds.add(t.WhatId);
+        }
+
+        // Find which WhatIds are actually User Story records
+        Set<Id> userStoryWhatIds = new Set<Id>();
+        for (User_Story__c us : [SELECT Id FROM User_Story__c WHERE Id IN :whatIds]) {
+            userStoryWhatIds.add(us.Id);
+        }
+
         for (Task t : completedTasks) {
             if (t.WhatId == null) continue;
-            String whatType = String.valueOf(t.WhatId.getSObjectType());
-            if (!whatType.contains('User_Story__c')) continue;
+            if (!userStoryWhatIds.contains(t.WhatId)) continue;
 
             // Match subject to formality field
             for (String subjectPrefix : FORMALITY_SUBJECT_TO_FIELD.keySet()) {
