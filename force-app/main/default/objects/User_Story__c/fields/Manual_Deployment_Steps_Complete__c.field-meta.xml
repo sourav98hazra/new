@@ -4,6 +4,6 @@
     <defaultValue>false</defaultValue>
     <description>Pre-SIT Formality: Manual Deployment Steps documented</description>
     <label>Manual Deployment Steps Complete</label>
-    <trackHistory>true</trackHistory>
+    <trackHistory>false</trackHistory>
     <type>Checkbox</type>
 </CustomField>

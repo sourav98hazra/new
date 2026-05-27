@@ -4,6 +4,6 @@
     <description>Sprint start date</description>
     <label>Start Date</label>
     <required>true</required>
-    <trackHistory>true</trackHistory>
+    <trackHistory>false</trackHistory>
     <type>Date</type>
 </CustomField>

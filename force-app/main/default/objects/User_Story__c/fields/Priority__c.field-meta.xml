@@ -4,7 +4,7 @@
     <description>Story priority level</description>
     <label>Priority</label>
     <required>false</required>
-    <trackHistory>true</trackHistory>
+    <trackHistory>false</trackHistory>
     <type>Picklist</type>
     <valueSet>
         <restricted>true</restricted>

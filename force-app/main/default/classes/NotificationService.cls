@@ -251,17 +251,15 @@ public with sharing class NotificationService {
         Date today = Date.today();
         
         // Get all developers with assigned incomplete tasks
-        List<Task__c> activeTasks = [
+        Set<Id> developersWithTasks = new Set<Id>();
+        for (AggregateResult ar : [
             SELECT Assigned_To__c
             FROM Task__c
             WHERE Status__c IN ('In Progress', 'Blocked')
             AND Assigned_To__c != null
             GROUP BY Assigned_To__c
-        ];
-        
-        Set<Id> developersWithTasks = new Set<Id>();
-        for (Task__c task : activeTasks) {
-            developersWithTasks.add(task.Assigned_To__c);
+        ]) {
+            developersWithTasks.add((Id)ar.get('Assigned_To__c'));
         }
         
         // Get developers who already logged progress today

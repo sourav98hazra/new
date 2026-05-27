@@ -5,7 +5,7 @@
     <label>Task Title</label>
     <length>255</length>
     <required>true</required>
-    <trackHistory>true</trackHistory>
+    <trackHistory>false</trackHistory>
     <type>Text</type>
     <unique>false</unique>
 </CustomField>

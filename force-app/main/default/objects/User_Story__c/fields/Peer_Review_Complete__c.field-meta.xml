@@ -4,6 +4,6 @@
     <defaultValue>false</defaultValue>
     <description>Pre-SIT Formality: Peer Review completed</description>
     <label>Peer Review Complete</label>
-    <trackHistory>true</trackHistory>
+    <trackHistory>false</trackHistory>
     <type>Checkbox</type>
 </CustomField>

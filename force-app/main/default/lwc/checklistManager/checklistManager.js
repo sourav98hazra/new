@@ -16,7 +16,8 @@ export default class ChecklistManager extends LightningElement {
         if (result.data) {
             this.checklistItems = result.data.map(item => ({
                 ...item,
-                checked: item.Is_Completed__c
+                checked: item.Is_Completed__c,
+                itemClass: item.Is_Completed__c ? 'slds-text-color_weak' : ''
             }));
             this.isLoading = false;
         } else if (result.error) {

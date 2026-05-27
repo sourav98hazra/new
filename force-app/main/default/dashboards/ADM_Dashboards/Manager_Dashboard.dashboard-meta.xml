@@ -16,7 +16,6 @@
         <columnSize>Medium</columnSize>
         <components>
             <autoselectColumnsFromReport>false</autoselectColumnsFromReport>
-            <chartAxisRange>Auto</chartAxisRange>
             <componentType>Table</componentType>
             <displayUnits>Auto</displayUnits>
             <drillEnabled>false</drillEnabled>
@@ -79,7 +78,6 @@
         </components>
         <components>
             <autoselectColumnsFromReport>false</autoselectColumnsFromReport>
-            <chartAxisRange>Auto</chartAxisRange>
             <componentType>Table</componentType>
             <displayUnits>Auto</displayUnits>
             <drillEnabled>false</drillEnabled>

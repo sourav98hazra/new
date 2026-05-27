@@ -4,6 +4,6 @@
     <defaultValue>false</defaultValue>
     <description>Pre-SIT Formality: Unit Test Sheet completed</description>
     <label>Unit Test Sheet Complete</label>
-    <trackHistory>true</trackHistory>
+    <trackHistory>false</trackHistory>
     <type>Checkbox</type>
 </CustomField>

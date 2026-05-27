@@ -4,6 +4,6 @@
     <description>Project target end date</description>
     <label>End Date</label>
     <required>false</required>
-    <trackHistory>true</trackHistory>
+    <trackHistory>false</trackHistory>
     <type>Date</type>
 </CustomField>

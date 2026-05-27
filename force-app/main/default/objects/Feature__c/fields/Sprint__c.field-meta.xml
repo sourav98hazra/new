@@ -8,7 +8,7 @@
     <relationshipName>Features</relationshipName>
     <relationshipOrder>0</relationshipOrder>
     <reparentableMasterDetail>false</reparentableMasterDetail>
-    <trackHistory>true</trackHistory>
+    <trackHistory>false</trackHistory>
     <type>MasterDetail</type>
     <writeRequiresMasterRead>false</writeRequiresMasterRead>
 </CustomField>

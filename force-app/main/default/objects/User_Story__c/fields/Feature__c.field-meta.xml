@@ -8,6 +8,6 @@
     <relationshipLabel>User Stories</relationshipLabel>
     <relationshipName>User_Stories</relationshipName>
     <required>false</required>
-    <trackHistory>true</trackHistory>
+    <trackHistory>false</trackHistory>
     <type>Lookup</type>
 </CustomField>

@@ -12,7 +12,7 @@
     <label>Sprint</label>
     <nameField>
         <label>Sprint Name</label>
-        <trackHistory>true</trackHistory>
+        <trackHistory>false</trackHistory>
         <type>Text</type>
     </nameField>
     <pluralLabel>Sprints</pluralLabel>

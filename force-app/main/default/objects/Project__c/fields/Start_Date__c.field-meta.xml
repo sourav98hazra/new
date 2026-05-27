@@ -4,6 +4,6 @@
     <description>Project start date</description>
     <label>Start Date</label>
     <required>false</required>
-    <trackHistory>true</trackHistory>
+    <trackHistory>false</trackHistory>
     <type>Date</type>
 </CustomField>

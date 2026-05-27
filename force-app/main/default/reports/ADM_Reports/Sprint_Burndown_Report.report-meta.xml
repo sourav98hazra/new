@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Report xmlns="http://soap.sforce.com/2006/04/metadata">
     <columns>
-        <field>User_Story__c.Name</field>
+        <field>CUST_NAME</field>
     </columns>
     <columns>
         <field>User_Story__c.Story_Title__c</field>
@@ -18,7 +18,7 @@
     <description>Shows sprint burndown by tracking story points and progress for active sprints</description>
     <filter>
         <criteriaItems>
-            <column>User_Story__c.Sprint__c.Status__c</column>
+            <column>User_Story__c.Sprint__r.Status__c</column>
             <columnToColumn>false</columnToColumn>
             <isUnlocked>true</isUnlocked>
             <operator>equals</operator>
@@ -32,13 +32,13 @@
         <sortOrder>Asc</sortOrder>
     </groupingsDown>
     <name>Sprint Burndown Report</name>
-    <reportType>User_Story__c</reportType>
+    <reportType>CustomEntity$User_Story__c</reportType>
     <scope>organization</scope>
     <showDetails>true</showDetails>
     <showGrandTotal>true</showGrandTotal>
     <showSubTotals>true</showSubTotals>
     <timeFrameFilter>
-        <dateColumn>User_Story__c.CreatedDate</dateColumn>
+        <dateColumn>CUST_CREATED_DATE</dateColumn>
         <interval>INTERVAL_CUSTOM</interval>
     </timeFrameFilter>
 </Report>

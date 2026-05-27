@@ -12,7 +12,7 @@
     <label>Feature</label>
     <nameField>
         <label>Feature Name</label>
-        <trackHistory>true</trackHistory>
+        <trackHistory>false</trackHistory>
         <type>Text</type>
     </nameField>
     <pluralLabel>Features</pluralLabel>

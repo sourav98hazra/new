@@ -4,5 +4,4 @@
     <description>Notification type for Agile Delivery Management task and story updates</description>
     <desktop>true</desktop>
     <mobile>true</mobile>
-    <recipientType>User</recipientType>
 </CustomNotificationType>

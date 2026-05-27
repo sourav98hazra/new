@@ -4,6 +4,6 @@
     <description>Task target completion date</description>
     <label>Due Date</label>
     <required>false</required>
-    <trackHistory>true</trackHistory>
+    <trackHistory>false</trackHistory>
     <type>Date</type>
 </CustomField>

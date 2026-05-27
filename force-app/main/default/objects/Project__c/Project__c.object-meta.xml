@@ -12,7 +12,7 @@
     <label>Project</label>
     <nameField>
         <label>Project Name</label>
-        <trackHistory>true</trackHistory>
+        <trackHistory>false</trackHistory>
         <type>Text</type>
     </nameField>
     <pluralLabel>Projects</pluralLabel>

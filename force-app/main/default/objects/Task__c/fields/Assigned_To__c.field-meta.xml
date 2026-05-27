@@ -7,6 +7,6 @@
     <referenceTo>User</referenceTo>
     <relationshipName>Assigned_Tasks</relationshipName>
     <required>false</required>
-    <trackHistory>true</trackHistory>
+    <trackHistory>false</trackHistory>
     <type>Lookup</type>
 </CustomField>

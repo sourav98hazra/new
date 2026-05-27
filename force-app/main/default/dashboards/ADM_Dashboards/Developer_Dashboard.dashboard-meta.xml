@@ -16,7 +16,6 @@
         <columnSize>Medium</columnSize>
         <components>
             <autoselectColumnsFromReport>false</autoselectColumnsFromReport>
-            <chartAxisRange>Auto</chartAxisRange>
             <componentType>Table</componentType>
             <displayUnits>Auto</displayUnits>
             <drillEnabled>false</drillEnabled>
@@ -36,7 +35,6 @@
         </components>
         <components>
             <autoselectColumnsFromReport>false</autoselectColumnsFromReport>
-            <chartAxisRange>Auto</chartAxisRange>
             <componentType>Gauge</componentType>
             <displayUnits>Auto</displayUnits>
             <drillEnabled>false</drillEnabled>
@@ -51,7 +49,6 @@
             <indicatorMiddleColor>#C2C254</indicatorMiddleColor>
             <report>ADM_Reports/Developer_Productivity_Report</report>
             <showPicturesOnTables>true</showPicturesOnTables>
-            <sortBy>RowLabelAscending</sortBy>
             <title>Weekly Progress</title>
         </components>
     </leftSection>
@@ -59,7 +56,6 @@
         <columnSize>Medium</columnSize>
         <components>
             <autoselectColumnsFromReport>false</autoselectColumnsFromReport>
-            <chartAxisRange>Auto</chartAxisRange>
             <componentType>Table</componentType>
             <displayUnits>Auto</displayUnits>
             <drillEnabled>false</drillEnabled>
@@ -79,7 +75,6 @@
         </components>
         <components>
             <autoselectColumnsFromReport>false</autoselectColumnsFromReport>
-            <chartAxisRange>Auto</chartAxisRange>
             <componentType>Gauge</componentType>
             <displayUnits>Auto</displayUnits>
             <drillEnabled>false</drillEnabled>
@@ -94,7 +89,6 @@
             <indicatorMiddleColor>#C2C254</indicatorMiddleColor>
             <report>ADM_Reports/Sprint_Burndown_Report</report>
             <showPicturesOnTables>true</showPicturesOnTables>
-            <sortBy>RowLabelAscending</sortBy>
             <title>Sprint Progress</title>
         </components>
     </middleSection>
