@@ -35,17 +35,19 @@ public without sharing class StatusManagementService {
     }
     
     /**
-     * @description Auto-update story status based on task completion
+     * @description Auto-update story status based on task completion.
+     * Key automation:
+     * - All tasks Completed AND Unit Testing Complete → auto "Dev Completed"
+     * - Story in Dev In Progress with progress > 0 → stays in Dev In Progress
      */
     public static void updateStoryStatus(Set<Id> storyIds) {
         if (storyIds == null || storyIds.isEmpty()) return;
-        
+
         List<User_Story__c> storiesToUpdate = new List<User_Story__c>();
-        
-        // Get stories with their task counts
-        Map<Id, Integer> totalTasksByStory = new Map<Id, Integer>();
+
+        Map<Id, Integer> totalTasksByStory     = new Map<Id, Integer>();
         Map<Id, Integer> completedTasksByStory = new Map<Id, Integer>();
-        
+
         for (AggregateResult ar : [
             SELECT User_Story__c, COUNT(Id) taskCount
             FROM Task__c
@@ -54,7 +56,7 @@ public without sharing class StatusManagementService {
         ]) {
             totalTasksByStory.put((Id)ar.get('User_Story__c'), (Integer)ar.get('taskCount'));
         }
-        
+
         for (AggregateResult ar : [
             SELECT User_Story__c, COUNT(Id) completedCount
             FROM Task__c
@@ -63,35 +65,37 @@ public without sharing class StatusManagementService {
         ]) {
             completedTasksByStory.put((Id)ar.get('User_Story__c'), (Integer)ar.get('completedCount'));
         }
-        
+
         for (User_Story__c story : [
-            SELECT Id, Status__c, Story_Progress__c
+            SELECT Id, Status__c, Story_Progress__c, Unit_Testing_Complete__c
             FROM User_Story__c
             WHERE Id IN :storyIds
         ]) {
             String newStatus = null;
-            Integer totalTasks = totalTasksByStory.get(story.Id);
+            Integer totalTasks     = totalTasksByStory.get(story.Id);
             Integer completedTasks = completedTasksByStory.get(story.Id);
-            
-            if (totalTasks == null) totalTasks = 0;
+
+            if (totalTasks     == null) totalTasks     = 0;
             if (completedTasks == null) completedTasks = 0;
-            
-            // Auto-transition logic
-            if (totalTasks > 0 && completedTasks == totalTasks && story.Status__c == 'In Progress') {
-                newStatus = 'Ready for QA';
-            } else if (story.Story_Progress__c > 0 && story.Status__c == 'New') {
-                newStatus = 'In Progress';
+
+            Boolean allTasksDone = (totalTasks > 0 && completedTasks == totalTasks);
+
+            // AUTO-ADVANCE: all tasks done + unit testing complete = Dev Completed
+            if (allTasksDone
+                && story.Unit_Testing_Complete__c == true
+                && (story.Status__c == 'Dev In Progress' || story.Status__c == 'Pending')) {
+                newStatus = 'Dev Completed';
             }
-            
+            // Still in progress
+            else if (story.Story_Progress__c > 0 && story.Status__c == 'New') {
+                newStatus = 'Dev In Progress';
+            }
+
             if (newStatus != null && newStatus != story.Status__c) {
-                User_Story__c storyToUpdate = new User_Story__c(
-                    Id = story.Id,
-                    Status__c = newStatus
-                );
-                storiesToUpdate.add(storyToUpdate);
+                storiesToUpdate.add(new User_Story__c(Id = story.Id, Status__c = newStatus));
             }
         }
-        
+
         if (!storiesToUpdate.isEmpty()) {
             update storiesToUpdate;
         }
