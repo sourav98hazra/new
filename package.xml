@@ -236,18 +236,7 @@
         <name>QuickAction</name>
     </types>
 
-    <!-- Flows -->
-    <types>
-        <members>Update_Task_Status</members>
-        <members>Complete_Task_Checklist</members>
-        <name>Flow</name>
-    </types>
 
-    <!-- FlexiPages -->
-    <types>
-        <members>ADM_Home</members>
-        <name>FlexiPage</name>
-    </types>
 
     <version>60.0</version>
 </Package>
