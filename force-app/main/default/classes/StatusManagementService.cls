@@ -2,7 +2,7 @@
  * @description Service class for managing status transitions and automation
  * Handles auto-status updates based on progress and business rules
  */
-public with sharing class StatusManagementService {
+public without sharing class StatusManagementService {
     
     /**
      * @description Auto-update task status based on progress

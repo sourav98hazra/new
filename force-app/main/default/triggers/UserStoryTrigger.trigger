@@ -55,7 +55,18 @@ trigger UserStoryTrigger on User_Story__c (after insert, after update, after del
                 }
 
                 // Bi-directional sync: checkbox ticked -> close Activity Task + auto-advance status
-                FormalitiesService.syncCheckboxToActivityTask(Trigger.new, Trigger.oldMap);
+                // Only call if a formality/unit-testing checkbox actually changed to avoid unnecessary DML
+                Boolean formalityCheckboxChanged = (
+                    story.Unit_Testing_Complete__c != oldStory.Unit_Testing_Complete__c ||
+                    story.Unit_Test_Sheet_Complete__c != oldStory.Unit_Test_Sheet_Complete__c ||
+                    story.Manual_Deployment_Steps_Complete__c != oldStory.Manual_Deployment_Steps_Complete__c ||
+                    story.Business_Dependency_Complete__c != oldStory.Business_Dependency_Complete__c ||
+                    story.AC_Update_Complete__c != oldStory.AC_Update_Complete__c ||
+                    story.Peer_Review_Complete__c != oldStory.Peer_Review_Complete__c
+                );
+                if (formalityCheckboxChanged) {
+                    FormalitiesService.syncCheckboxToActivityTask(Trigger.new, Trigger.oldMap);
+                }
             }
         }
 

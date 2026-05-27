@@ -2,7 +2,7 @@
  * @description Service class for calculating progress across all hierarchy levels
  * Implements weighted average calculations for Task, Story, Feature, Sprint, and Project
  */
-public with sharing class ProgressCalculationService {
+public without sharing class ProgressCalculationService {
     
     /**
      * @description Calculate task progress from daily progress entries

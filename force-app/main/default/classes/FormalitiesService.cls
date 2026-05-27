@@ -229,6 +229,8 @@ public without sharing class FormalitiesService {
     /**
      * @description Called when a checkbox is ticked on the User Story (via UserStoryTrigger)
      * Closes the corresponding Activity Task (Checkbox -> Activity Task sync)
+     * NOTE: stories param is Trigger.new - do NOT pass it to any DML method directly.
+     *       updateStoryStatusFromFormalities must create fresh SObject instances for DML.
      */
     public static void syncCheckboxToActivityTask(List<User_Story__c> stories, Map<Id, User_Story__c> oldMap) {
         Map<Id, Set<String>> storyChangedSubjects = new Map<Id, Set<String>>();
@@ -237,7 +239,7 @@ public without sharing class FormalitiesService {
             User_Story__c oldStory = oldMap.get(story.Id);
             Set<String> changedSubjects = new Set<String>();
 
-            // Check all 6 checkbox fields for changes (true->false direction)
+            // Check all 6 checkbox fields for changes (false -> true only)
             for (String fieldName : ALL_CHECKBOX_FIELDS) {
                 Boolean newVal = (Boolean) story.get(fieldName);
                 Boolean oldVal = (Boolean) oldStory.get(fieldName);
@@ -274,22 +276,59 @@ public without sharing class FormalitiesService {
 
         if (!tasksToClose.isEmpty()) update tasksToClose;
 
-        // Recalculate status only for formality changes (not Unit Testing)
-        updateStoryStatusFromFormalities(stories, oldMap);
+        // Recalculate formality status - pass story IDs so we can re-query (not trigger.new)
+        recalculateFormalitiesStatusByIds(storyChangedSubjects.keySet());
     }
 
 
 
     /**
+     * @description Re-queries stories by ID and updates status from formality checkboxes.
+     * Called after checkbox sync to avoid DML on Trigger.new/old records.
+     */
+    public static void recalculateFormalitiesStatusByIds(Set<Id> storyIds) {
+        if (storyIds == null || storyIds.isEmpty()) return;
+
+        List<User_Story__c> stories = [
+            SELECT Id, Status__c,
+                Unit_Test_Sheet_Complete__c,
+                Manual_Deployment_Steps_Complete__c,
+                Business_Dependency_Complete__c,
+                AC_Update_Complete__c,
+                Peer_Review_Complete__c,
+                All_Formalities_Complete__c
+            FROM User_Story__c
+            WHERE Id IN :storyIds
+        ];
+
+        List<User_Story__c> toUpdate = new List<User_Story__c>();
+        for (User_Story__c story : stories) {
+            Boolean inFormalitiesPhase = (
+                story.Status__c == 'Dev Completed' ||
+                story.Status__c == 'Formalities InProgress' ||
+                story.Status__c == 'Completed - SIT Ready'
+            );
+            if (!inFormalitiesPhase) continue;
+
+            User_Story__c updated = recalculateFormalitiesStatus(story);
+            if (updated.Status__c != story.Status__c) {
+                toUpdate.add(updated);
+            }
+        }
+
+        if (!toUpdate.isEmpty()) update toUpdate;
+    }
+
+    /**
      * @description Auto-updates story status based on the 5 Pre-SIT formality checkboxes.
-     * Unit_Testing_Complete__c does NOT affect status here (it's a dev gate, not a formality).
+     * Unit_Testing_Complete__c does NOT affect status here (it is a dev gate, not a formality).
+     * NOTE: Do not pass Trigger.new records here - they cannot be DML'd directly.
      */
     public static void updateStoryStatusFromFormalities(List<User_Story__c> stories, Map<Id, User_Story__c> oldMap) {
-        List<User_Story__c> storiesToUpdate = new List<User_Story__c>();
+        Set<Id> changedIds = new Set<Id>();
 
         for (User_Story__c story : stories) {
             User_Story__c oldStory = oldMap.get(story.Id);
-
             Boolean inFormalitiesPhase = (
                 story.Status__c == 'Dev Completed' ||
                 story.Status__c == 'Formalities InProgress' ||
@@ -304,13 +343,10 @@ public without sharing class FormalitiesService {
                 story.AC_Update_Complete__c != oldStory.AC_Update_Complete__c ||
                 story.Peer_Review_Complete__c != oldStory.Peer_Review_Complete__c
             );
-            if (!anyFormalityChanged) continue;
-
-            story = recalculateFormalitiesStatus(story);
-            storiesToUpdate.add(story);
+            if (anyFormalityChanged) changedIds.add(story.Id);
         }
 
-        if (!storiesToUpdate.isEmpty()) update storiesToUpdate;
+        if (!changedIds.isEmpty()) recalculateFormalitiesStatusByIds(changedIds);
     }
 
 
