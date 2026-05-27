@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <name>Sprint Story Status Report</name>
+    <description>Shows sprint progress with number of stories in each status. Helps track how work is distributed across the development lifecycle.</description>
+    <reportType>CustomEntity$User_Story__c</reportType>
+    <format>Matrix</format>
+    <currency>USD</currency>
+    <showDetails>true</showDetails>
+    <groupingsDown>
+        <dateGranularity>None</dateGranularity>
+        <field>User_Story__c.Sprint__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <groupingsAcross>
+        <dateGranularity>None</dateGranularity>
+        <field>User_Story__c.Status__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsAcross>
+    <columns>
+        <field>CUST_NAME</field>
+    </columns>
+    <columns>
+        <field>User_Story__c.Story_Title__c</field>
+    </columns>
+    <columns>
+        <field>User_Story__c.Story_Points__c</field>
+    </columns>
+    <columns>
+        <field>User_Story__c.Assigned_To__c</field>
+    </columns>
+    <columns>
+        <field>User_Story__c.Story_Progress__c</field>
+    </columns>
+    <columns>
+        <field>User_Story__c.Priority__c</field>
+    </columns>
+    <aggregates>
+        <calculatedFormula>RowCount</calculatedFormula>
+        <datatype>number</datatype>
+        <description>Total number of stories</description>
+        <developerName>FORMULA1</developerName>
+        <isActive>true</isActive>
+        <isCrossBlock>false</isCrossBlock>
+        <masterLabel>Story Count</masterLabel>
+        <scale>0</scale>
+    </aggregates>
+    <aggregates>
+        <calculatedFormula>User_Story__c.Story_Points__c:SUM</calculatedFormula>
+        <datatype>number</datatype>
+        <description>Sum of story points</description>
+        <developerName>FORMULA2</developerName>
+        <isActive>true</isActive>
+        <isCrossBlock>false</isCrossBlock>
+        <masterLabel>Total Story Points</masterLabel>
+        <scale>0</scale>
+    </aggregates>
+    <filter>
+        <criteriaItems>
+            <column>User_Story__c.Sprint__r.Status__c</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>equals</operator>
+            <value>Active</value>
+        </criteriaItems>
+    </filter>
+    <chart>
+        <backgroundColor1>#FFFFFF</backgroundColor1>
+        <backgroundColor2>#FFFFFF</backgroundColor2>
+        <backgroundFadeDir>Diagonal</backgroundFadeDir>
+        <chartSummaries>
+            <axisBinding>y</axisBinding>
+            <column>RowCount</column>
+        </chartSummaries>
+        <chartType>HorizontalBarStacked</chartType>
+        <enableHoverLabels>true</enableHoverLabels>
+        <expandOthers>true</expandOthers>
+        <groupingColumn>User_Story__c.Sprint__c</groupingColumn>
+        <legendPosition>Bottom</legendPosition>
+        <location>CHART_TOP</location>
+        <secondaryGroupingColumn>User_Story__c.Status__c</secondaryGroupingColumn>
+        <showAxisLabels>true</showAxisLabels>
+        <showPercentage>false</showPercentage>
+        <showTotal>true</showTotal>
+        <showValues>true</showValues>
+        <size>Medium</size>
+        <summaryAxisRange>Auto</summaryAxisRange>
+        <textColor>#000000</textColor>
+        <textSize>12</textSize>
+        <title>Stories by Sprint &amp; Status</title>
+        <titleColor>#000000</titleColor>
+        <titleSize>18</titleSize>
+    </chart>
+</Report>
