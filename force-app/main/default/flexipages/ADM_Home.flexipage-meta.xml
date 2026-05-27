@@ -12,7 +12,7 @@
     </flexiPageRegions>
     <masterLabel>ADM Home</masterLabel>
     <template>
-        <name>flexipage:defaultHomeTemplate</name>
+        <name>flexipage:defaultHome2Col</name>
     </template>
     <type>HomePage</type>
 </FlexiPage>

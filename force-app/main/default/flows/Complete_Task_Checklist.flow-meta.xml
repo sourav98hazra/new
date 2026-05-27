@@ -97,6 +97,18 @@
                     <stringValue>None</stringValue>
                 </value>
             </inputParameters>
+            <inputParameters>
+                <name>minRowSelection</name>
+                <value>
+                    <numberValue>0.0</numberValue>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>maxRowSelection</name>
+                <value>
+                    <numberValue>0.0</numberValue>
+                </value>
+            </inputParameters>
             <isRequired>false</isRequired>
             <outputParameters>
                 <assignToReference>UpdatedItems</assignToReference>

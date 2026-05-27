@@ -1,6 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>60.0</apiVersion>
+    <assignments>
+        <name>Set_Task_Fields</name>
+        <label>Set Task Fields</label>
+        <locationX>176</locationX>
+        <locationY>296</locationY>
+        <assignmentItems>
+            <assignToReference>Get_Task.Status__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Status_Screen.SelectedStatus</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>Get_Task.Blocked_Reason__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Status_Screen.BlockedReason</elementReference>
+            </value>
+        </assignmentItems>
+        <connector>
+            <targetReference>Update_Task</targetReference>
+        </connector>
+    </assignments>
     <choices>
         <name>Choice_New</name>
         <choiceText>New</choiceText>
@@ -80,28 +103,8 @@
         <name>Update_Task</name>
         <label>Update Task</label>
         <locationX>176</locationX>
-        <locationY>350</locationY>
-        <filterLogic>and</filterLogic>
-        <filters>
-            <field>Id</field>
-            <operator>EqualTo</operator>
-            <value>
-                <elementReference>recordId</elementReference>
-            </value>
-        </filters>
-        <inputAssignments>
-            <field>Status__c</field>
-            <value>
-                <elementReference>Status_Screen.SelectedStatus</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <field>Blocked_Reason__c</field>
-            <value>
-                <elementReference>Status_Screen.BlockedReason</elementReference>
-            </value>
-        </inputAssignments>
-        <object>Task__c</object>
+        <locationY>404</locationY>
+        <inputReference>Get_Task</inputReference>
     </recordUpdates>
     <screens>
         <name>Status_Screen</name>
@@ -112,7 +115,7 @@
         <allowFinish>true</allowFinish>
         <allowPause>false</allowPause>
         <connector>
-            <targetReference>Update_Task</targetReference>
+            <targetReference>Set_Task_Fields</targetReference>
         </connector>
         <fields>
             <name>TaskInfo</name>
