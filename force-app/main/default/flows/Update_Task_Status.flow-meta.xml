@@ -1,29 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>60.0</apiVersion>
-    <assignments>
-        <name>Set_Status</name>
-        <label>Set Status on Record</label>
-        <locationX>176</locationX>
-        <locationY>350</locationY>
-        <assignmentItems>
-            <assignToReference>Get_Task.Status__c</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>Screen_UpdateStatus.fldNewStatus</elementReference>
-            </value>
-        </assignmentItems>
-        <assignmentItems>
-            <assignToReference>Get_Task.Blocked_Reason__c</assignToReference>
-            <operator>Assign</operator>
-            <value>
-                <elementReference>Screen_UpdateStatus.fldBlockedReason</elementReference>
-            </value>
-        </assignmentItems>
-        <connector>
-            <targetReference>Update_Task</targetReference>
-        </connector>
-    </assignments>
     <choices>
         <name>choiceNew</name>
         <choiceText>New</choiceText>
@@ -91,8 +68,28 @@
         <name>Update_Task</name>
         <label>Update Task Record</label>
         <locationX>176</locationX>
-        <locationY>458</locationY>
-        <inputReference>Get_Task</inputReference>
+        <locationY>350</locationY>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>recordId</elementReference>
+            </value>
+        </filters>
+        <inputAssignments>
+            <field>Status__c</field>
+            <value>
+                <elementReference>varNewStatus</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Blocked_Reason__c</field>
+            <value>
+                <elementReference>varBlockedReason</elementReference>
+            </value>
+        </inputAssignments>
+        <object>Task__c</object>
     </recordUpdates>
     <screens>
         <name>Screen_UpdateStatus</name>
@@ -103,7 +100,7 @@
         <allowFinish>true</allowFinish>
         <allowPause>false</allowPause>
         <connector>
-            <targetReference>Set_Status</targetReference>
+            <targetReference>Update_Task</targetReference>
         </connector>
         <fields>
             <name>Info_Display</name>
@@ -113,7 +110,7 @@
             <fieldType>DisplayText</fieldType>
         </fields>
         <fields>
-            <name>fldNewStatus</name>
+            <name>varNewStatus</name>
             <choiceReferences>choiceNew</choiceReferences>
             <choiceReferences>choiceInProgress</choiceReferences>
             <choiceReferences>choiceBlocked</choiceReferences>
@@ -125,7 +122,7 @@
             <isRequired>true</isRequired>
         </fields>
         <fields>
-            <name>fldBlockedReason</name>
+            <name>varBlockedReason</name>
             <dataType>String</dataType>
             <fieldText>Blocked Reason (required if Blocked)</fieldText>
             <fieldType>LargeTextArea</fieldType>
