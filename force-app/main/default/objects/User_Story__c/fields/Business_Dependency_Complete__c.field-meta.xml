@@ -3,7 +3,7 @@
     <fullName>Business_Dependency_Complete__c</fullName>
     <defaultValue>false</defaultValue>
     <description>Pre-SIT Formality: Business Dependency identified and documented</description>
-    <label>Business Dependency Complete</label>
+    <label>Business Dependency Sheet Complete</label>
     <trackHistory>false</trackHistory>
     <type>Checkbox</type>
 </CustomField>
