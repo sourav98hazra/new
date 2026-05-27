@@ -201,5 +201,22 @@
         <name>EmailTemplate</name>
     </types>
 
+    <!-- Custom Tabs -->
+    <types>
+        <members>Project__c</members>
+        <members>Sprint__c</members>
+        <members>Feature__c</members>
+        <members>User_Story__c</members>
+        <members>Task__c</members>
+        <members>Daily_Progress__c</members>
+        <name>CustomTab</name>
+    </types>
+
+    <!-- Custom Application -->
+    <types>
+        <members>Agile_Delivery_Management</members>
+        <name>CustomApplication</name>
+    </types>
+
     <version>60.0</version>
 </Package>

@@ -116,4 +116,36 @@
         <apexClass>StatusManagementService</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+
+    <!-- Application Visibility -->
+    <applicationVisibilities>
+        <application>Agile_Delivery_Management</application>
+        <visible>true</visible>
+    </applicationVisibilities>
+
+    <!-- Tab Visibility -->
+    <tabSettings>
+        <tab>Project__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>Sprint__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>Feature__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>User_Story__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>Task__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>Daily_Progress__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
 </PermissionSet>

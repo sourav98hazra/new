@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <brand>
+        <headerColor>#1B5297</headerColor>
+    </brand>
+    <description>Agile Delivery Management System - Track Projects, Sprints, Features, User Stories, Tasks, and Daily Progress with automated calculations, notifications, and QA/SIT lifecycle management.</description>
+    <formFactors>
+        <formFactor>Large</formFactor>
+    </formFactors>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
+    <label>Agile Delivery Management</label>
+    <navType>Standard</navType>
+    <tabs>standard-home</tabs>
+    <tabs>Project__c</tabs>
+    <tabs>Sprint__c</tabs>
+    <tabs>Feature__c</tabs>
+    <tabs>User_Story__c</tabs>
+    <tabs>Task__c</tabs>
+    <tabs>Daily_Progress__c</tabs>
+    <tabs>standard-report</tabs>
+    <tabs>standard-Dashboard</tabs>
+    <uiType>Lightning</uiType>
+</CustomApplication>
