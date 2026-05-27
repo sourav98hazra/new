@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>Task__c.Assigned_To__c</field>
+    </columns>
+    <columns>
+        <field>Task__c.Task_Title__c</field>
+    </columns>
+    <columns>
+        <field>Daily_Progress__c.Hours_Worked__c</field>
+    </columns>
+    <columns>
+        <field>Daily_Progress__c.Progress_Date__c</field>
+    </columns>
+    <columns>
+        <field>Task__c.Task_Progress__c</field>
+    </columns>
+    <description>Shows developer productivity by tracking hours worked and task progress across active sprints</description>
+    <filter>
+        <criteriaItems>
+            <column>Task__c.User_Story__c.Sprint__c.Status__c</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>equals</operator>
+            <value>Active</value>
+        </criteriaItems>
+    </filter>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>Task__c.Assigned_To__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Developer Productivity Report</name>
+    <reportType>Task__c_with_Daily_Progress__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <timeFrameFilter>
+        <dateColumn>Daily_Progress__c.Progress_Date__c</dateColumn>
+        <interval>INTERVAL_CURRENT</interval>
+    </timeFrameFilter>
+</Report>

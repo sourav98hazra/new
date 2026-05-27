@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>User_Story__c.Name</field>
+    </columns>
+    <columns>
+        <field>User_Story__c.Story_Title__c</field>
+    </columns>
+    <columns>
+        <field>User_Story__c.Status__c</field>
+    </columns>
+    <columns>
+        <field>User_Story__c.Assigned_To__c</field>
+    </columns>
+    <columns>
+        <field>User_Story__c.Sprint__c</field>
+    </columns>
+    <description>Identifies bottlenecks in QA/SIT/UAT phases by showing stories waiting in testing queues</description>
+    <filter>
+        <criteriaItems>
+            <column>User_Story__c.Status__c</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>equals</operator>
+            <value>Sent to QA,Sent to SIT,Sent to UAT</value>
+        </criteriaItems>
+    </filter>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>User_Story__c.Status__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>QA Bottleneck Report</name>
+    <reportType>User_Story__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <timeFrameFilter>
+        <dateColumn>User_Story__c.CreatedDate</dateColumn>
+        <interval>INTERVAL_CUSTOM</interval>
+    </timeFrameFilter>
+</Report>

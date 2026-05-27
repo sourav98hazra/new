@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>Task__c.Name</field>
+    </columns>
+    <columns>
+        <field>Task__c.Task_Title__c</field>
+    </columns>
+    <columns>
+        <field>Task__c.Assigned_To__c</field>
+    </columns>
+    <columns>
+        <field>Task__c.Due_Date__c</field>
+    </columns>
+    <columns>
+        <field>Task__c.Status__c</field>
+    </columns>
+    <columns>
+        <field>Task__c.Task_Progress__c</field>
+    </columns>
+    <description>Lists all overdue tasks that are not yet completed, grouped by assignee</description>
+    <filter>
+        <booleanFilter>1 AND 2</booleanFilter>
+        <criteriaItems>
+            <column>Task__c.Is_Overdue__c</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>equals</operator>
+            <value>1</value>
+        </criteriaItems>
+        <criteriaItems>
+            <column>Task__c.Status__c</column>
+            <columnToColumn>false</columnToColumn>
+            <isUnlocked>true</isUnlocked>
+            <operator>notEqual</operator>
+            <value>Completed</value>
+        </criteriaItems>
+    </filter>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>Task__c.Assigned_To__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Overdue Tasks Report</name>
+    <reportType>Task__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <showGrandTotal>true</showGrandTotal>
+    <showSubTotals>true</showSubTotals>
+    <timeFrameFilter>
+        <dateColumn>Task__c.Due_Date__c</dateColumn>
+        <interval>INTERVAL_CUSTOM</interval>
+    </timeFrameFilter>
+</Report>
