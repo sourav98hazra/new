@@ -232,7 +232,6 @@
     <!-- FlexiPages -->
     <types>
         <members>ADM_Home_Page</members>
-        <members>ADM_Sprint_Record_Page</members>
         <name>FlexiPage</name>
     </types>
 

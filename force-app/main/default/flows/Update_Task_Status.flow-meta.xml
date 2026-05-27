@@ -10,14 +10,14 @@
             <assignToReference>Get_Task.Status__c</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Status_Screen.fldNewStatus</elementReference>
+                <elementReference>Screen_UpdateStatus.fldNewStatus</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
             <assignToReference>Get_Task.Blocked_Reason__c</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>Status_Screen.fldBlockedReason</elementReference>
+                <elementReference>Screen_UpdateStatus.fldBlockedReason</elementReference>
             </value>
         </assignmentItems>
         <connector>

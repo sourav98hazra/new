@@ -116,7 +116,6 @@
         <fields>Developer__c</fields>
         <relatedList>Daily_Progress__c.Task__c</relatedList>
     </relatedLists>
-    </relatedLists>
     <platformActionList>
         <actionListContext>Record</actionListContext>
         <platformActionListItems>
