@@ -13,8 +13,7 @@ public with sharing class NotificationService {
         try {
             return URL.getOrgDomainUrl().toExternalForm();
         } catch (Exception e) {
-            // Fallback if getOrgDomainUrl is not available
-            return URL.getSalesforceBaseUrl().toExternalForm();
+            return '';
         }
     }
     
