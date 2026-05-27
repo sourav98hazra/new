@@ -1,0 +1,156 @@
+.guide-header {
+    background-color: #f4f6f9;
+    border-radius: 0.5rem;
+    border-left: 4px solid #0176d3;
+}
+
+.timeline-container {
+    position: relative;
+    padding-left: 0.5rem;
+}
+
+.timeline-item {
+    display: flex;
+    margin-bottom: 1.25rem;
+    cursor: pointer;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.timeline-item:hover {
+    background-color: #f4f6f9;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.timeline-item:last-child .timeline-line {
+    display: none;
+}
+
+.timeline-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 1rem;
+    min-width: 2.5rem;
+}
+
+.step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background-color: #0176d3;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.timeline-line {
+    width: 2px;
+    flex-grow: 1;
+    background-color: #d8dde6;
+    margin-top: 0.25rem;
+    min-height: 1.5rem;
+}
+
+.timeline-content {
+    flex: 1;
+    padding-top: 0.25rem;
+}
+
+.step-title {
+    font-weight: 600;
+    color: #181818;
+}
+
+.step-description {
+    color: #444444;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.phase-badge {
+    display: inline-block;
+    margin-top: 0.5rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 1rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.phase-badge[data-phase="development"] {
+    background-color: #e1f5fe;
+    color: #01579b;
+}
+
+.phase-badge[data-phase="formalities"] {
+    background-color: #fff3e0;
+    color: #e65100;
+}
+
+.phase-badge[data-phase="delivery"] {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+}
+
+.phase-badge[data-phase="planning"] {
+    background-color: #e8eaf6;
+    color: #1a237e;
+}
+
+.phase-badge[data-phase="execution"] {
+    background-color: #fce4ec;
+    color: #880e4f;
+}
+
+.phase-badge[data-phase="closure"] {
+    background-color: #e0f2f1;
+    color: #004d40;
+}
+
+.phase-badge[data-phase="task"] {
+    background-color: #e1f5fe;
+    color: #01579b;
+}
+
+.phase-badge[data-phase="story"] {
+    background-color: #f3e5f5;
+    color: #4a148c;
+}
+
+.phase-badge[data-phase="feature"] {
+    background-color: #fff3e0;
+    color: #e65100;
+}
+
+.phase-badge[data-phase="sprint"] {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+}
+
+.phase-badge[data-phase="project"] {
+    background-color: #e8eaf6;
+    color: #1a237e;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .timeline-item {
+        padding: 0.5rem;
+    }
+
+    .step-description {
+        font-size: 0.8rem;
+    }
+
+    .timeline-marker {
+        margin-right: 0.75rem;
+    }
+}

@@ -152,7 +152,32 @@
         <members>dailyProgressModal</members>
         <members>sprintDashboard</members>
         <members>checklistManager</members>
+        <members>developerProcessGuide</members>
         <name>LightningComponentBundle</name>
+    </types>
+
+    <!-- Quick Actions -->
+    <types>
+        <members>Project__c.New_Sprint</members>
+        <members>Project__c.Update_Status</members>
+        <members>Sprint__c.New_Story</members>
+        <members>Sprint__c.New_Feature</members>
+        <members>Sprint__c.Update_Status</members>
+        <members>User_Story__c.New_Task</members>
+        <members>User_Story__c.Update_Status</members>
+        <members>User_Story__c.Complete_Formalities</members>
+        <members>Task__c.Update_Status</members>
+        <members>Task__c.Log_Progress</members>
+        <members>Task__c.Complete_Checklist</members>
+        <members>Daily_Progress__c.New_Progress</members>
+        <name>QuickAction</name>
+    </types>
+
+    <!-- Flows -->
+    <types>
+        <members>Complete_Task_Checklist</members>
+        <members>Update_Task_Status</members>
+        <name>Flow</name>
     </types>
 
     <!-- Permission Sets -->

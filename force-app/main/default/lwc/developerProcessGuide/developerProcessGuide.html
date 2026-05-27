@@ -1,0 +1,69 @@
+<template>
+    <lightning-card title="Process Guide" icon-name="standard:flow">
+        <!-- Tabs -->
+        <div class="slds-tabs_default">
+            <ul class="slds-tabs_default__nav" role="tablist">
+                <li class={developerTabClass} role="presentation">
+                    <a class="slds-tabs_default__link" role="tab" data-tab="developer" onclick={handleTabClick}>
+                        <lightning-icon icon-name="standard:task" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                        Developer Workflow
+                    </a>
+                </li>
+                <li class={leadTabClass} role="presentation">
+                    <a class="slds-tabs_default__link" role="tab" data-tab="lead" onclick={handleTabClick}>
+                        <lightning-icon icon-name="standard:account" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                        Lead / Manager Workflow
+                    </a>
+                </li>
+                <li class={progressTabClass} role="presentation">
+                    <a class="slds-tabs_default__link" role="tab" data-tab="progress" onclick={handleTabClick}>
+                        <lightning-icon icon-name="standard:report" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                        Progress Flow
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="slds-tabs_default__content slds-show">
+                <!-- Description -->
+                <template if:true={isDeveloperTab}>
+                    <div class="slds-m-bottom_medium slds-p-around_medium guide-header">
+                        <p class="slds-text-body_regular">Follow these 13 steps from picking up a task to marking a story as Done. Each step builds on the previous one.</p>
+                    </div>
+                </template>
+                <template if:true={isLeadTab}>
+                    <div class="slds-m-bottom_medium slds-p-around_medium guide-header">
+                        <p class="slds-text-body_regular">Lead/Manager workflow from project creation through sprint closure. Manage work, monitor progress, and ensure quality delivery.</p>
+                    </div>
+                </template>
+                <template if:true={isProgressTab}>
+                    <div class="slds-m-bottom_medium slds-p-around_medium guide-header">
+                        <p class="slds-text-body_regular">Progress percentage flows automatically from daily entries up through the project hierarchy. All progress fields are auto-calculated and read-only.</p>
+                    </div>
+                </template>
+
+                <!-- Timeline Steps -->
+                <div class="slds-p-around_medium">
+                    <div class="timeline-container">
+                        <template for:each={currentSteps} for:item="step">
+                            <div key={step.id} class="timeline-item" data-id={step.id} onclick={handleStepClick}>
+                                <div class="timeline-marker">
+                                    <div class="step-number">{step.number}</div>
+                                    <div class="timeline-line"></div>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="slds-grid slds-grid_vertical-align-center slds-m-bottom_xx-small">
+                                        <lightning-icon icon-name={step.icon} size="small" class="slds-m-right_small"></lightning-icon>
+                                        <h3 class="slds-text-heading_small step-title">{step.title}</h3>
+                                    </div>
+                                    <p class="slds-text-body_regular step-description">{step.description}</p>
+                                    <span class="phase-badge" data-phase={step.phase}>{step.phase}</span>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </lightning-card>
+</template>
