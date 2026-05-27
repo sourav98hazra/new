@@ -1,56 +1,227 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <!-- Custom Objects -->
     <types>
-        <members>*</members>
-        <name>ApexClass</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>ApexTrigger</name>
-    </types>
-    <types>
-        <members>*</members>
+        <members>Project__c</members>
+        <members>Sprint__c</members>
+        <members>Feature__c</members>
+        <members>User_Story__c</members>
+        <members>Task__c</members>
+        <members>Daily_Progress__c</members>
+        <members>Task_Checklist_Item__c</members>
+        <members>Task_Dependency__c</members>
         <name>CustomObject</name>
     </types>
+
+    <!-- Custom Fields -->
     <types>
-        <members>*</members>
+        <members>Project__c.Project_Manager__c</members>
+        <members>Project__c.Overall_Progress__c</members>
+        <members>Project__c.Start_Date__c</members>
+        <members>Project__c.End_Date__c</members>
+        <members>Project__c.Active_Sprint_Count__c</members>
+        <members>Project__c.Total_Story_Points__c</members>
+        <members>Project__c.Status__c</members>
+        <members>Project__c.Description__c</members>
+        <members>Sprint__c.Project__c</members>
+        <members>Sprint__c.Status__c</members>
+        <members>Sprint__c.Start_Date__c</members>
+        <members>Sprint__c.End_Date__c</members>
+        <members>Sprint__c.Sprint_Goal__c</members>
+        <members>Sprint__c.Sprint_Progress__c</members>
+        <members>Sprint__c.Total_Story_Points__c</members>
+        <members>Sprint__c.Completed_Story_Points__c</members>
+        <members>Sprint__c.Velocity__c</members>
+        <members>Sprint__c.Days_Remaining__c</members>
+        <members>Sprint__c.Retrospective_Notes__c</members>
+        <members>Feature__c.Sprint__c</members>
+        <members>Feature__c.Status__c</members>
+        <members>Feature__c.Priority__c</members>
+        <members>Feature__c.Feature_Progress__c</members>
+        <members>Feature__c.Description__c</members>
+        <members>User_Story__c.Sprint__c</members>
+        <members>User_Story__c.Feature__c</members>
+        <members>User_Story__c.Status__c</members>
+        <members>User_Story__c.Priority__c</members>
+        <members>User_Story__c.Story_Title__c</members>
+        <members>User_Story__c.Story_Points__c</members>
+        <members>User_Story__c.Estimated_Hours__c</members>
+        <members>User_Story__c.Story_Progress__c</members>
+        <members>User_Story__c.Assigned_To__c</members>
+        <members>User_Story__c.Description__c</members>
+        <members>User_Story__c.Acceptance_Criteria__c</members>
+        <members>User_Story__c.QA_Notes__c</members>
+        <members>User_Story__c.Rejection_Reason__c</members>
+        <members>User_Story__c.Pending_Reason__c</members>
+        <members>User_Story__c.Unit_Test_Sheet_Complete__c</members>
+        <members>User_Story__c.Manual_Deployment_Steps_Complete__c</members>
+        <members>User_Story__c.Business_Dependency_Complete__c</members>
+        <members>User_Story__c.AC_Update_Complete__c</members>
+        <members>User_Story__c.Peer_Review_Complete__c</members>
+        <members>User_Story__c.All_Formalities_Complete__c</members>
+        <members>Task__c.User_Story__c</members>
+        <members>Task__c.Status__c</members>
+        <members>Task__c.Priority__c</members>
+        <members>Task__c.Task_Title__c</members>
+        <members>Task__c.Task_Type__c</members>
+        <members>Task__c.Estimated_Hours__c</members>
+        <members>Task__c.Actual_Hours__c</members>
+        <members>Task__c.Task_Progress__c</members>
+        <members>Task__c.Assigned_To__c</members>
+        <members>Task__c.Due_Date__c</members>
+        <members>Task__c.Description__c</members>
+        <members>Task__c.Checklist_Complete__c</members>
+        <members>Task__c.Blocked_Reason__c</members>
+        <members>Task__c.Is_Overdue__c</members>
+        <members>Daily_Progress__c.Task__c</members>
+        <members>Daily_Progress__c.Progress_Date__c</members>
+        <members>Daily_Progress__c.Hours_Worked__c</members>
+        <members>Daily_Progress__c.Progress_Percentage__c</members>
+        <members>Daily_Progress__c.Notes__c</members>
+        <members>Daily_Progress__c.Developer__c</members>
+        <members>Task_Checklist_Item__c.Task__c</members>
+        <members>Task_Checklist_Item__c.Is_Completed__c</members>
+        <members>Task_Checklist_Item__c.Description__c</members>
+        <members>Task_Checklist_Item__c.Completed_Date__c</members>
+        <members>Task_Checklist_Item__c.Completed_By__c</members>
+        <members>Task_Checklist_Item__c.Sequence__c</members>
+        <members>Task_Dependency__c.Predecessor_Task__c</members>
+        <members>Task_Dependency__c.Successor_Task__c</members>
+        <members>Task_Dependency__c.Dependency_Type__c</members>
+        <members>Task_Dependency__c.Is_Blocking__c</members>
+        <members>Task_Dependency__c.Notes__c</members>
         <name>CustomField</name>
     </types>
+
+    <!-- Apex Classes -->
     <types>
-        <members>*</members>
+        <members>ProgressCalculationService</members>
+        <members>ProgressCalculationServiceTest</members>
+        <members>ChecklistService</members>
+        <members>ChecklistServiceTest</members>
+        <members>StatusManagementService</members>
+        <members>StatusManagementServiceTest</members>
+        <members>NotificationService</members>
+        <members>NotificationServiceTest</members>
+        <members>DailyProgressController</members>
+        <members>SprintDashboardController</members>
+        <members>ChecklistManagerController</members>
+        <members>DailyNotificationScheduler</members>
+        <members>DailyNotificationSchedulerTest</members>
+        <members>TriggerTestHelper</members>
+        <members>TriggerTests</members>
+        <name>ApexClass</name>
+    </types>
+
+    <!-- Apex Triggers -->
+    <types>
+        <members>DailyProgressTrigger</members>
+        <members>TaskTrigger</members>
+        <members>TaskChecklistItemTrigger</members>
+        <members>UserStoryTrigger</members>
+        <members>FeatureTrigger</members>
+        <members>SprintTrigger</members>
+        <name>ApexTrigger</name>
+    </types>
+
+    <!-- Validation Rules -->
+    <types>
+        <members>Project__c.Progress_Cannot_Exceed_100</members>
+        <members>Project__c.End_Date_After_Start_Date</members>
+        <members>Sprint__c.Progress_Cannot_Exceed_100</members>
+        <members>Sprint__c.End_Date_After_Start_Date</members>
+        <members>Sprint__c.Closed_Sprint_Cannot_Be_Modified</members>
+        <members>Sprint__c.Cannot_Close_With_Incomplete_Stories</members>
+        <members>Feature__c.Progress_Cannot_Exceed_100</members>
+        <members>User_Story__c.Progress_Cannot_Exceed_100</members>
+        <members>User_Story__c.Checklist_Required_Before_QA</members>
+        <members>User_Story__c.Checklist_Required_Before_SIT</members>
+        <members>User_Story__c.Formalities_Required_Before_SIT_Ready</members>
+        <members>Task__c.Progress_Cannot_Exceed_100</members>
+        <members>Task__c.Checklist_Required_Before_Complete</members>
+        <members>Task__c.Cannot_Complete_Blocked_Task</members>
+        <members>Daily_Progress__c.Hours_Worked_Must_Be_Valid</members>
+        <members>Daily_Progress__c.Cannot_Edit_Historical_Progress</members>
+        <members>Daily_Progress__c.Progress_Percentage_Range</members>
+        <members>Task_Dependency__c.Cannot_Depend_On_Self</members>
         <name>ValidationRule</name>
     </types>
+
+    <!-- Lightning Web Components -->
     <types>
-        <members>*</members>
+        <members>dailyProgressModal</members>
+        <members>sprintDashboard</members>
+        <members>checklistManager</members>
         <name>LightningComponentBundle</name>
     </types>
+
+    <!-- Permission Sets -->
     <types>
-        <members>*</members>
+        <members>ADM_Admin</members>
+        <members>ADM_Lead</members>
+        <members>ADM_Developer_Pro</members>
+        <members>ADM_Developer</members>
+        <members>ADM_QA</members>
+        <members>ADM_Manager</members>
         <name>PermissionSet</name>
     </types>
+
+    <!-- Custom Permissions -->
     <types>
-        <members>*</members>
-        <name>Flow</name>
+        <members>Modify_Closed_Sprints</members>
+        <members>Edit_Historical_Progress</members>
+        <name>CustomPermission</name>
     </types>
+
+    <!-- Page Layouts -->
     <types>
-        <members>*</members>
-        <name>Report</name>
-    </types>
-    <types>
-        <members>*</members>
-        <name>Dashboard</name>
-    </types>
-    <types>
-        <members>*</members>
+        <members>Project__c-Project Layout</members>
+        <members>Sprint__c-Sprint Layout</members>
+        <members>Feature__c-Feature Layout</members>
+        <members>User_Story__c-User Story Layout</members>
+        <members>Task__c-Task Layout</members>
+        <members>Daily_Progress__c-Daily Progress Layout</members>
+        <members>Task_Checklist_Item__c-Task Checklist Item Layout</members>
+        <members>Task_Dependency__c-Task Dependency Layout</members>
         <name>Layout</name>
     </types>
+
+    <!-- Reports -->
     <types>
-        <members>*</members>
-        <name>CustomTab</name>
+        <members>ADM_Reports</members>
+        <members>ADM_Reports/Developer_Productivity_Report</members>
+        <members>ADM_Reports/Sprint_Velocity_Report</members>
+        <members>ADM_Reports/Overdue_Tasks_Report</members>
+        <members>ADM_Reports/Sprint_Burndown_Report</members>
+        <members>ADM_Reports/QA_Bottleneck_Report</members>
+        <members>ADM_Reports/Project_Health_Report</members>
+        <members>ADM_Reports/Sprint_Story_Status_Report</members>
+        <name>Report</name>
     </types>
+
+    <!-- Dashboards -->
     <types>
-        <members>*</members>
-        <name>FlexiPage</name>
+        <members>ADM_Dashboards</members>
+        <members>ADM_Dashboards/Developer_Dashboard</members>
+        <members>ADM_Dashboards/Lead_Dashboard</members>
+        <members>ADM_Dashboards/Manager_Dashboard</members>
+        <name>Dashboard</name>
     </types>
+
+    <!-- Custom Notification Types -->
+    <types>
+        <members>ADM_Task_Notification</members>
+        <name>CustomNotificationType</name>
+    </types>
+
+    <!-- Email Templates -->
+    <types>
+        <members>ADM_Email_Templates</members>
+        <members>ADM_Email_Templates/Task_Assignment_Notification</members>
+        <members>ADM_Email_Templates/Overdue_Task_Notification</members>
+        <members>ADM_Email_Templates/Daily_Progress_Reminder</members>
+        <name>EmailTemplate</name>
+    </types>
+
     <version>60.0</version>
 </Package>
