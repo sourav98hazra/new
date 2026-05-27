@@ -128,7 +128,7 @@
         <members>User_Story__c.Checklist_Required_Before_QA</members>
         <members>User_Story__c.Checklist_Required_Before_SIT</members>
         <members>User_Story__c.Formalities_Required_Before_SIT_Ready</members>
-        <members>User_Story__c.Unit_Testing_Required_Before_Dev_Completed</members>
+        <members>User_Story__c.Unit_Test_Required_Before_Dev_Complete</members>
         <members>Task__c.Progress_Cannot_Exceed_100</members>
         <members>Task__c.Cannot_Complete_Blocked_Task</members>
         <members>Daily_Progress__c.Hours_Worked_Must_Be_Valid</members>

@@ -85,10 +85,6 @@
     </objectPermissions>
     
     <!-- Apex Class Access -->
-    <classAccesses>
-        <apexClass>ChecklistService</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
     
     <!-- Application Visibility -->
     <applicationVisibilities>

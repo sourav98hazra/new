@@ -75,10 +75,7 @@
         <modifyAllRecords>true</modifyAllRecords>
         <object>Daily_Progress__c</object>
         <viewAllRecords>true</viewAllRecords>
-    </objectPermissions>
-    
-    <!-- Task Checklist Item Object Permissions -->
-    
+    </objectPermissions>    
     <!-- Task Dependency Object Permissions -->
     <objectPermissions>
         <allowCreate>true</allowCreate>
@@ -93,10 +90,6 @@
     <!-- Apex Class Access -->
     <classAccesses>
         <apexClass>ProgressCalculationService</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>ChecklistService</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>

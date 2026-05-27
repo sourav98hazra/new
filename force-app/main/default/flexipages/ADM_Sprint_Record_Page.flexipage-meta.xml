@@ -12,5 +12,8 @@
     </flexiPageRegions>
     <masterLabel>ADM Sprint Record Page</masterLabel>
     <sobjectType>Sprint__c</sobjectType>
+    <template>
+        <name>flexipage:defaultRecordPage</name>
+    </template>
     <type>RecordPage</type>
 </FlexiPage>

@@ -10,14 +10,14 @@
             <assignToReference>Get_Task.Status__c</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>varNewStatus</elementReference>
+                <elementReference>Status_Screen.fldNewStatus</elementReference>
             </value>
         </assignmentItems>
         <assignmentItems>
             <assignToReference>Get_Task.Blocked_Reason__c</assignToReference>
             <operator>Assign</operator>
             <value>
-                <elementReference>varBlockedReason</elementReference>
+                <elementReference>Status_Screen.fldBlockedReason</elementReference>
             </value>
         </assignmentItems>
         <connector>
@@ -113,7 +113,7 @@
             <fieldType>DisplayText</fieldType>
         </fields>
         <fields>
-            <name>varNewStatus</name>
+            <name>fldNewStatus</name>
             <choiceReferences>choiceNew</choiceReferences>
             <choiceReferences>choiceInProgress</choiceReferences>
             <choiceReferences>choiceBlocked</choiceReferences>
@@ -125,7 +125,7 @@
             <isRequired>true</isRequired>
         </fields>
         <fields>
-            <name>varBlockedReason</name>
+            <name>fldBlockedReason</name>
             <dataType>String</dataType>
             <fieldText>Blocked Reason (required if Blocked)</fieldText>
             <fieldType>LargeTextArea</fieldType>
@@ -147,20 +147,6 @@
         <dataType>String</dataType>
         <isCollection>false</isCollection>
         <isInput>true</isInput>
-        <isOutput>false</isOutput>
-    </variables>
-    <variables>
-        <name>varNewStatus</name>
-        <dataType>String</dataType>
-        <isCollection>false</isCollection>
-        <isInput>false</isInput>
-        <isOutput>false</isOutput>
-    </variables>
-    <variables>
-        <name>varBlockedReason</name>
-        <dataType>String</dataType>
-        <isCollection>false</isCollection>
-        <isInput>false</isInput>
         <isOutput>false</isOutput>
     </variables>
 </Flow>
