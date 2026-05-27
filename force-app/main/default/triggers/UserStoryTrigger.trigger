@@ -1,7 +1,14 @@
 /**
  * @description Trigger for User_Story__c object
- * Handles story progress updates, feature status updates,
- * formality Activity Task auto-creation and bi-directional sync
+ * Handles story progress, feature/sprint cascades, formality sync,
+ * and auto-creation of Activity Tasks at each story stage.
+ *
+ * ACTIVITY TASK LIFECYCLE (auto-created at each stage):
+ *   Dev In Progress    → Write Code, Write Unit Tests, Unit Testing
+ *   Dev Completed      → Unit Test Sheet, Manual Deploy Sheet, Business Dep Sheet, AC Update, Peer Review
+ *   Completed-SIT Ready→ Raise PR
+ *   Sent to SIT        → Smoke Test SIT
+ *   Rejected           → Fix Issues (with rejection reason)
  */
 trigger UserStoryTrigger on User_Story__c (after insert, after update, after delete) {
     Set<Id> featureIds = new Set<Id>();
@@ -9,8 +16,11 @@ trigger UserStoryTrigger on User_Story__c (after insert, after update, after del
 
     if (Trigger.isInsert || Trigger.isUpdate) {
 
-        List<User_Story__c> movedToDevInProgress = new List<User_Story__c>();
-        List<User_Story__c> movedToDevCompleted  = new List<User_Story__c>();
+        List<User_Story__c> movedToDevInProgress  = new List<User_Story__c>();
+        List<User_Story__c> movedToDevCompleted   = new List<User_Story__c>();
+        List<User_Story__c> movedToSITReady       = new List<User_Story__c>();
+        List<User_Story__c> movedToSentToSIT      = new List<User_Story__c>();
+        List<User_Story__c> movedToRejected       = new List<User_Story__c>();
 
         for (User_Story__c story : Trigger.new) {
             if (story.Feature__c != null) featureIds.add(story.Feature__c);
@@ -26,19 +36,31 @@ trigger UserStoryTrigger on User_Story__c (after insert, after update, after del
                     sprintIds.add(oldStory.Sprint__c);
                 }
 
-                // Detect status transitions
+                // Detect status transitions - create Activity Tasks at each stage
                 if (story.Status__c != oldStory.Status__c) {
-                    if (story.Status__c == 'Dev In Progress') {
-                        movedToDevInProgress.add(story);
-                    }
-                    if (story.Status__c == 'Dev Completed') {
-                        movedToDevCompleted.add(story);
-                    }
-                    if (story.Status__c == 'Sent to QA') {
-                        NotificationService.notifyStoryReadyForQA(story.Id);
-                    }
-                    if (story.Status__c == 'Rejected' && story.Rejection_Reason__c != null) {
-                        NotificationService.notifyStoryRejected(story.Id, story.Rejection_Reason__c);
+
+                    switch on story.Status__c {
+                        when 'Dev In Progress' {
+                            movedToDevInProgress.add(story);
+                        }
+                        when 'Dev Completed' {
+                            movedToDevCompleted.add(story);
+                        }
+                        when 'Completed - SIT Ready' {
+                            movedToSITReady.add(story);
+                        }
+                        when 'Sent to SIT' {
+                            movedToSentToSIT.add(story);
+                        }
+                        when 'Rejected' {
+                            movedToRejected.add(story);
+                            if (story.Rejection_Reason__c != null) {
+                                NotificationService.notifyStoryRejected(story.Id, story.Rejection_Reason__c);
+                            }
+                        }
+                        when 'Sent to QA' {
+                            NotificationService.notifyStoryReadyForQA(story.Id);
+                        }
                     }
                 }
 
@@ -57,11 +79,21 @@ trigger UserStoryTrigger on User_Story__c (after insert, after update, after del
             }
         }
 
+        // Create Activity Tasks for each stage transition
         if (!movedToDevInProgress.isEmpty()) {
-            FormalitiesService.createUnitTestingActivityIfNeeded(movedToDevInProgress);
+            FormalitiesService.createDevInProgressActivities(movedToDevInProgress);
         }
         if (!movedToDevCompleted.isEmpty()) {
             FormalitiesService.createFormalityActivitiesIfNeeded(movedToDevCompleted);
+        }
+        if (!movedToSITReady.isEmpty()) {
+            FormalitiesService.createRaisePRActivity(movedToSITReady);
+        }
+        if (!movedToSentToSIT.isEmpty()) {
+            FormalitiesService.createSITSmokeTestActivity(movedToSentToSIT);
+        }
+        if (!movedToRejected.isEmpty()) {
+            FormalitiesService.createFixIssuesActivity(movedToRejected);
         }
     }
 

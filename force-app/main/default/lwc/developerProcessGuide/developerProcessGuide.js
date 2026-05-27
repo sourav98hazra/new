@@ -26,7 +26,7 @@ export default class DeveloperProcessGuide extends LightningElement {
             id: 3,
             number: '3',
             title: 'Set Story Status to "Dev In Progress"',
-            description: 'Use the "Update Status" button on the story. The system automatically creates a "Unit Testing" Activity Task linked to the story for you to complete later.',
+            description: 'Use the "Update Status" button on the story. The system automatically creates 3 Activity Tasks:\n• Write Code: [Story]\n• Write Unit Tests: [Story]\n• Unit Testing: [Story]',
             icon: 'standard:activations',
             phase: 'development'
         },
@@ -49,72 +49,80 @@ export default class DeveloperProcessGuide extends LightningElement {
         {
             id: 6,
             number: '6',
-            title: 'Complete Unit Testing',
-            description: 'Write and run unit tests for the story. When done, either close the "Unit Testing" Activity Task OR tick the "Unit Testing Complete" checkbox on the story — both sync automatically to each other.',
+            title: 'Close "Write Code" Activity Task',
+            description: 'Once your code implementation is complete, close the "Write Code" Activity Task from the story\'s Activity section. This signals to your lead that coding is done.',
             icon: 'standard:code_set',
             phase: 'development'
         },
         {
             id: 7,
             number: '7',
-            title: 'Mark Task as "Completed"',
-            description: 'Once a task is fully done, update its status to Completed. All tasks under the story must be completed before the story can move forward.',
-            icon: 'standard:approval',
+            title: 'Close "Write Unit Tests" Activity Task',
+            description: 'After writing and passing your unit tests, close the "Write Unit Tests" Activity Task. Your test coverage should meet the project\'s minimum threshold.',
+            icon: 'standard:test',
             phase: 'development'
         },
         {
             id: 8,
             number: '8',
-            title: 'Set Story Status to "Dev Completed"',
-            description: 'ALL tasks must be 100% complete AND Unit Testing must be marked complete before this is allowed. When set, the system auto-creates 5 Pre-SIT formality Activity Tasks for you.',
-            icon: 'standard:code_review',
-            phase: 'formalities'
+            title: 'Complete Unit Testing & Close Activity Task',
+            description: 'Run all unit tests and verify they pass. Close the "Unit Testing" Activity Task OR tick "Unit Testing Complete" on the story — both sync automatically. This gate is REQUIRED before Dev Completed.',
+            icon: 'standard:approval',
+            phase: 'development'
         },
         {
             id: 9,
             number: '9',
-            title: 'Complete Pre-SIT Formalities',
-            description: 'Close each formality Activity Task as you finish it, OR tick the checkbox on the story — either action syncs the other automatically:\n• Unit Test Sheet\n• Manual Deployment Steps Sheet\n• Business Dependency Sheet\n• AC Update\n• Peer Review',
-            icon: 'standard:document',
-            phase: 'formalities'
+            title: 'Mark Task as "Completed"',
+            description: 'Update each custom Task record status to Completed. When ALL tasks are done AND Unit Testing is complete, the story automatically advances to "Dev Completed".',
+            icon: 'standard:task2',
+            phase: 'development'
         },
         {
             id: 10,
             number: '10',
-            title: 'Story Auto-Moves to "Formalities InProgress"',
-            description: 'As you complete formalities one by one, the story status automatically changes to "Formalities InProgress". No manual status update needed.',
-            icon: 'standard:in_progress',
+            title: '"Dev Completed" → 5 Formality Activity Tasks Created',
+            description: 'Once the story reaches Dev Completed (auto or manual), 5 Activity Tasks appear:\n• Unit Test Sheet\n• Manual Deployment Steps Sheet\n• Business Dependency Sheet\n• AC Update\n• Peer Review',
+            icon: 'standard:document',
             phase: 'formalities'
         },
         {
             id: 11,
             number: '11',
-            title: 'Story Auto-Moves to "Completed - SIT Ready"',
-            description: 'Once ALL 5 formality Activity Tasks are closed (or all 5 checkboxes ticked), the story status automatically advances to "Completed - SIT Ready". No manual action required.',
-            icon: 'standard:partners',
+            title: 'Complete Each Formality Activity Task',
+            description: 'Close each formality Activity Task as you finish it — OR tick the checkbox on the story. Either syncs the other automatically. Story moves to "Formalities InProgress" as you progress.',
+            icon: 'standard:in_progress',
             phase: 'formalities'
         },
         {
             id: 12,
             number: '12',
-            title: 'Raise PR → "PR InProgress"',
-            description: 'Create a Pull Request for your code changes. Update the story status to "PR InProgress" so the lead knows it is awaiting code review.',
-            icon: 'standard:merge',
-            phase: 'delivery'
+            title: 'Story Auto-Moves to "Completed - SIT Ready"',
+            description: 'When ALL 5 formality tasks are closed, the story automatically advances to "Completed - SIT Ready". A "Raise PR" Activity Task is also auto-created for you.',
+            icon: 'standard:partners',
+            phase: 'formalities'
         },
         {
             id: 13,
             number: '13',
-            title: 'Deploy to SIT → "Sent to SIT"',
-            description: 'After the PR is approved and merged, deploy the code to the SIT environment. Update the story status to "Sent to SIT".',
-            icon: 'standard:deployment_unit',
+            title: 'Close "Raise PR" → Set "PR InProgress"',
+            description: 'Create your Pull Request for code review. Close the "Raise PR" Activity Task and update the story status to "PR InProgress" so the lead knows it awaits review.',
+            icon: 'standard:merge',
             phase: 'delivery'
         },
         {
             id: 14,
             number: '14',
+            title: 'Deploy to SIT → "Sent to SIT" + Smoke Test Activity Created',
+            description: 'After PR is approved and merged, deploy to SIT. Update story to "Sent to SIT". A "Smoke Test SIT" Activity Task is auto-created for you to verify the deployment.',
+            icon: 'standard:deployment_unit',
+            phase: 'delivery'
+        },
+        {
+            id: 15,
+            number: '15',
             title: 'QA / UAT → "Done"',
-            description: 'QA team tests in the QA environment ("Sent to QA"), then stakeholders sign off in UAT ("Sent to UAT"). Once all testing passes, the story is marked "Done".',
+            description: 'QA tests in "Sent to QA", stakeholders sign off in "Sent to UAT". If rejected, a "Fix Issues" Activity Task is auto-created with the rejection reason. Once all passes → "Done".',
             icon: 'standard:thanks',
             phase: 'delivery'
         }

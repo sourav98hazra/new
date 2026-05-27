@@ -1,10 +1,15 @@
 /**
- * @description Service class for managing bi-directional sync between
- * User Story formality checkboxes and Salesforce Activity Tasks.
+ * @description Service class for managing the full Activity Task lifecycle across all story stages.
  *
- * DESIGN:
- * - When story moves to "Dev In Progress" -> auto-create "Unit Testing" Activity Task
- * - When story moves to "Dev Completed" -> auto-create Activity Tasks for 5 incomplete formalities
+ * FULL ACTIVITY LIFECYCLE:
+ * Dev In Progress  -> "Write Code: [Story]", "Write Unit Tests: [Story]", "Unit Testing: [Story]"
+ * Dev Completed    -> "Unit Test Sheet: [Story]", "Manual Deployment Steps Sheet: [Story]",
+ *                    "Business Dependency Sheet: [Story]", "AC Update: [Story]", "Peer Review: [Story]"
+ * SIT Ready        -> "Raise PR: [Story]"
+ * Sent to SIT      -> "Smoke Test SIT: [Story]"
+ * Rejected         -> "Fix Issues: [Story] - [Rejection Reason]"
+ *
+ * CHECKBOX SYNC:
  * - When Activity Task is closed -> tick corresponding checkbox on Story (bi-directional)
  * - When checkbox is ticked -> close corresponding Activity Task (bi-directional)
  * - When all 5 formalities complete -> auto-move story to "Completed - SIT Ready"
@@ -78,8 +83,160 @@ public without sharing class FormalitiesService {
 
 
     /**
+     * @description Helper: check whether an open Activity Task with a given subject prefix already exists
+     */
+    private static Boolean activityExists(Id whatId, String subjectPrefix) {
+        return [SELECT COUNT() FROM Task
+                WHERE WhatId = :whatId
+                AND Subject LIKE :(subjectPrefix + '%')
+                AND Status != 'Completed'] > 0;
+    }
+
+    /**
+     * @description Helper: build a standard Activity Task
+     */
+    private static Task buildTask(String subject, Id whatId, Id ownerId,
+                                  String status, String priority,
+                                  Integer dueDays, String description) {
+        return new Task(
+            Subject      = subject,
+            WhatId       = whatId,
+            OwnerId      = ownerId != null ? ownerId : UserInfo.getUserId(),
+            Status       = status,
+            Priority     = priority,
+            ActivityDate = Date.today().addDays(dueDays),
+            Description  = description
+        );
+    }
+
+
+
+    /**
+     * @description Called when story → "Dev In Progress"
+     * Creates three dev Activity Tasks:
+     *   1. Write Code
+     *   2. Write Unit Tests
+     *   3. Unit Testing (the gate that must be closed before Dev Completed)
+     */
+    public static void createDevInProgressActivities(List<User_Story__c> stories) {
+        List<Task> toCreate = new List<Task>();
+
+        for (User_Story__c story : stories) {
+            Id owner = story.Assigned_To__c;
+
+            // 1. Write Code
+            if (!activityExists(story.Id, 'Write Code')) {
+                toCreate.add(buildTask(
+                    'Write Code: ' + story.Story_Title__c,
+                    story.Id, owner, 'In Progress', 'High', 3,
+                    'Implement the feature described in story: ' + story.Story_Title__c +
+                    '. Follow the acceptance criteria and coding standards. Close when development is complete.'
+                ));
+            }
+
+            // 2. Write Unit Tests
+            if (!activityExists(story.Id, 'Write Unit Tests')) {
+                toCreate.add(buildTask(
+                    'Write Unit Tests: ' + story.Story_Title__c,
+                    story.Id, owner, 'Not Started', 'High', 5,
+                    'Write unit tests for: ' + story.Story_Title__c +
+                    '. Ensure coverage meets the required threshold. Close when tests are written and passing.'
+                ));
+            }
+
+            // 3. Unit Testing gate (already gated by checkbox)
+            if (story.Unit_Testing_Complete__c != true && !activityExists(story.Id, UNIT_TESTING_SUBJECT)) {
+                toCreate.add(buildTask(
+                    UNIT_TESTING_SUBJECT + ': ' + story.Story_Title__c,
+                    story.Id, owner, 'Not Started', 'High', 5,
+                    'Run and verify all unit tests for story: ' + story.Story_Title__c +
+                    '. Once done, close this task OR tick "Unit Testing Complete" on the story — both sync.'
+                ));
+            }
+        }
+
+        if (!toCreate.isEmpty()) insert toCreate;
+    }
+
+
+
+    /**
+     * @description Called when story → "Completed - SIT Ready"
+     * Creates "Raise PR" Activity Task for the developer
+     */
+    public static void createRaisePRActivity(List<User_Story__c> stories) {
+        List<Task> toCreate = new List<Task>();
+
+        for (User_Story__c story : stories) {
+            if (!activityExists(story.Id, 'Raise PR')) {
+                toCreate.add(buildTask(
+                    'Raise PR: ' + story.Story_Title__c,
+                    story.Id, story.Assigned_To__c, 'Not Started', 'High', 1,
+                    'Create a Pull Request for story: ' + story.Story_Title__c +
+                    '. Update the story status to "PR InProgress" after raising. ' +
+                    'Once the PR is approved and merged, close this task.'
+                ));
+            }
+        }
+
+        if (!toCreate.isEmpty()) insert toCreate;
+    }
+
+
+
+    /**
+     * @description Called when story → "Sent to SIT"
+     * Creates "Smoke Test SIT" Activity Task for the developer
+     */
+    public static void createSITSmokeTestActivity(List<User_Story__c> stories) {
+        List<Task> toCreate = new List<Task>();
+
+        for (User_Story__c story : stories) {
+            if (!activityExists(story.Id, 'Smoke Test SIT')) {
+                toCreate.add(buildTask(
+                    'Smoke Test SIT: ' + story.Story_Title__c,
+                    story.Id, story.Assigned_To__c, 'Not Started', 'Normal', 1,
+                    'Perform smoke testing in the SIT environment for: ' + story.Story_Title__c +
+                    '. Verify the core functionality works as expected after deployment. ' +
+                    'Close this task when smoke testing passes.'
+                ));
+            }
+        }
+
+        if (!toCreate.isEmpty()) insert toCreate;
+    }
+
+
+
+    /**
+     * @description Called when story → "Rejected"
+     * Creates "Fix Issues" Activity Task with the rejection reason
+     */
+    public static void createFixIssuesActivity(List<User_Story__c> stories) {
+        List<Task> toCreate = new List<Task>();
+
+        for (User_Story__c story : stories) {
+            if (!activityExists(story.Id, 'Fix Issues')) {
+                String reason = story.Rejection_Reason__c != null ? story.Rejection_Reason__c : 'See QA notes on the story.';
+                toCreate.add(buildTask(
+                    'Fix Issues: ' + story.Story_Title__c,
+                    story.Id, story.Assigned_To__c, 'In Progress', 'High', 2,
+                    'Address the following issues raised during QA/SIT review:\n\n' +
+                    reason + '\n\nOnce fixed, update the story status back to "Dev In Progress" and re-run testing.'
+                ));
+            }
+        }
+
+        if (!toCreate.isEmpty()) insert toCreate;
+    }
+
+
+
+    /**
      * @description Called when story status changes to "Dev In Progress"
      * Creates Activity Task for Unit Testing if not already complete
+     * @deprecated Use createDevInProgressActivities() for the full set.
+     *             Kept for backward compatibility.
      */
     public static void createUnitTestingActivityIfNeeded(List<User_Story__c> stories) {
         List<Task> tasksToCreate = new List<Task>();
