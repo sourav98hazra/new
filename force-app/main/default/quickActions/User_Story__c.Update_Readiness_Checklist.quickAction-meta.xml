@@ -1,71 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <QuickAction xmlns="http://soap.sforce.com/2006/04/metadata">
     <actionSubtype>ScreenAction</actionSubtype>
-    <description>Update Story Readiness Checklist items — all checkboxes sync with Activity Tasks automatically</description>
+    <description>Update Story Readiness Checklist — all 10 checkboxes pre-populated with current values. Saving auto-closes matching Activity Tasks and triggers auto-status progressions. Replaces the old Pre-SIT Formalities flow.</description>
     <label>Update Readiness Checklist</label>
     <optionsCreateFeedItem>false</optionsCreateFeedItem>
-    <quickActionLayout>
-        <layoutSectionStyle>TwoColumnsLeftToRight</layoutSectionStyle>
-        <quickActionLayoutColumns>
-            <quickActionLayoutItems>
-                <emptySpace>false</emptySpace>
-                <field>Story_Info_Verified__c</field>
-                <uiBehavior>Edit</uiBehavior>
-            </quickActionLayoutItems>
-            <quickActionLayoutItems>
-                <emptySpace>false</emptySpace>
-                <field>Unit_Testing_Complete__c</field>
-                <uiBehavior>Edit</uiBehavior>
-            </quickActionLayoutItems>
-            <quickActionLayoutItems>
-                <emptySpace>false</emptySpace>
-                <field>Unit_Test_Sheet_Complete__c</field>
-                <uiBehavior>Edit</uiBehavior>
-            </quickActionLayoutItems>
-            <quickActionLayoutItems>
-                <emptySpace>false</emptySpace>
-                <field>Manual_Deployment_Steps_Complete__c</field>
-                <uiBehavior>Edit</uiBehavior>
-            </quickActionLayoutItems>
-            <quickActionLayoutItems>
-                <emptySpace>false</emptySpace>
-                <field>Business_Dependency_Complete__c</field>
-                <uiBehavior>Edit</uiBehavior>
-            </quickActionLayoutItems>
-        </quickActionLayoutColumns>
-        <quickActionLayoutColumns>
-            <quickActionLayoutItems>
-                <emptySpace>false</emptySpace>
-                <field>AC_Update_Complete__c</field>
-                <uiBehavior>Edit</uiBehavior>
-            </quickActionLayoutItems>
-            <quickActionLayoutItems>
-                <emptySpace>false</emptySpace>
-                <field>Peer_Review_Complete__c</field>
-                <uiBehavior>Edit</uiBehavior>
-            </quickActionLayoutItems>
-            <quickActionLayoutItems>
-                <emptySpace>false</emptySpace>
-                <field>Translations_Sheet_Complete__c</field>
-                <uiBehavior>Edit</uiBehavior>
-            </quickActionLayoutItems>
-            <quickActionLayoutItems>
-                <emptySpace>false</emptySpace>
-                <field>PR_Creation_Complete__c</field>
-                <uiBehavior>Edit</uiBehavior>
-            </quickActionLayoutItems>
-            <quickActionLayoutItems>
-                <emptySpace>false</emptySpace>
-                <field>Smoke_Test_SIT_Complete__c</field>
-                <uiBehavior>Edit</uiBehavior>
-            </quickActionLayoutItems>
-            <quickActionLayoutItems>
-                <emptySpace>false</emptySpace>
-                <field>All_Formalities_Complete__c</field>
-                <uiBehavior>Readonly</uiBehavior>
-            </quickActionLayoutItems>
-        </quickActionLayoutColumns>
-    </quickActionLayout>
-    <type>Update</type>
+    <flowDefinition>Update_Readiness_Checklist</flowDefinition>
+    <type>Flow</type>
     <targetObject>User_Story__c</targetObject>
 </QuickAction>

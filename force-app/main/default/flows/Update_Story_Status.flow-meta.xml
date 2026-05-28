@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>60.0</apiVersion>
+    <label>Update Story Status</label>
+    <interviewLabel>Update Story Status {!$Flow.CurrentDateTime}</interviewLabel>
+    <processType>Flow</processType>
+    <status>Active</status>
+    <environments>Default</environments>
+
+    <!-- ═══════════════════════════════════════════
+         STATUS CHOICES — all 14 lifecycle values
+    ═══════════════════════════════════════════ -->
+    <choices>
+        <name>choiceNew</name>
+        <choiceText>New</choiceText>
+        <dataType>String</dataType>
+        <value><stringValue>New</stringValue></value>
+    </choices>
+    <choices>
+        <name>choiceDevInProgress</name>
+        <choiceText>Dev In Progress</choiceText>
+        <dataType>String</dataType>
+        <value><stringValue>Dev In Progress</stringValue></value>
+    </choices>
+    <choices>
+        <name>choicePending</name>
+        <choiceText>Pending</choiceText>
+        <dataType>String</dataType>
+        <value><stringValue>Pending</stringValue></value>
+    </choices>
+    <choices>
+        <name>choiceDevCompleted</name>
+        <choiceText>Dev Completed</choiceText>
+        <dataType>String</dataType>
+        <value><stringValue>Dev Completed</stringValue></value>
+    </choices>
+    <choices>
+        <name>choiceFormalitiesInProgress</name>
+        <choiceText>Formalities InProgress</choiceText>
+        <dataType>String</dataType>
+        <value><stringValue>Formalities InProgress</stringValue></value>
+    </choices>
+    <choices>
+        <name>choiceSITReady</name>
+        <choiceText>Completed - SIT Ready</choiceText>
+        <dataType>String</dataType>
+        <value><stringValue>Completed - SIT Ready</stringValue></value>
+    </choices>
+    <choices>
+        <name>choicePRInProgress</name>
+        <choiceText>PR InProgress</choiceText>
+        <dataType>String</dataType>
+        <value><stringValue>PR InProgress</stringValue></value>
+    </choices>
+    <choices>
+        <name>choiceSentToSIT</name>
+        <choiceText>Sent to SIT</choiceText>
+        <dataType>String</dataType>
+        <value><stringValue>Sent to SIT</stringValue></value>
+    </choices>
+    <choices>
+        <name>choiceSuccessfullyDeployed</name>
+        <choiceText>Successfully Deployed to SIT</choiceText>
+        <dataType>String</dataType>
+        <value><stringValue>Successfully Deployed to SIT</stringValue></value>
+    </choices>
+    <choices>
+        <name>choiceSentToQA</name>
+        <choiceText>Sent to QA</choiceText>
+        <dataType>String</dataType>
+        <value><stringValue>Sent to QA</stringValue></value>
+    </choices>
+    <choices>
+        <name>choiceSentToUAT</name>
+        <choiceText>Sent to UAT</choiceText>
+        <dataType>String</dataType>
+        <value><stringValue>Sent to UAT</stringValue></value>
+    </choices>
+    <choices>
+        <name>choiceSentToProd</name>
+        <choiceText>Sent to Prod</choiceText>
+        <dataType>String</dataType>
+        <value><stringValue>Sent to Prod</stringValue></value>
+    </choices>
+    <choices>
+        <name>choiceDone</name>
+        <choiceText>Done</choiceText>
+        <dataType>String</dataType>
+        <value><stringValue>Done</stringValue></value>
+    </choices>
+    <choices>
+        <name>choiceRejected</name>
+        <choiceText>Rejected</choiceText>
+        <dataType>String</dataType>
+        <value><stringValue>Rejected</stringValue></value>
+    </choices>
+
+    <!-- ═══════════════════════════════════════════
+         VARIABLES
+    ═══════════════════════════════════════════ -->
+    <variables>
+        <name>recordId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>varNewStatus</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>varPendingReason</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>varQANotes</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>varRejectionReason</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+
+    <!-- ═══════════════════════════════════════════
+         STEP 1: Get the User Story
+    ═══════════════════════════════════════════ -->
+    <recordLookups>
+        <name>Get_Story</name>
+        <label>Get User Story</label>
+        <locationX>176</locationX>
+        <locationY>100</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Screen_UpdateStatus</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value><elementReference>recordId</elementReference></value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>User_Story__c</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+
+    <!-- ═══════════════════════════════════════════
+         STEP 2: Screen — show current status + context,
+                 pick new status, enter optional fields
+    ═══════════════════════════════════════════ -->
+    <screens>
+        <name>Screen_UpdateStatus</name>
+        <label>Update Story Status</label>
+        <locationX>176</locationX>
+        <locationY>220</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Update_Story</targetReference>
+        </connector>
+
+        <!-- Story context header -->
+        <fields>
+            <name>Display_StoryInfo</name>
+            <fieldText>&lt;p&gt;&lt;strong&gt;Story:&lt;/strong&gt; {!Get_Story.Story_Title__c}&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Current Status:&lt;/strong&gt; {!Get_Story.Status__c}&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Sprint:&lt;/strong&gt; {!Get_Story.Sprint__c}&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Assigned To:&lt;/strong&gt; {!Get_Story.Assigned_To__c}&lt;/p&gt;
+&lt;hr/&gt;
+&lt;p&gt;&lt;em&gt;⚠️ Validation rules enforce lifecycle gates — e.g. Story Info must be verified before Dev In Progress, all Readiness Checklist items required before Completed - SIT Ready.&lt;/em&gt;&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+
+        <!-- Status radio buttons — all 14 values -->
+        <fields>
+            <name>varNewStatus</name>
+            <choiceReferences>choiceNew</choiceReferences>
+            <choiceReferences>choiceDevInProgress</choiceReferences>
+            <choiceReferences>choicePending</choiceReferences>
+            <choiceReferences>choiceDevCompleted</choiceReferences>
+            <choiceReferences>choiceFormalitiesInProgress</choiceReferences>
+            <choiceReferences>choiceSITReady</choiceReferences>
+            <choiceReferences>choicePRInProgress</choiceReferences>
+            <choiceReferences>choiceSentToSIT</choiceReferences>
+            <choiceReferences>choiceSuccessfullyDeployed</choiceReferences>
+            <choiceReferences>choiceSentToQA</choiceReferences>
+            <choiceReferences>choiceSentToUAT</choiceReferences>
+            <choiceReferences>choiceSentToProd</choiceReferences>
+            <choiceReferences>choiceDone</choiceReferences>
+            <choiceReferences>choiceRejected</choiceReferences>
+            <dataType>String</dataType>
+            <defaultValue>
+                <elementReference>Get_Story.Status__c</elementReference>
+            </defaultValue>
+            <fieldText>New Status</fieldText>
+            <fieldType>RadioButtons</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+
+        <!-- Contextual fields shown below -->
+        <fields>
+            <name>varPendingReason</name>
+            <dataType>String</dataType>
+            <defaultValue>
+                <elementReference>Get_Story.Pending_Reason__c</elementReference>
+            </defaultValue>
+            <fieldText>Pending Reason (fill in if moving to Pending)</fieldText>
+            <fieldType>LargeTextArea</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+        <fields>
+            <name>varQANotes</name>
+            <dataType>String</dataType>
+            <defaultValue>
+                <elementReference>Get_Story.QA_Notes__c</elementReference>
+            </defaultValue>
+            <fieldText>QA Notes (fill in if moving to Sent to QA / Sent to UAT)</fieldText>
+            <fieldType>LargeTextArea</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+        <fields>
+            <name>varRejectionReason</name>
+            <dataType>String</dataType>
+            <defaultValue>
+                <elementReference>Get_Story.Rejection_Reason__c</elementReference>
+            </defaultValue>
+            <fieldText>Rejection Reason (required if moving to Rejected)</fieldText>
+            <fieldType>LargeTextArea</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+
+    <!-- ═══════════════════════════════════════════
+         STEP 3: Update the User Story record
+    ═══════════════════════════════════════════ -->
+    <recordUpdates>
+        <name>Update_Story</name>
+        <label>Update Story Status</label>
+        <locationX>176</locationX>
+        <locationY>360</locationY>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value><elementReference>recordId</elementReference></value>
+        </filters>
+        <inputAssignments>
+            <field>Status__c</field>
+            <value><elementReference>varNewStatus</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Pending_Reason__c</field>
+            <value><elementReference>varPendingReason</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>QA_Notes__c</field>
+            <value><elementReference>varQANotes</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Rejection_Reason__c</field>
+            <value><elementReference>varRejectionReason</elementReference></value>
+        </inputAssignments>
+        <object>User_Story__c</object>
+    </recordUpdates>
+
+    <!-- ═══════════════════════════════════════════
+         START
+    ═══════════════════════════════════════════ -->
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Get_Story</targetReference>
+        </connector>
+    </start>
+</Flow>

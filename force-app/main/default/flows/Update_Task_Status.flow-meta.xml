@@ -26,6 +26,14 @@
         </value>
     </choices>
     <choices>
+        <name>choicePending</name>
+        <choiceText>Pending</choiceText>
+        <dataType>String</dataType>
+        <value>
+            <stringValue>Pending</stringValue>
+        </value>
+    </choices>
+    <choices>
         <name>choiceCompleted</name>
         <choiceText>Completed</choiceText>
         <dataType>String</dataType>
@@ -114,6 +122,7 @@
             <choiceReferences>choiceNew</choiceReferences>
             <choiceReferences>choiceInProgress</choiceReferences>
             <choiceReferences>choiceBlocked</choiceReferences>
+            <choiceReferences>choicePending</choiceReferences>
             <choiceReferences>choiceCompleted</choiceReferences>
             <dataType>String</dataType>
             <defaultSelectedChoiceReference>choiceInProgress</defaultSelectedChoiceReference>

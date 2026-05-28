@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>60.0</apiVersion>
+    <label>Update Readiness Checklist</label>
+    <interviewLabel>Update Readiness Checklist {!$Flow.CurrentDateTime}</interviewLabel>
+    <processType>Flow</processType>
+    <status>Active</status>
+    <environments>Default</environments>
+
+    <!-- ═══════════════════════════════════════════
+         VARIABLES
+    ═══════════════════════════════════════════ -->
+    <variables>
+        <name>recordId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>varStoryInfoVerified</name>
+        <dataType>Boolean</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>varUnitTestingComplete</name>
+        <dataType>Boolean</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>varUnitTestSheetComplete</name>
+        <dataType>Boolean</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>varManualDeploymentStepsComplete</name>
+        <dataType>Boolean</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>varBusinessDependencyComplete</name>
+        <dataType>Boolean</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>varACUpdateComplete</name>
+        <dataType>Boolean</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>varPeerReviewComplete</name>
+        <dataType>Boolean</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>varTranslationsSheetComplete</name>
+        <dataType>Boolean</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>varPRCreationComplete</name>
+        <dataType>Boolean</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>varSmokeTetSITComplete</name>
+        <dataType>Boolean</dataType>
+        <isCollection>false</isCollection>
+        <isInput>false</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+
+
+    <!-- ═══════════════════════════════════════════
+         STEP 1: Get the User Story (to pre-populate current values)
+    ═══════════════════════════════════════════ -->
+    <recordLookups>
+        <name>Get_Story</name>
+        <label>Get User Story</label>
+        <locationX>176</locationX>
+        <locationY>100</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Screen_Checklist</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value><elementReference>recordId</elementReference></value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>User_Story__c</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+
+    <!-- ═══════════════════════════════════════════
+         STEP 2: Screen — show all 10 checklist items
+                 pre-populated with current checkbox values
+    ═══════════════════════════════════════════ -->
+    <screens>
+        <name>Screen_Checklist</name>
+        <label>Update Readiness Checklist</label>
+        <locationX>176</locationX>
+        <locationY>220</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Update_Story</targetReference>
+        </connector>
+
+        <!-- Header -->
+        <fields>
+            <name>Display_Header</name>
+            <fieldText>&lt;p&gt;&lt;strong&gt;Story:&lt;/strong&gt; {!Get_Story.Story_Title__c}&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Status:&lt;/strong&gt; {!Get_Story.Status__c}&lt;/p&gt;
+&lt;hr/&gt;
+&lt;p&gt;Tick each item below as you complete it. Saving will update the story and auto-close the matching Activity Task.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;— Verification &amp; Dev Gate —&lt;/strong&gt;&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+
+        <!-- Gate: Story Info Verified -->
+        <fields>
+            <name>varStoryInfoVerified</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <elementReference>Get_Story.Story_Info_Verified__c</elementReference>
+            </defaultValue>
+            <fieldText>Story Info Verified (gate: required before Dev In Progress)</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+
+        <!-- Gate: Unit Testing -->
+        <fields>
+            <name>varUnitTestingComplete</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <elementReference>Get_Story.Unit_Testing_Complete__c</elementReference>
+            </defaultValue>
+            <fieldText>Unit Testing Complete (gate: required before Dev Completed)</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+
+        <!-- Divider -->
+        <fields>
+            <name>Display_ReadinessDivider</name>
+            <fieldText>&lt;p&gt;&lt;strong&gt;— Story Readiness Checklist (all 6 required before Completed - SIT Ready) —&lt;/strong&gt;&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+
+        <!-- Readiness: Unit Test Sheet -->
+        <fields>
+            <name>varUnitTestSheetComplete</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <elementReference>Get_Story.Unit_Test_Sheet_Complete__c</elementReference>
+            </defaultValue>
+            <fieldText>Unit Test Sheet Complete</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+
+        <!-- Readiness: Manual Deployment Steps -->
+        <fields>
+            <name>varManualDeploymentStepsComplete</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <elementReference>Get_Story.Manual_Deployment_Steps_Complete__c</elementReference>
+            </defaultValue>
+            <fieldText>Manual Deployment Steps Sheet Complete</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+
+        <!-- Readiness: Business Dependency -->
+        <fields>
+            <name>varBusinessDependencyComplete</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <elementReference>Get_Story.Business_Dependency_Complete__c</elementReference>
+            </defaultValue>
+            <fieldText>Business Dependency Sheet Complete</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+
+        <!-- Readiness: AC Update -->
+        <fields>
+            <name>varACUpdateComplete</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <elementReference>Get_Story.AC_Update_Complete__c</elementReference>
+            </defaultValue>
+            <fieldText>AC Update Complete</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+
+        <!-- Readiness: Peer Review -->
+        <fields>
+            <name>varPeerReviewComplete</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <elementReference>Get_Story.Peer_Review_Complete__c</elementReference>
+            </defaultValue>
+            <fieldText>Peer Review Complete</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+
+        <!-- Readiness: Translations Sheet -->
+        <fields>
+            <name>varTranslationsSheetComplete</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <elementReference>Get_Story.Translations_Sheet_Complete__c</elementReference>
+            </defaultValue>
+            <fieldText>Translations Sheet Complete</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+
+        <!-- Divider -->
+        <fields>
+            <name>Display_PRSITDivider</name>
+            <fieldText>&lt;p&gt;&lt;strong&gt;— PR &amp; SIT Gates —&lt;/strong&gt;&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+
+        <!-- Gate: PR Creation Complete -->
+        <fields>
+            <name>varPRCreationComplete</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <elementReference>Get_Story.PR_Creation_Complete__c</elementReference>
+            </defaultValue>
+            <fieldText>PR Creation Complete (gate: required before Sent to SIT — auto-moves story)</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+
+        <!-- Gate: Smoke Test SIT Complete -->
+        <fields>
+            <name>varSmokeTetSITComplete</name>
+            <dataType>Boolean</dataType>
+            <defaultValue>
+                <elementReference>Get_Story.Smoke_Test_SIT_Complete__c</elementReference>
+            </defaultValue>
+            <fieldText>Smoke Test SIT Complete (auto-moves story to Successfully Deployed to SIT)</fieldText>
+            <fieldType>InputField</fieldType>
+            <isRequired>false</isRequired>
+        </fields>
+
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+
+    <!-- ═══════════════════════════════════════════
+         STEP 3: Update all 10 checkbox fields on the story.
+                 Triggers auto-close of matching Activity Tasks
+                 and auto-status progressions via UserStoryTrigger.
+    ═══════════════════════════════════════════ -->
+    <recordUpdates>
+        <name>Update_Story</name>
+        <label>Save Readiness Checklist</label>
+        <locationX>176</locationX>
+        <locationY>360</locationY>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value><elementReference>recordId</elementReference></value>
+        </filters>
+        <inputAssignments>
+            <field>Story_Info_Verified__c</field>
+            <value><elementReference>varStoryInfoVerified</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Unit_Testing_Complete__c</field>
+            <value><elementReference>varUnitTestingComplete</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Unit_Test_Sheet_Complete__c</field>
+            <value><elementReference>varUnitTestSheetComplete</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Manual_Deployment_Steps_Complete__c</field>
+            <value><elementReference>varManualDeploymentStepsComplete</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Business_Dependency_Complete__c</field>
+            <value><elementReference>varBusinessDependencyComplete</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>AC_Update_Complete__c</field>
+            <value><elementReference>varACUpdateComplete</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Peer_Review_Complete__c</field>
+            <value><elementReference>varPeerReviewComplete</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Translations_Sheet_Complete__c</field>
+            <value><elementReference>varTranslationsSheetComplete</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>PR_Creation_Complete__c</field>
+            <value><elementReference>varPRCreationComplete</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Smoke_Test_SIT_Complete__c</field>
+            <value><elementReference>varSmokeTetSITComplete</elementReference></value>
+        </inputAssignments>
+        <object>User_Story__c</object>
+    </recordUpdates>
+
+    <!-- ═══════════════════════════════════════════
+         START
+    ═══════════════════════════════════════════ -->
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Get_Story</targetReference>
+        </connector>
+    </start>
+</Flow>

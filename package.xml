@@ -284,6 +284,8 @@
     ═══════════════════════════════════════════════════════════ -->
     <types>
         <members>Update_Task_Status</members>
+        <members>Update_Story_Status</members>
+        <members>Update_Readiness_Checklist</members>
         <name>Flow</name>
     </types>
 
