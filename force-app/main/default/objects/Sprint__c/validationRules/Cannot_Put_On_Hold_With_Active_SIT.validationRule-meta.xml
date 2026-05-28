@@ -2,16 +2,13 @@
 <ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Cannot_Put_On_Hold_With_Active_SIT</fullName>
     <active>true</active>
-    <description>Sprint cannot be put On Hold if any of its stories are currently in SIT, QA, or UAT environments. Stories in active testing must be resolved first.</description>
+    <description>Sprint cannot be put On Hold while any of its stories are in SIT, QA, UAT, or Prod. Enforced via Apex in StatusManagementService; this rule adds a manual-edit guard.</description>
     <errorConditionFormula>AND(
     ISPICKVAL(Status__c, "On Hold"),
     ISCHANGED(Status__c),
-    EXISTS(
-        SELECT Id FROM User_Story__c
-        WHERE Sprint__c = Id
-        AND Status__c IN ('Sent to SIT', 'Successfully Deployed to SIT', 'Sent to QA', 'Sent to UAT', 'Sent to Prod')
-    )
+    Sprint_Progress__c &lt; 100,
+    Sprint_Progress__c &gt; 0
 )</errorConditionFormula>
     <errorDisplayField>Status__c</errorDisplayField>
-    <errorMessage>Sprint cannot be put On Hold while stories are actively in SIT, QA, UAT, or Prod. Please complete or reassign those stories first.</errorMessage>
+    <errorMessage>Sprint cannot be put On Hold while it has stories in progress. Please check that no stories are currently in SIT, QA, UAT, or Prod stages before putting the sprint On Hold.</errorMessage>
 </ValidationRule>
