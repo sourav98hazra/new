@@ -2,10 +2,11 @@
 <LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>60.0</apiVersion>
     <isExposed>true</isExposed>
+    <masterLabel>Developer Process Guide</masterLabel>
+    <description>3-tab workflow guide: Developer Workflow (14 steps), Lead/Manager Workflow (11 steps), Progress Flow. Add to the Home page or any App page.</description>
     <targets>
         <target>lightning__HomePage</target>
         <target>lightning__AppPage</target>
+        <target>lightning__RecordPage</target>
     </targets>
-    <masterLabel>Developer Process Guide</masterLabel>
-    <description>Shows developers the step-by-step workflow for completing tasks and stories including progress tracking</description>
 </LightningComponentBundle>
