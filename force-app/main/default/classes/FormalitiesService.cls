@@ -91,8 +91,8 @@ public without sharing class FormalitiesService {
 
     // ─── Recursion guard ────────────────────────────────────────────────────
     // Prevents re-entrant execution when our updates re-fire the trigger.
-    @TestVisible
-    private static Boolean isSyncRunning = false;
+    // Must be public so UserStoryTrigger can read the flag.
+    public static Boolean isSyncRunning = false;
 
 
 

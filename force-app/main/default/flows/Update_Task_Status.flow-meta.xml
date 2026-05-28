@@ -1,61 +1,57 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>60.0</apiVersion>
+    <label>Update Task Status</label>
+    <interviewLabel>Update Task Status {!$Flow.CurrentDateTime}</interviewLabel>
+    <processType>Flow</processType>
+    <status>Active</status>
+    <environments>Default</environments>
+
     <choices>
         <name>choiceNew</name>
         <choiceText>New</choiceText>
         <dataType>String</dataType>
-        <value>
-            <stringValue>New</stringValue>
-        </value>
+        <value><stringValue>New</stringValue></value>
     </choices>
     <choices>
         <name>choiceInProgress</name>
         <choiceText>In Progress</choiceText>
         <dataType>String</dataType>
-        <value>
-            <stringValue>In Progress</stringValue>
-        </value>
+        <value><stringValue>In Progress</stringValue></value>
     </choices>
     <choices>
         <name>choiceBlocked</name>
         <choiceText>Blocked</choiceText>
         <dataType>String</dataType>
-        <value>
-            <stringValue>Blocked</stringValue>
-        </value>
+        <value><stringValue>Blocked</stringValue></value>
     </choices>
     <choices>
         <name>choicePending</name>
         <choiceText>Pending</choiceText>
         <dataType>String</dataType>
-        <value>
-            <stringValue>Pending</stringValue>
-        </value>
+        <value><stringValue>Pending</stringValue></value>
     </choices>
     <choices>
         <name>choiceCompleted</name>
         <choiceText>Completed</choiceText>
         <dataType>String</dataType>
-        <value>
-            <stringValue>Completed</stringValue>
-        </value>
+        <value><stringValue>Completed</stringValue></value>
     </choices>
-    <environments>Default</environments>
-    <interviewLabel>Update Task Status {!$Flow.CurrentDateTime}</interviewLabel>
-    <label>Update Task Status</label>
-    <processMetadataValues>
-        <name>BuilderType</name>
-        <value>
-            <stringValue>LightningFlowBuilder</stringValue>
-        </value>
-    </processMetadataValues>
-    <processType>Flow</processType>
+
+    <variables>
+        <name>recordId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+
+    <!-- Step 1: Get the Task__c record -->
     <recordLookups>
         <name>Get_Task</name>
         <label>Get Task Record</label>
         <locationX>176</locationX>
-        <locationY>134</locationY>
+        <locationY>100</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
             <targetReference>Screen_UpdateStatus</targetReference>
@@ -64,46 +60,19 @@
         <filters>
             <field>Id</field>
             <operator>EqualTo</operator>
-            <value>
-                <elementReference>recordId</elementReference>
-            </value>
+            <value><elementReference>recordId</elementReference></value>
         </filters>
         <getFirstRecordOnly>true</getFirstRecordOnly>
         <object>Task__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
-    <recordUpdates>
-        <name>Update_Task</name>
-        <label>Update Task Record</label>
-        <locationX>176</locationX>
-        <locationY>350</locationY>
-        <filterLogic>and</filterLogic>
-        <filters>
-            <field>Id</field>
-            <operator>EqualTo</operator>
-            <value>
-                <elementReference>recordId</elementReference>
-            </value>
-        </filters>
-        <inputAssignments>
-            <field>Status__c</field>
-            <value>
-                <elementReference>varNewStatus</elementReference>
-            </value>
-        </inputAssignments>
-        <inputAssignments>
-            <field>Blocked_Reason__c</field>
-            <value>
-                <elementReference>varBlockedReason</elementReference>
-            </value>
-        </inputAssignments>
-        <object>Task__c</object>
-    </recordUpdates>
+
+    <!-- Step 2: Show current task info + status picker + blocked reason -->
     <screens>
         <name>Screen_UpdateStatus</name>
         <label>Update Task Status</label>
         <locationX>176</locationX>
-        <locationY>242</locationY>
+        <locationY>220</locationY>
         <allowBack>false</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>false</allowPause>
@@ -144,16 +113,16 @@
         <showHeader>true</showHeader>
     </screens>
 
-    <!-- BUG19 FIX: if status=Blocked but reason is blank, show error screen -->
+    <!-- Step 3: If Blocked + no reason → show error screen, otherwise save -->
     <decisions>
         <name>Check_Blocked_Reason</name>
         <label>Blocked with no Reason?</label>
         <locationX>176</locationX>
-        <locationY>310</locationY>
+        <locationY>330</locationY>
         <defaultConnector>
             <targetReference>Update_Task</targetReference>
         </defaultConnector>
-        <defaultConnectorLabel>OK — save</defaultConnectorLabel>
+        <defaultConnectorLabel>OK — proceed to save</defaultConnectorLabel>
         <rules>
             <name>Blocked_No_Reason</name>
             <conditionLogic>and</conditionLogic>
@@ -178,23 +147,48 @@
         </rules>
     </decisions>
 
+    <!-- Step 3a: Error screen if Blocked reason is missing -->
     <screens>
         <name>Screen_BlockedError</name>
         <label>Blocked Reason Required</label>
         <locationX>400</locationX>
-        <locationY>310</locationY>
+        <locationY>330</locationY>
         <allowBack>true</allowBack>
         <allowFinish>false</allowFinish>
         <allowPause>false</allowPause>
         <fields>
             <name>Display_BlockedError</name>
             <fieldText>&lt;p&gt;&lt;b style="color:#c23934;"&gt;Blocked Reason is required.&lt;/b&gt;&lt;/p&gt;
-&lt;p&gt;You selected &lt;b&gt;Blocked&lt;/b&gt; status but did not enter a reason. Click Back and fill in the Blocked Reason field.&lt;/p&gt;</fieldText>
+&lt;p&gt;You selected &lt;b&gt;Blocked&lt;/b&gt; but did not enter a reason. Click Back and fill in the Blocked Reason field.&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
         </fields>
         <showFooter>true</showFooter>
         <showHeader>true</showHeader>
     </screens>
+
+    <!-- Step 4: Save the task -->
+    <recordUpdates>
+        <name>Update_Task</name>
+        <label>Update Task Record</label>
+        <locationX>176</locationX>
+        <locationY>450</locationY>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Id</field>
+            <operator>EqualTo</operator>
+            <value><elementReference>recordId</elementReference></value>
+        </filters>
+        <inputAssignments>
+            <field>Status__c</field>
+            <value><elementReference>varNewStatus</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Blocked_Reason__c</field>
+            <value><elementReference>varBlockedReason</elementReference></value>
+        </inputAssignments>
+        <object>Task__c</object>
+    </recordUpdates>
+
     <start>
         <locationX>50</locationX>
         <locationY>0</locationY>
@@ -202,12 +196,4 @@
             <targetReference>Get_Task</targetReference>
         </connector>
     </start>
-    <status>Active</status>
-    <variables>
-        <name>recordId</name>
-        <dataType>String</dataType>
-        <isCollection>false</isCollection>
-        <isInput>true</isInput>
-        <isOutput>false</isOutput>
-    </variables>
 </Flow>
