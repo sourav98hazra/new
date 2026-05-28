@@ -69,7 +69,11 @@ trigger TaskTrigger on Task__c (after insert, after update, after delete) {
             StatusManagementService.updateTaskStatus(statusOrProgressChanged);
         }
 
-        TaskActivitySyncService.syncTaskUpdatesToActivityTask(Trigger.new, Trigger.oldMap);
+        // Sync any changes (status, title, assignee, due date) to mirrored Activity Task
+        // Guard: skip if ActivityTaskTrigger already triggered this (prevents loop)
+        if (!TaskActivitySyncService.isSyncRunning) {
+            TaskActivitySyncService.syncTaskUpdatesToActivityTask(Trigger.new, Trigger.oldMap);
+        }
 
         if (!storyIds.isEmpty()) {
             StatusManagementService.updateStoryStatus(storyIds);

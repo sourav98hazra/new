@@ -52,7 +52,8 @@ trigger ActivityTaskTrigger on Task (after update) {
     }
 
     // 3. Mirrored Task__c activity → sync status back to Task__c
-    if (!mirroredChanged.isEmpty()) {
+    // Guard: skip if TaskTrigger already triggered this (prevents loop)
+    if (!mirroredChanged.isEmpty() && !TaskActivitySyncService.isSyncRunning) {
         TaskActivitySyncService.syncActivityTaskUpdateToCustomTask(mirroredChanged, Trigger.oldMap);
     }
 }

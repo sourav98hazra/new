@@ -23,6 +23,17 @@ public without sharing class TaskActivitySyncService {
 
     public static final String TASK_SUBJECT_SUFFIX = ' (Task)';
 
+    /**
+     * Recursion guard — prevents the bi-directional sync from looping:
+     *   Task__c update → syncTaskUpdatesToActivityTask → update Activity Task
+     *   → ActivityTaskTrigger → syncActivityTaskUpdateToCustomTask → update Task__c
+     *   → TaskTrigger → syncTaskUpdatesToActivityTask → ... (infinite loop)
+     *
+     * Set to true at the START of each direction's DML, reset to false after.
+     * Both triggers check this flag before calling into the sync service.
+     */
+    public static Boolean isSyncRunning = false;
+
     // ─── Status mappings ───────────────────────────────────────────────────
 
     private static final Map<String, String> CUSTOM_TO_ACTIVITY_STATUS = new Map<String, String>{
@@ -161,11 +172,15 @@ public without sharing class TaskActivitySyncService {
             if (dirty) activitiesToUpdate.add(act);
         }
 
-        if (!activitiesToUpdate.isEmpty()) update activitiesToUpdate;
+        if (!activitiesToUpdate.isEmpty()) {
+            isSyncRunning = true;
+            try {
+                update activitiesToUpdate;
+            } finally {
+                isSyncRunning = false;
+            }
+        }
     }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // ACTIVITY TASK → TASK__C  (called from ActivityTaskTrigger on update)
     // ═══════════════════════════════════════════════════════════════════════
 
     /**
@@ -229,11 +244,15 @@ public without sharing class TaskActivitySyncService {
             }
         }
 
-        if (!tasksToUpdate.isEmpty()) update tasksToUpdate;
+        if (!tasksToUpdate.isEmpty()) {
+            isSyncRunning = true;
+            try {
+                update tasksToUpdate;
+            } finally {
+                isSyncRunning = false;
+            }
+        }
     }
-
-    // ═══════════════════════════════════════════════════════════════════════
-    // HELPERS
     // ═══════════════════════════════════════════════════════════════════════
 
     private static String mapPriority(String customPriority) {
