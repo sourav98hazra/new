@@ -271,6 +271,7 @@
         <members>Sprint__c.New_Story</members>
         <members>Sprint__c.New_Feature</members>
         <members>Sprint__c.Update_Status</members>
+        <members>Feature__c.New_Story</members>
         <members>User_Story__c.New_Task</members>
         <members>User_Story__c.Update_Status</members>
         <members>User_Story__c.Update_Readiness_Checklist</members>
