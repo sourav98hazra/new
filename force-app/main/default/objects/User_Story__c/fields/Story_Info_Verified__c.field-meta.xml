@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Story_Info_Verified__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Gate: Developer has verified story title, description, acceptance criteria, and all task info before starting Dev In Progress. Must be checked before status can move to Dev In Progress.</description>
+    <label>Story Info Verified</label>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

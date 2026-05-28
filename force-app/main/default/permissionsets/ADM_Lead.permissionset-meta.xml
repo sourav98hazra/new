@@ -380,4 +380,42 @@
         <field>User_Story__c.Unit_Test_Sheet_Complete__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <!-- New v2 fields -->
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>User_Story__c.Story_Info_Verified__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>User_Story__c.Translations_Sheet_Complete__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>User_Story__c.PR_Creation_Complete__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>User_Story__c.Smoke_Test_SIT_Complete__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>User_Story__c.Unit_Testing_Complete__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <classAccesses>
+        <apexClass>FormalitiesService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>TaskActivitySyncService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>SITDeploymentEmailQueueable</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
 </PermissionSet>

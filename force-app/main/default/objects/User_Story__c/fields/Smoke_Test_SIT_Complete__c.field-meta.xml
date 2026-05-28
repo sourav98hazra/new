@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Smoke_Test_SIT_Complete__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Story Readiness: Smoke testing in SIT environment has been completed and passed</description>
+    <label>Smoke Test SIT Complete</label>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

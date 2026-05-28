@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Translations_Sheet_Complete__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Story Readiness: Translations sheet has been completed for any UI/label changes</description>
+    <label>Translations Sheet Complete</label>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

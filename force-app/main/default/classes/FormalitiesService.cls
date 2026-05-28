@@ -1,90 +1,109 @@
 /**
- * @description Service class for managing the full Activity Task lifecycle across all story stages.
+ * @description Service class managing the complete Activity Task lifecycle for User Stories.
  *
- * FULL ACTIVITY LIFECYCLE:
- * Dev In Progress  -> "Write Code: [Story]", "Write Unit Tests: [Story]", "Unit Testing: [Story]"
- * Dev Completed    -> "Unit Test Sheet: [Story]", "Manual Deployment Steps Sheet: [Story]",
- *                    "Business Dependency Sheet: [Story]", "AC Update: [Story]", "Peer Review: [Story]"
- * SIT Ready        -> "Raise PR: [Story]"
- * Sent to SIT      -> "Smoke Test SIT: [Story]"
- * Rejected         -> "Fix Issues: [Story] - [Rejection Reason]"
+ * LIFECYCLE STAGES & ACTIVITY TASKS CREATED:
+ * ─────────────────────────────────────────────────────────────────────────────
+ * New                      → "Verify Story Info: [Story]"  (gate: Story_Info_Verified__c)
+ * Dev In Progress          → "Write Code: [Story]"  (mirrors Task__c records via TaskActivitySyncService)
+ *                            "Write Unit Tests: [Story]"
+ *                            "Unit Testing: [Story]"  (gate: Unit_Testing_Complete__c)
+ * Dev Completed            → "Unit Test Sheet: [Story]"
+ *                            "Manual Deployment Steps Sheet: [Story]"
+ *                            "Business Dependency Sheet: [Story]"
+ *                            "AC Update: [Story]"
+ *                            "Peer Review: [Story]"
+ *                            "Translations Sheet: [Story]"  (gate: Translations_Sheet_Complete__c)
+ * Completed - SIT Ready    → "PR Creation: [Story]"  (gate: PR_Creation_Complete__c)
+ *                            → auto-moves to PR InProgress when activity goes In Progress
+ * PR InProgress            → (PR Creation activity already created above)
+ *                            → when PR_Creation_Complete__c ticked → auto-move to Sent to SIT
+ * Sent to SIT              → "Smoke Test SIT: [Story]"  (gate: Smoke_Test_SIT_Complete__c)
+ *                            → when complete → auto-move to Successfully Deployed to SIT
+ * Successfully Deployed    → triggers SITDeploymentEmailQueueable batch email
+ * Rejected                 → "Fix Issues: [Story] – [Rejection Reason]"
  *
- * CHECKBOX SYNC:
- * - When Activity Task is closed -> tick corresponding checkbox on Story (bi-directional)
- * - When checkbox is ticked -> close corresponding Activity Task (bi-directional)
- * - When all 5 formalities complete -> auto-move story to "Completed - SIT Ready"
- * - When some formalities done -> auto-move story to "Formalities InProgress"
+ * CHECKBOX SYNC (11 fields, fully bi-directional):
+ *   Activity Task closed ↔ Checkbox ticked  (both directions sync the other)
+ *
+ * AUTO STATUS PROGRESSIONS:
+ *   PR Creation activity → In Progress  ⟹  story → PR InProgress
+ *   PR_Creation_Complete__c = TRUE       ⟹  story → Sent to SIT
+ *   Smoke_Test_SIT_Complete__c = TRUE    ⟹  story → Successfully Deployed to SIT
+ *   All 6 readiness fields complete      ⟹  story → Completed - SIT Ready
+ *   Some readiness fields complete       ⟹  story → Formalities InProgress
  */
-// without sharing is required because:
-// 1. ActivityTaskTrigger fires when ANY user completes a task (may not own the User Story)
-// 2. The checkbox and status updates must propagate regardless of record ownership
 public without sharing class FormalitiesService {
 
-    // Unified map: Activity Task subject prefix -> checkbox field API name
-    // IMPORTANT: Ordered so more specific prefixes come before ambiguous ones.
-    // 'Unit Test Sheet' must be checked BEFORE 'Unit Testing' or 'Unit Test' to avoid prefix collision.
-    // We use a List of pairs for ordered matching.
+    // ─── Ordered subject-prefix → field mapping ────────────────────────────
+    // IMPORTANT: more-specific prefixes MUST appear before shorter/ambiguous ones.
     public static final List<String[]> ORDERED_SUBJECT_FIELD_PAIRS = new List<String[]>{
-        new String[]{ 'Unit Test Sheet',              'Unit_Test_Sheet_Complete__c'          },
-        new String[]{ 'Manual Deployment Steps Sheet','Manual_Deployment_Steps_Complete__c'  },
-        new String[]{ 'Business Dependency Sheet',    'Business_Dependency_Complete__c'      },
-        new String[]{ 'AC Update',                    'AC_Update_Complete__c'                },
-        new String[]{ 'Peer Review',                  'Peer_Review_Complete__c'              },
-        new String[]{ 'Unit Testing',                 'Unit_Testing_Complete__c'             }
+        new String[]{ 'Verify Story Info',             'Story_Info_Verified__c'                },
+        new String[]{ 'Unit Test Sheet',               'Unit_Test_Sheet_Complete__c'           },
+        new String[]{ 'Manual Deployment Steps Sheet', 'Manual_Deployment_Steps_Complete__c'   },
+        new String[]{ 'Business Dependency Sheet',     'Business_Dependency_Complete__c'       },
+        new String[]{ 'AC Update',                     'AC_Update_Complete__c'                 },
+        new String[]{ 'Peer Review',                   'Peer_Review_Complete__c'               },
+        new String[]{ 'Translations Sheet',            'Translations_Sheet_Complete__c'        },
+        new String[]{ 'PR Creation',                   'PR_Creation_Complete__c'               },
+        new String[]{ 'Smoke Test SIT',                'Smoke_Test_SIT_Complete__c'            },
+        new String[]{ 'Unit Testing',                  'Unit_Testing_Complete__c'              }
     };
 
-    // Reverse map: checkbox field -> Activity Task subject prefix (for creating tasks)
+    // ─── Field → subject prefix (reverse map) ─────────────────────────────
     public static final Map<String, String> FIELD_TO_SUBJECT = new Map<String, String>{
+        'Story_Info_Verified__c'                => 'Verify Story Info',
         'Unit_Testing_Complete__c'              => 'Unit Testing',
         'Unit_Test_Sheet_Complete__c'           => 'Unit Test Sheet',
         'Manual_Deployment_Steps_Complete__c'   => 'Manual Deployment Steps Sheet',
         'Business_Dependency_Complete__c'       => 'Business Dependency Sheet',
         'AC_Update_Complete__c'                 => 'AC Update',
-        'Peer_Review_Complete__c'               => 'Peer Review'
+        'Peer_Review_Complete__c'               => 'Peer Review',
+        'Translations_Sheet_Complete__c'        => 'Translations Sheet',
+        'PR_Creation_Complete__c'               => 'PR Creation',
+        'Smoke_Test_SIT_Complete__c'            => 'Smoke Test SIT'
     };
 
-    // The 5 Pre-SIT formality fields (NOT including Unit Testing which is a dev gate)
-    public static final Set<String> FORMALITY_FIELDS = new Set<String>{
+    // ─── Field sets ─────────────────────────────────────────────────────────
+
+    /** 6 Story Readiness Checklist fields — ALL must be true before "Completed - SIT Ready" */
+    public static final List<String> READINESS_FIELDS = new List<String>{
         'Unit_Test_Sheet_Complete__c',
         'Manual_Deployment_Steps_Complete__c',
         'Business_Dependency_Complete__c',
         'AC_Update_Complete__c',
-        'Peer_Review_Complete__c'
+        'Peer_Review_Complete__c',
+        'Translations_Sheet_Complete__c'
     };
 
-    // All 6 checkbox fields including Unit Testing
+    /** All 10 checkbox fields that participate in bi-directional sync */
     public static final Set<String> ALL_CHECKBOX_FIELDS = new Set<String>{
+        'Story_Info_Verified__c',
         'Unit_Testing_Complete__c',
         'Unit_Test_Sheet_Complete__c',
         'Manual_Deployment_Steps_Complete__c',
         'Business_Dependency_Complete__c',
         'AC_Update_Complete__c',
-        'Peer_Review_Complete__c'
+        'Peer_Review_Complete__c',
+        'Translations_Sheet_Complete__c',
+        'PR_Creation_Complete__c',
+        'Smoke_Test_SIT_Complete__c'
     };
 
-    public static final String UNIT_TESTING_SUBJECT = 'Unit Testing';
 
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // PRIVATE HELPERS
+    // ═══════════════════════════════════════════════════════════════════════════
 
-    /**
-     * @description Match an Activity Task subject to its checkbox field using ordered prefix matching.
-     * Returns null if no match found.
-     */
+    /** Match an Activity Task subject to its checkbox field using ordered prefix matching. */
     public static String matchSubjectToField(String subject) {
         if (subject == null) return null;
         for (String[] pair : ORDERED_SUBJECT_FIELD_PAIRS) {
-            if (subject.startsWith(pair[0])) {
-                return pair[1];
-            }
+            if (subject.startsWith(pair[0])) return pair[1];
         }
         return null;
     }
 
-
-
-    /**
-     * @description Helper: check whether an open Activity Task with a given subject prefix already exists
-     */
     private static Boolean activityExists(Id whatId, String subjectPrefix) {
         return [SELECT COUNT() FROM Task
                 WHERE WhatId = :whatId
@@ -92,9 +111,6 @@ public without sharing class FormalitiesService {
                 AND Status != 'Completed'] > 0;
     }
 
-    /**
-     * @description Helper: build a standard Activity Task
-     */
     private static Task buildTask(String subject, Id whatId, Id ownerId,
                                   String status, String priority,
                                   Integer dueDays, String description) {
@@ -109,200 +125,131 @@ public without sharing class FormalitiesService {
         );
     }
 
-
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STAGE: NEW → Verify Story Info activity
+    // ═══════════════════════════════════════════════════════════════════════════
 
     /**
-     * @description Called when story → "Dev In Progress"
-     * Creates three dev Activity Tasks:
-     *   1. Write Code
-     *   2. Write Unit Tests
-     *   3. Unit Testing (the gate that must be closed before Dev Completed)
+     * Creates "Verify Story Info" Activity Task when a story is first created (New).
+     * Bi-directionally synced with Story_Info_Verified__c checkbox.
+     * Gate: story cannot move to Dev In Progress until this is checked.
+     */
+    public static void createStoryVerificationActivity(List<User_Story__c> stories) {
+        List<Task> toCreate = new List<Task>();
+        for (User_Story__c story : stories) {
+            if (story.Story_Info_Verified__c == true) continue;
+            if (activityExists(story.Id, 'Verify Story Info')) continue;
+            toCreate.add(buildTask(
+                'Verify Story Info: ' + story.Story_Title__c,
+                story.Id, story.Assigned_To__c, 'Not Started', 'High', 1,
+                'Before development starts, verify all story information:\n' +
+                '• Story Title is clear and accurate\n' +
+                '• Description fully explains what needs to be built\n' +
+                '• Acceptance Criteria are testable and complete\n' +
+                '• All Tasks are created with correct estimates\n' +
+                '• Story Points and Estimated Hours are set\n\n' +
+                'Close this task OR tick "Story Info Verified" on the story once done. ' +
+                'This is required before moving to Dev In Progress.'
+            ));
+        }
+        if (!toCreate.isEmpty()) insert toCreate;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STAGE: DEV IN PROGRESS → dev activity tasks
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /**
+     * Creates Write Code, Write Unit Tests, and Unit Testing Activity Tasks.
+     * Note: Write Code and Write Unit Tests mirror Task__c records (see TaskActivitySyncService).
+     * Unit Testing is the gate for Dev Completed.
      */
     public static void createDevInProgressActivities(List<User_Story__c> stories) {
         List<Task> toCreate = new List<Task>();
-
         for (User_Story__c story : stories) {
             Id owner = story.Assigned_To__c;
 
-            // 1. Write Code
             if (!activityExists(story.Id, 'Write Code')) {
                 toCreate.add(buildTask(
                     'Write Code: ' + story.Story_Title__c,
                     story.Id, owner, 'In Progress', 'High', 3,
                     'Implement the feature described in story: ' + story.Story_Title__c +
-                    '. Follow the acceptance criteria and coding standards. Close when development is complete.'
+                    '.\nFollow acceptance criteria and coding standards.\n' +
+                    'This task mirrors your Task__c records — status updates sync both ways. ' +
+                    'Close when all development is complete.'
                 ));
             }
 
-            // 2. Write Unit Tests
             if (!activityExists(story.Id, 'Write Unit Tests')) {
                 toCreate.add(buildTask(
                     'Write Unit Tests: ' + story.Story_Title__c,
                     story.Id, owner, 'Not Started', 'High', 5,
                     'Write unit tests for: ' + story.Story_Title__c +
-                    '. Ensure coverage meets the required threshold. Close when tests are written and passing.'
+                    '.\nEnsure coverage meets the required threshold (typically ≥75%).\n' +
+                    'This task mirrors your Task__c records — status updates sync both ways. ' +
+                    'Close when all tests are written and passing.'
                 ));
             }
 
-            // 3. Unit Testing gate (already gated by checkbox)
-            if (story.Unit_Testing_Complete__c != true && !activityExists(story.Id, UNIT_TESTING_SUBJECT)) {
+            if (story.Unit_Testing_Complete__c != true && !activityExists(story.Id, 'Unit Testing')) {
                 toCreate.add(buildTask(
-                    UNIT_TESTING_SUBJECT + ': ' + story.Story_Title__c,
+                    'Unit Testing: ' + story.Story_Title__c,
                     story.Id, owner, 'Not Started', 'High', 5,
-                    'Run and verify all unit tests for story: ' + story.Story_Title__c +
-                    '. Once done, close this task OR tick "Unit Testing Complete" on the story — both sync.'
+                    'Run and verify all unit tests for: ' + story.Story_Title__c +
+                    '.\nAll tests must pass before Dev Completed.\n' +
+                    'Close this task OR tick "Unit Testing Complete" on the story — both sync automatically.\n' +
+                    'REQUIRED before story can move to "Dev Completed".'
                 ));
             }
         }
-
         if (!toCreate.isEmpty()) insert toCreate;
     }
 
 
 
-    /**
-     * @description Called when story → "Completed - SIT Ready"
-     * Creates "Raise PR" Activity Task for the developer
-     */
-    public static void createRaisePRActivity(List<User_Story__c> stories) {
-        List<Task> toCreate = new List<Task>();
-
-        for (User_Story__c story : stories) {
-            if (!activityExists(story.Id, 'Raise PR')) {
-                toCreate.add(buildTask(
-                    'Raise PR: ' + story.Story_Title__c,
-                    story.Id, story.Assigned_To__c, 'Not Started', 'High', 1,
-                    'Create a Pull Request for story: ' + story.Story_Title__c +
-                    '. Update the story status to "PR InProgress" after raising. ' +
-                    'Once the PR is approved and merged, close this task.'
-                ));
-            }
-        }
-
-        if (!toCreate.isEmpty()) insert toCreate;
-    }
-
-
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STAGE: DEV COMPLETED → 6 Story Readiness Checklist activity tasks
+    // ═══════════════════════════════════════════════════════════════════════════
 
     /**
-     * @description Called when story → "Sent to SIT"
-     * Creates "Smoke Test SIT" Activity Task for the developer
-     */
-    public static void createSITSmokeTestActivity(List<User_Story__c> stories) {
-        List<Task> toCreate = new List<Task>();
-
-        for (User_Story__c story : stories) {
-            if (!activityExists(story.Id, 'Smoke Test SIT')) {
-                toCreate.add(buildTask(
-                    'Smoke Test SIT: ' + story.Story_Title__c,
-                    story.Id, story.Assigned_To__c, 'Not Started', 'Normal', 1,
-                    'Perform smoke testing in the SIT environment for: ' + story.Story_Title__c +
-                    '. Verify the core functionality works as expected after deployment. ' +
-                    'Close this task when smoke testing passes.'
-                ));
-            }
-        }
-
-        if (!toCreate.isEmpty()) insert toCreate;
-    }
-
-
-
-    /**
-     * @description Called when story → "Rejected"
-     * Creates "Fix Issues" Activity Task with the rejection reason
-     */
-    public static void createFixIssuesActivity(List<User_Story__c> stories) {
-        List<Task> toCreate = new List<Task>();
-
-        for (User_Story__c story : stories) {
-            if (!activityExists(story.Id, 'Fix Issues')) {
-                String reason = story.Rejection_Reason__c != null ? story.Rejection_Reason__c : 'See QA notes on the story.';
-                toCreate.add(buildTask(
-                    'Fix Issues: ' + story.Story_Title__c,
-                    story.Id, story.Assigned_To__c, 'In Progress', 'High', 2,
-                    'Address the following issues raised during QA/SIT review:\n\n' +
-                    reason + '\n\nOnce fixed, update the story status back to "Dev In Progress" and re-run testing.'
-                ));
-            }
-        }
-
-        if (!toCreate.isEmpty()) insert toCreate;
-    }
-
-
-
-    /**
-     * @description Called when story status changes to "Dev In Progress"
-     * Creates Activity Task for Unit Testing if not already complete
-     * @deprecated Use createDevInProgressActivities() for the full set.
-     *             Kept for backward compatibility.
-     */
-    public static void createUnitTestingActivityIfNeeded(List<User_Story__c> stories) {
-        List<Task> tasksToCreate = new List<Task>();
-
-        for (User_Story__c story : stories) {
-            if (story.Unit_Testing_Complete__c == true) continue;
-
-            Integer existing = [
-                SELECT COUNT() FROM Task
-                WHERE WhatId = :story.Id
-                AND Subject LIKE :('%' + UNIT_TESTING_SUBJECT + '%')
-                AND Status != 'Completed'
-            ];
-            if (existing > 0) continue;
-
-            tasksToCreate.add(new Task(
-                Subject      = UNIT_TESTING_SUBJECT + ' - ' + story.Story_Title__c,
-                WhatId       = story.Id,
-                OwnerId      = story.Assigned_To__c != null ? story.Assigned_To__c : UserInfo.getUserId(),
-                Status       = 'In Progress',
-                Priority     = 'High',
-                ActivityDate = Date.today().addDays(2),
-                Description  = 'Complete unit testing for story: ' + story.Story_Title__c +
-                               '. Once done, close this task or tick "Unit Testing Complete" on the story.'
-            ));
-        }
-
-        if (!tasksToCreate.isEmpty()) insert tasksToCreate;
-    }
-
-
-
-    /**
-     * @description Called when story moves to "Dev Completed"
-     * Creates Activity Tasks for each of the 5 incomplete Pre-SIT formality checkboxes
+     * Creates one Activity Task per incomplete readiness checklist field.
+     * Includes the new Translations Sheet field.
+     * All sync bi-directionally with checkboxes on the User Story.
+     * When all 6 are complete → story auto-advances to "Completed - SIT Ready".
      */
     public static void createFormalityActivitiesIfNeeded(List<User_Story__c> stories) {
         List<Task> tasksToCreate = new List<Task>();
 
         for (User_Story__c story : stories) {
-            Set<String> existingSubjects = new Set<String>();
-            for (Task t : [
-                SELECT Subject FROM Task
-                WHERE WhatId = :story.Id
-                AND Status != 'Completed'
-            ]) {
-                existingSubjects.add(t.Subject);
+            // Fetch existing open activity subjects to avoid duplicates
+            Set<String> existingPrefixes = new Set<String>();
+            for (Task t : [SELECT Subject FROM Task WHERE WhatId = :story.Id AND Status != 'Completed']) {
+                for (String[] pair : ORDERED_SUBJECT_FIELD_PAIRS) {
+                    if (t.Subject != null && t.Subject.startsWith(pair[0])) {
+                        existingPrefixes.add(pair[0]);
+                        break;
+                    }
+                }
             }
 
-            for (String fieldName : FORMALITY_FIELDS) {
+            for (String fieldName : READINESS_FIELDS) {
                 Boolean isComplete = (Boolean) story.get(fieldName);
                 if (isComplete == true) continue;
 
-                String subject = FIELD_TO_SUBJECT.get(fieldName) + ' - ' + story.Story_Title__c;
-                if (existingSubjects.contains(subject)) continue;
+                String prefix = FIELD_TO_SUBJECT.get(fieldName);
+                if (existingPrefixes.contains(prefix)) continue;
 
                 tasksToCreate.add(new Task(
-                    Subject      = subject,
+                    Subject      = prefix + ': ' + story.Story_Title__c,
                     WhatId       = story.Id,
                     OwnerId      = story.Assigned_To__c != null ? story.Assigned_To__c : UserInfo.getUserId(),
                     Status       = 'Not Started',
                     Priority     = 'Normal',
                     ActivityDate = Date.today().addDays(3),
-                    Description  = 'Complete Pre-SIT formality "' + FIELD_TO_SUBJECT.get(fieldName) +
-                                   '" for story: ' + story.Story_Title__c +
-                                   '. Close this task once done or tick the checkbox on the story.'
+                    Description  = 'Complete Story Readiness item "' + prefix + '" for story: ' +
+                                   story.Story_Title__c + '.\n' +
+                                   'Close this task OR tick the checkbox on the story — both sync automatically.\n' +
+                                   'All 6 readiness items must be complete before moving to "Completed - SIT Ready".'
                 ));
             }
         }
@@ -310,22 +257,112 @@ public without sharing class FormalitiesService {
         if (!tasksToCreate.isEmpty()) insert tasksToCreate;
     }
 
-
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STAGE: COMPLETED - SIT READY → PR Creation activity
+    // ═══════════════════════════════════════════════════════════════════════════
 
     /**
-     * @description Called when a Salesforce Activity Task is completed (via ActivityTaskTrigger)
-     * Ticks the corresponding checkbox on the parent User Story (Activity Task -> Checkbox sync)
+     * Creates "PR Creation" Activity Task when story reaches Completed - SIT Ready.
+     * When this activity moves to In Progress → story auto-moves to PR InProgress.
+     * When PR_Creation_Complete__c is ticked → story auto-moves to Sent to SIT.
+     */
+    public static void createPRCreationActivity(List<User_Story__c> stories) {
+        List<Task> toCreate = new List<Task>();
+        for (User_Story__c story : stories) {
+            if (story.PR_Creation_Complete__c == true) continue;
+            if (activityExists(story.Id, 'PR Creation')) continue;
+            toCreate.add(buildTask(
+                'PR Creation: ' + story.Story_Title__c,
+                story.Id, story.Assigned_To__c, 'Not Started', 'High', 1,
+                'Create and manage the Pull Request for: ' + story.Story_Title__c + '.\n\n' +
+                '1. Raise the PR in your version control system\n' +
+                '2. When you start working on it, set this activity to "In Progress" ' +
+                '   — the story will automatically move to "PR InProgress"\n' +
+                '3. Address all review comments\n' +
+                '4. Once PR is approved and merged, close this task ' +
+                '   — "PR Creation Complete" checkbox ticks automatically ' +
+                '   and the story moves to "Sent to SIT".\n\n' +
+                'Gate: story cannot move to "Sent to SIT" without this being complete.'
+            ));
+        }
+        if (!toCreate.isEmpty()) insert toCreate;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STAGE: SENT TO SIT → Smoke Test SIT activity
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /**
+     * Creates "Smoke Test SIT" Activity Task when story is Sent to SIT.
+     * When Smoke_Test_SIT_Complete__c is ticked → story auto-moves to Successfully Deployed to SIT.
+     */
+    public static void createSITSmokeTestActivity(List<User_Story__c> stories) {
+        List<Task> toCreate = new List<Task>();
+        for (User_Story__c story : stories) {
+            if (story.Smoke_Test_SIT_Complete__c == true) continue;
+            if (activityExists(story.Id, 'Smoke Test SIT')) continue;
+            toCreate.add(buildTask(
+                'Smoke Test SIT: ' + story.Story_Title__c,
+                story.Id, story.Assigned_To__c, 'Not Started', 'Normal', 1,
+                'Perform smoke testing in the SIT environment for: ' + story.Story_Title__c + '.\n\n' +
+                '• Verify core functionality works as expected after deployment\n' +
+                '• Check critical user flows end-to-end\n' +
+                '• Confirm no regression in related areas\n\n' +
+                'Close this task OR tick "Smoke Test SIT Complete" on the story — ' +
+                'the story will automatically move to "Successfully Deployed to SIT" and ' +
+                'an email will be sent to all testers/stakeholders.'
+            ));
+        }
+        if (!toCreate.isEmpty()) insert toCreate;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STAGE: REJECTED → Fix Issues activity
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    public static void createFixIssuesActivity(List<User_Story__c> stories) {
+        List<Task> toCreate = new List<Task>();
+        for (User_Story__c story : stories) {
+            if (activityExists(story.Id, 'Fix Issues')) continue;
+            String reason = story.Rejection_Reason__c != null
+                ? story.Rejection_Reason__c : 'See QA / SIT notes on the story.';
+            toCreate.add(buildTask(
+                'Fix Issues: ' + story.Story_Title__c,
+                story.Id, story.Assigned_To__c, 'In Progress', 'High', 2,
+                'Address the following issues raised during QA/SIT review:\n\n' +
+                reason + '\n\n' +
+                'Steps:\n' +
+                '1. Fix all reported issues\n' +
+                '2. Re-run unit tests\n' +
+                '3. Update story status back to "Dev In Progress"\n' +
+                '4. Close this task when all fixes are ready for re-testing.'
+            ));
+        }
+        if (!toCreate.isEmpty()) insert toCreate;
+    }
+
+
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // BI-DIRECTIONAL SYNC: Activity Task → Checkbox (called from ActivityTaskTrigger)
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /**
+     * When a Salesforce Activity Task is completed, tick the matching checkbox on the User Story.
+     * Also handles auto-status progressions:
+     *   - PR_Creation_Complete__c = true  → story → Sent to SIT
+     *   - Smoke_Test_SIT_Complete__c = true → story → Successfully Deployed to SIT
+     *   - All readiness fields complete → story → Completed - SIT Ready
      */
     public static void syncTaskCompletionToStory(List<Task> completedTasks) {
         Map<Id, Map<String, Boolean>> storyFieldUpdates = new Map<Id, Map<String, Boolean>>();
 
-        // Collect all WhatIds
         Set<Id> whatIds = new Set<Id>();
         for (Task t : completedTasks) {
             if (t.WhatId != null) whatIds.add(t.WhatId);
         }
 
-        // Confirm WhatIds are User Story records (safe polymorphic check)
+        // Only process User Story WhatIds
         Set<Id> userStoryIds = new Set<Id>();
         for (User_Story__c us : [SELECT Id FROM User_Story__c WHERE Id IN :whatIds]) {
             userStoryIds.add(us.Id);
@@ -333,8 +370,6 @@ public without sharing class FormalitiesService {
 
         for (Task t : completedTasks) {
             if (t.WhatId == null || !userStoryIds.contains(t.WhatId)) continue;
-
-            // Use ordered matching to find the right field
             String matchedField = matchSubjectToField(t.Subject);
             if (matchedField == null) continue;
 
@@ -346,48 +381,73 @@ public without sharing class FormalitiesService {
 
         if (storyFieldUpdates.isEmpty()) return;
 
-        List<User_Story__c> storiesToUpdate = [
-            SELECT Id, Status__c,
-                Unit_Testing_Complete__c,
-                Unit_Test_Sheet_Complete__c,
-                Manual_Deployment_Steps_Complete__c,
-                Business_Dependency_Complete__c,
-                AC_Update_Complete__c,
-                Peer_Review_Complete__c,
-                All_Formalities_Complete__c
+        List<User_Story__c> stories = [
+            SELECT Id, Status__c, Story_Title__c,
+                Story_Info_Verified__c, Unit_Testing_Complete__c,
+                Unit_Test_Sheet_Complete__c, Manual_Deployment_Steps_Complete__c,
+                Business_Dependency_Complete__c, AC_Update_Complete__c,
+                Peer_Review_Complete__c, Translations_Sheet_Complete__c,
+                PR_Creation_Complete__c, Smoke_Test_SIT_Complete__c,
+                All_Formalities_Complete__c, Assigned_To__c
             FROM User_Story__c
             WHERE Id IN :storyFieldUpdates.keySet()
         ];
 
-        List<User_Story__c> finalUpdates = new List<User_Story__c>();
+        List<User_Story__c> toUpdate = new List<User_Story__c>();
 
-        for (User_Story__c story : storiesToUpdate) {
+        for (User_Story__c story : stories) {
             Boolean changed = false;
-            Map<String, Boolean> updates = storyFieldUpdates.get(story.Id);
-
-            for (String fieldName : updates.keySet()) {
+            for (String fieldName : storyFieldUpdates.get(story.Id).keySet()) {
                 if ((Boolean) story.get(fieldName) != true) {
                     story.put(fieldName, true);
                     changed = true;
                 }
             }
-
             if (changed) {
-                story = recalculateFormalitiesStatus(story);
-                finalUpdates.add(story);
+                story = applyAutoStatusProgression(story);
+                toUpdate.add(story);
             }
         }
 
-        if (!finalUpdates.isEmpty()) update finalUpdates;
+        if (!toUpdate.isEmpty()) update toUpdate;
     }
 
+    /**
+     * Called from ActivityTaskTrigger when a "PR Creation" Activity Task moves to In Progress.
+     * Auto-moves the parent User Story to "PR InProgress".
+     */
+    public static void syncPRActivityInProgressToStory(List<Task> inProgressTasks) {
+        Set<Id> whatIds = new Set<Id>();
+        for (Task t : inProgressTasks) {
+            if (t.WhatId != null && t.Subject != null && t.Subject.startsWith('PR Creation')) {
+                whatIds.add(t.WhatId);
+            }
+        }
+        if (whatIds.isEmpty()) return;
 
+        Set<Id> userStoryIds = new Set<Id>();
+        for (User_Story__c us : [SELECT Id FROM User_Story__c WHERE Id IN :whatIds]) {
+            userStoryIds.add(us.Id);
+        }
+
+        List<User_Story__c> toUpdate = new List<User_Story__c>();
+        for (User_Story__c story : [
+            SELECT Id, Status__c FROM User_Story__c
+            WHERE Id IN :userStoryIds
+            AND Status__c = 'Completed - SIT Ready'
+        ]) {
+            toUpdate.add(new User_Story__c(Id = story.Id, Status__c = 'PR InProgress'));
+        }
+        if (!toUpdate.isEmpty()) update toUpdate;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // BI-DIRECTIONAL SYNC: Checkbox → Activity Task (called from UserStoryTrigger)
+    // ═══════════════════════════════════════════════════════════════════════════
 
     /**
-     * @description Called when a checkbox is ticked on the User Story (via UserStoryTrigger)
-     * Closes the corresponding Activity Task (Checkbox -> Activity Task sync)
-     * NOTE: stories param is Trigger.new - do NOT pass it to any DML method directly.
-     *       updateStoryStatusFromFormalities must create fresh SObject instances for DML.
+     * When a checkbox is ticked on the User Story, close the matching Activity Task.
+     * Then recalculates status progressions.
      */
     public static void syncCheckboxToActivityTask(List<User_Story__c> stories, Map<Id, User_Story__c> oldMap) {
         Map<Id, Set<String>> storyChangedSubjects = new Map<Id, Set<String>>();
@@ -396,12 +456,12 @@ public without sharing class FormalitiesService {
             User_Story__c oldStory = oldMap.get(story.Id);
             Set<String> changedSubjects = new Set<String>();
 
-            // Check all 6 checkbox fields for changes (false -> true only)
             for (String fieldName : ALL_CHECKBOX_FIELDS) {
                 Boolean newVal = (Boolean) story.get(fieldName);
                 Boolean oldVal = (Boolean) oldStory.get(fieldName);
-                if (newVal == true && oldVal == false) {
-                    changedSubjects.add(FIELD_TO_SUBJECT.get(fieldName));
+                if (newVal == true && oldVal != true) {
+                    String subjectPrefix = FIELD_TO_SUBJECT.get(fieldName);
+                    if (subjectPrefix != null) changedSubjects.add(subjectPrefix);
                 }
             }
 
@@ -412,132 +472,178 @@ public without sharing class FormalitiesService {
 
         if (storyChangedSubjects.isEmpty()) return;
 
+        // Close matching open Activity Tasks
         List<Task> tasksToClose = new List<Task>();
         for (Task t : [
-            SELECT Id, Subject, WhatId, Status
-            FROM Task
-            WHERE WhatId IN :storyChangedSubjects.keySet()
-            AND Status != 'Completed'
+            SELECT Id, Subject, WhatId FROM Task
+            WHERE WhatId IN :storyChangedSubjects.keySet() AND Status != 'Completed'
         ]) {
-            Set<String> changedSubjects = storyChangedSubjects.get(t.WhatId);
-            if (changedSubjects == null || t.Subject == null) continue;
-
-            for (String subjectPrefix : changedSubjects) {
-                if (t.Subject.startsWith(subjectPrefix)) {
+            if (t.Subject == null) continue;
+            Set<String> subjects = storyChangedSubjects.get(t.WhatId);
+            if (subjects == null) continue;
+            for (String prefix : subjects) {
+                if (t.Subject.startsWith(prefix)) {
                     t.Status = 'Completed';
                     tasksToClose.add(t);
                     break;
                 }
             }
         }
-
         if (!tasksToClose.isEmpty()) update tasksToClose;
 
-        // Recalculate formality status - pass story IDs so we can re-query (not trigger.new)
-        recalculateFormalitiesStatusByIds(storyChangedSubjects.keySet());
+        // Re-query and recalculate status (never DML on Trigger.new directly)
+        recalculateStatusByIds(storyChangedSubjects.keySet());
     }
 
 
 
+    // ═══════════════════════════════════════════════════════════════════════════
+    // AUTO STATUS PROGRESSION ENGINE
+    // ═══════════════════════════════════════════════════════════════════════════
+
     /**
-     * @description Re-queries stories by ID and updates status from formality checkboxes.
-     * Called after checkbox sync to avoid DML on Trigger.new/old records.
+     * Applies all auto-status progressions based on current checkbox state.
+     * Called in-memory (no DML here) — caller must update the record.
+     *
+     * Rules (in priority order):
+     *   1. Smoke_Test_SIT_Complete__c = true  → Successfully Deployed to SIT
+     *   2. PR_Creation_Complete__c = true AND status is PR InProgress/Sent to SIT-ish → Sent to SIT
+     *   3. All 6 readiness fields complete    → Completed - SIT Ready
+     *   4. Some readiness fields complete     → Formalities InProgress (only from Dev Completed)
      */
-    public static void recalculateFormalitiesStatusByIds(Set<Id> storyIds) {
+    public static User_Story__c applyAutoStatusProgression(User_Story__c story) {
+        String s = story.Status__c;
+
+        // Rule 1: Smoke Test complete → Successfully Deployed to SIT
+        if (story.Smoke_Test_SIT_Complete__c == true
+            && s == 'Sent to SIT') {
+            story.Status__c = 'Successfully Deployed to SIT';
+            return story;
+        }
+
+        // Rule 2: PR Creation complete → Sent to SIT
+        if (story.PR_Creation_Complete__c == true
+            && (s == 'PR InProgress' || s == 'Completed - SIT Ready')) {
+            story.Status__c = 'Sent to SIT';
+            return story;
+        }
+
+        // Rules 3 & 4: readiness checklist progression
+        Boolean inFormalitiesPhase = (s == 'Dev Completed' || s == 'Formalities InProgress' || s == 'Completed - SIT Ready');
+        if (!inFormalitiesPhase) return story;
+
+        Integer done = 0;
+        for (String f : READINESS_FIELDS) {
+            if ((Boolean) story.get(f) == true) done++;
+        }
+
+        if (done == READINESS_FIELDS.size()) {
+            // All 6 done — advance to SIT Ready only if not already past that
+            if (s == 'Dev Completed' || s == 'Formalities InProgress') {
+                story.Status__c = 'Completed - SIT Ready';
+            }
+        } else if (done > 0 && s == 'Dev Completed') {
+            story.Status__c = 'Formalities InProgress';
+        }
+
+        return story;
+    }
+
+    /**
+     * Re-queries stories by ID, applies auto progressions, and updates if changed.
+     * Use this when you cannot DML on Trigger.new (e.g. after checkbox sync).
+     */
+    public static void recalculateStatusByIds(Set<Id> storyIds) {
         if (storyIds == null || storyIds.isEmpty()) return;
 
         List<User_Story__c> stories = [
-            SELECT Id, Status__c,
-                Unit_Test_Sheet_Complete__c,
-                Manual_Deployment_Steps_Complete__c,
-                Business_Dependency_Complete__c,
-                AC_Update_Complete__c,
-                Peer_Review_Complete__c,
+            SELECT Id, Status__c, Story_Title__c, Assigned_To__c,
+                Story_Info_Verified__c, Unit_Testing_Complete__c,
+                Unit_Test_Sheet_Complete__c, Manual_Deployment_Steps_Complete__c,
+                Business_Dependency_Complete__c, AC_Update_Complete__c,
+                Peer_Review_Complete__c, Translations_Sheet_Complete__c,
+                PR_Creation_Complete__c, Smoke_Test_SIT_Complete__c,
                 All_Formalities_Complete__c
-            FROM User_Story__c
-            WHERE Id IN :storyIds
+            FROM User_Story__c WHERE Id IN :storyIds
         ];
 
         List<User_Story__c> toUpdate = new List<User_Story__c>();
         for (User_Story__c story : stories) {
-            Boolean inFormalitiesPhase = (
-                story.Status__c == 'Dev Completed' ||
-                story.Status__c == 'Formalities InProgress' ||
-                story.Status__c == 'Completed - SIT Ready'
-            );
-            if (!inFormalitiesPhase) continue;
+            String originalStatus = story.Status__c;
+            story = applyAutoStatusProgression(story);
+            if (story.Status__c != originalStatus) {
+                toUpdate.add(story);
+            }
+        }
+        if (!toUpdate.isEmpty()) update toUpdate;
+    }
 
-            User_Story__c updated = recalculateFormalitiesStatus(story);
-            if (updated.Status__c != story.Status__c) {
-                toUpdate.add(updated);
+    // ═══════════════════════════════════════════════════════════════════════════
+    // STATUS → ACTIVITY TASK SYNC (Story status → Activity Task status)
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    /**
+     * When story moves to PR InProgress, set the open "PR Creation" Activity Task to In Progress.
+     * When story moves to Sent to SIT, set the open "PR Creation" Activity Task to Completed.
+     */
+    public static void syncStoryStatusToActivityTasks(List<User_Story__c> stories, Map<Id, User_Story__c> oldMap) {
+        List<Id> movedToPRInProgress = new List<Id>();
+        List<Id> movedToSentToSIT    = new List<Id>();
+
+        for (User_Story__c story : stories) {
+            User_Story__c old = oldMap.get(story.Id);
+            if (story.Status__c == old.Status__c) continue;
+
+            if (story.Status__c == 'PR InProgress') {
+                movedToPRInProgress.add(story.Id);
+            } else if (story.Status__c == 'Sent to SIT') {
+                movedToSentToSIT.add(story.Id);
+            }
+        }
+
+        List<Task> toUpdate = new List<Task>();
+
+        if (!movedToPRInProgress.isEmpty()) {
+            for (Task t : [SELECT Id, Status FROM Task
+                           WHERE WhatId IN :movedToPRInProgress
+                           AND Subject LIKE 'PR Creation%'
+                           AND Status = 'Not Started']) {
+                t.Status = 'In Progress';
+                toUpdate.add(t);
+            }
+        }
+
+        if (!movedToSentToSIT.isEmpty()) {
+            for (Task t : [SELECT Id, Status FROM Task
+                           WHERE WhatId IN :movedToSentToSIT
+                           AND Subject LIKE 'PR Creation%'
+                           AND Status != 'Completed']) {
+                t.Status = 'Completed';
+                toUpdate.add(t);
             }
         }
 
         if (!toUpdate.isEmpty()) update toUpdate;
     }
 
-    /**
-     * @description Auto-updates story status based on the 5 Pre-SIT formality checkboxes.
-     * Unit_Testing_Complete__c does NOT affect status here (it is a dev gate, not a formality).
-     * NOTE: Do not pass Trigger.new records here - they cannot be DML'd directly.
-     */
-    public static void updateStoryStatusFromFormalities(List<User_Story__c> stories, Map<Id, User_Story__c> oldMap) {
-        Set<Id> changedIds = new Set<Id>();
+    // ═══════════════════════════════════════════════════════════════════════════
+    // LEGACY / BACKWARD-COMPAT ALIASES
+    // ═══════════════════════════════════════════════════════════════════════════
 
-        for (User_Story__c story : stories) {
-            User_Story__c oldStory = oldMap.get(story.Id);
-            Boolean inFormalitiesPhase = (
-                story.Status__c == 'Dev Completed' ||
-                story.Status__c == 'Formalities InProgress' ||
-                story.Status__c == 'Completed - SIT Ready'
-            );
-            if (!inFormalitiesPhase) continue;
-
-            Boolean anyFormalityChanged = (
-                story.Unit_Test_Sheet_Complete__c != oldStory.Unit_Test_Sheet_Complete__c ||
-                story.Manual_Deployment_Steps_Complete__c != oldStory.Manual_Deployment_Steps_Complete__c ||
-                story.Business_Dependency_Complete__c != oldStory.Business_Dependency_Complete__c ||
-                story.AC_Update_Complete__c != oldStory.AC_Update_Complete__c ||
-                story.Peer_Review_Complete__c != oldStory.Peer_Review_Complete__c
-            );
-            if (anyFormalityChanged) changedIds.add(story.Id);
-        }
-
-        if (!changedIds.isEmpty()) recalculateFormalitiesStatusByIds(changedIds);
+    /** @deprecated Use createFormalityActivitiesIfNeeded() */
+    public static void createUnitTestingActivityIfNeeded(List<User_Story__c> stories) {
+        createDevInProgressActivities(stories);
     }
 
+    /** @deprecated Use recalculateStatusByIds() */
+    public static void recalculateFormalitiesStatusByIds(Set<Id> storyIds) {
+        recalculateStatusByIds(storyIds);
+    }
 
-
-    /**
-     * @description Calculates story status from the 5 Pre-SIT formality checkboxes only.
-     * - 1-4 complete AND status is Dev Completed -> move to "Formalities InProgress"
-     * - All 5 complete -> move to "Completed - SIT Ready"
-     */
-    private static User_Story__c recalculateFormalitiesStatus(User_Story__c story) {
-        Integer completedCount = 0;
-        if (story.Unit_Test_Sheet_Complete__c == true)           completedCount++;
-        if (story.Manual_Deployment_Steps_Complete__c == true)   completedCount++;
-        if (story.Business_Dependency_Complete__c == true)       completedCount++;
-        if (story.AC_Update_Complete__c == true)                 completedCount++;
-        if (story.Peer_Review_Complete__c == true)               completedCount++;
-
-        String currentStatus = story.Status__c;
-
-        if (completedCount == 5) {
-            if (currentStatus != 'Completed - SIT Ready' &&
-                currentStatus != 'PR InProgress' &&
-                currentStatus != 'Sent to SIT' &&
-                currentStatus != 'Sent to QA' &&
-                currentStatus != 'Sent to UAT' &&
-                currentStatus != 'Done') {
-                story.Status__c = 'Completed - SIT Ready';
-            }
-        } else if (completedCount > 0) {
-            if (currentStatus == 'Dev Completed') {
-                story.Status__c = 'Formalities InProgress';
-            }
-        }
-
-        return story;
+    /** @deprecated Use recalculateStatusByIds() */
+    public static void updateStoryStatusFromFormalities(List<User_Story__c> stories, Map<Id, User_Story__c> oldMap) {
+        Set<Id> ids = new Set<Id>();
+        for (User_Story__c s : stories) ids.add(s.Id);
+        recalculateStatusByIds(ids);
     }
 }

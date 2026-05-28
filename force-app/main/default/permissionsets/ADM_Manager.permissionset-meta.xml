@@ -367,4 +367,30 @@
         <field>User_Story__c.Unit_Test_Sheet_Complete__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <!-- New v2 fields -->
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>User_Story__c.Story_Info_Verified__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>User_Story__c.Translations_Sheet_Complete__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>User_Story__c.PR_Creation_Complete__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>User_Story__c.Smoke_Test_SIT_Complete__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>User_Story__c.Unit_Testing_Complete__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
 </PermissionSet>
