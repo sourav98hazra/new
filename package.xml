@@ -159,6 +159,7 @@
         <members>User_Story__c.Story_Info_Must_Be_Verified_Before_Dev_Start</members>
         <members>User_Story__c.Unit_Test_Required_Before_Dev_Complete</members>
         <members>User_Story__c.Dev_Tasks_Must_Be_Complete_Before_Dev_Completed</members>
+        <members>User_Story__c.QA_Gate_Before_Sent_To_Prod</members>
         <members>User_Story__c.All_Readiness_Required_Before_SIT_Ready</members>
         <members>User_Story__c.Translations_Required_Before_SIT_Ready</members>
         <members>User_Story__c.PR_Required_Before_Sent_To_SIT</members>

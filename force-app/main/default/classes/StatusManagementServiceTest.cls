@@ -22,7 +22,8 @@ private class StatusManagementServiceTest {
             Story_Title__c = 'Test Story',
             Sprint__c = sprint.Id,
             Status__c = 'New',
-            Story_Progress__c = 0
+            Story_Progress__c = 0,
+            Story_Info_Verified__c = true
         );
         insert story;
         
@@ -51,30 +52,30 @@ private class StatusManagementServiceTest {
     @isTest
     static void testHandleQAApproval() {
         User_Story__c story = [SELECT Id FROM User_Story__c LIMIT 1];
-        story.Status__c = 'In QA';
+        story.Status__c = 'Sent to QA';
         update story;
-        
+
         Test.startTest();
         StatusManagementService.handleQAApproval(story.Id, true, 'Looks good!');
         Test.stopTest();
-        
+
         User_Story__c updatedStory = [SELECT Status__c, QA_Notes__c FROM User_Story__c WHERE Id = :story.Id];
-        System.assertEquals('QA Approved', updatedStory.Status__c, 'Story should be QA approved');
+        System.assertEquals('Sent to UAT', updatedStory.Status__c, 'Story should move to Sent to UAT on QA approval');
         System.assertEquals('Looks good!', updatedStory.QA_Notes__c, 'QA notes should be saved');
     }
-    
+
     @isTest
     static void testReopenStory() {
         User_Story__c story = [SELECT Id FROM User_Story__c LIMIT 1];
-        story.Status__c = 'In QA';
+        story.Status__c = 'Rejected';
         update story;
-        
+
         Test.startTest();
         StatusManagementService.reopenStory(story.Id, 'Bug found');
         Test.stopTest();
-        
+
         User_Story__c updatedStory = [SELECT Status__c, Rejection_Reason__c FROM User_Story__c WHERE Id = :story.Id];
-        System.assertEquals('In Progress', updatedStory.Status__c, 'Story should be reopened');
+        System.assertEquals('Dev In Progress', updatedStory.Status__c, 'Story should reopen to Dev In Progress');
         System.assertEquals('Bug found', updatedStory.Rejection_Reason__c, 'Rejection reason should be saved');
     }
 }

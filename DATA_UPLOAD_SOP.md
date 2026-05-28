@@ -265,7 +265,7 @@ Use Data Loader when you have more than 50,000 records or need to automate the p
 - `Pending_Reason__c` is only required when Status is "Pending"
 - Story_Points__c should use Fibonacci: 1, 2, 3, 5, 8, 13, 21
 
-**Valid Status Values (12-status lifecycle):**
+**Valid Status Values (14-status lifecycle):**
 1. New
 2. Dev In Progress
 3. Pending
@@ -274,12 +274,14 @@ Use Data Loader when you have more than 50,000 records or need to automate the p
 6. Completed - SIT Ready
 7. PR InProgress
 8. Sent to SIT
-9. Sent to QA
-10. Sent to UAT
-11. Done
-12. Rejected
+9. Successfully Deployed to SIT
+10. Sent to QA
+11. Sent to UAT
+12. Sent to Prod
+13. Done
+14. Rejected
 
-**Important:** Do NOT set status to "Completed - SIT Ready" unless all Pre-SIT Formalities checkboxes are checked (these cannot be set via CSV upload for new records - use "Dev Completed" or "Formalities InProgress" instead).
+**Important:** Do NOT set status to "Completed - SIT Ready" unless all 6 Story Readiness Checklist checkboxes are checked. Upload stories as "Dev Completed" or "Formalities InProgress" and update checklist items in the UI to avoid triggering validation gates.
 
 **Verification:** Open User Stories, confirm Sprint and Feature lookups, and verify status values are correct.
 
@@ -658,7 +660,7 @@ Once verified, update the Sprint Status from "Planning" to "Active":
    - Remove any BOM (Byte Order Mark) characters from the CSV
    - Save as UTF-8 encoding
 
-9. **Handle the Pre-SIT Formalities correctly** - When uploading User Stories with status "Formalities InProgress" or later, remember that the formalities checkboxes cannot be set to true via bulk upload if the validation rule blocks "Completed - SIT Ready" status. Upload stories as "Dev Completed" and update formalities in the UI.
+9. **Handle the Story Readiness Checklist correctly** — When uploading User Stories with status "Formalities InProgress" or later, the readiness checkboxes cannot be set via bulk upload if validation rules block "Completed - SIT Ready". Upload stories as "Dev Completed" and update checklist items in the UI.
 
 10. **Monitor API limits** - Each batch of records counts against your org's daily API limit. Check Setup > System Overview to monitor usage before large uploads.
 
@@ -696,7 +698,7 @@ Before starting any bulk upload:
 | Project | Planning, Active, On Hold, Completed, Cancelled |
 | Sprint | Planning, Active, Closed |
 | Feature | Not Started, In Progress, Completed |
-| User Story | New, Dev In Progress, Pending, Dev Completed, Formalities InProgress, Completed - SIT Ready, PR InProgress, Sent to SIT, Sent to QA, Sent to UAT, Done, Rejected |
+| User Story | New, Dev In Progress, Pending, Dev Completed, Formalities InProgress, Completed - SIT Ready, PR InProgress, Sent to SIT, Successfully Deployed to SIT, Sent to QA, Sent to UAT, Sent to Prod, Done, Rejected |
 | Task | New, In Progress, Blocked, Completed |
 
 ### Priority Values (All Objects)

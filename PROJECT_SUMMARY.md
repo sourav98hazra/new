@@ -1,243 +1,185 @@
-# Salesforce Agile Delivery Management System - Project Summary
+# Salesforce Agile Delivery Management System — Project Summary
 
-## ✅ **PROJECT COMPLETE - 100%**
+## ✅ v2.0 COMPLETE
 
-All 10 tasks completed successfully with full implementation of your requirements including the updated Story Development Lifecycle with Pre-SIT Formalities.
+Full lifecycle redesign with Story Info verification gate, Task__c↔Activity Task bi-directional sync, PR Creation auto-status, Smoke Test auto-status, SIT batch email, and all 10 checkboxes fully synced.
 
 ---
 
 ## 📦 What Was Built
 
-### 1. **Custom Objects (8 Total)** ✅
-- **Project__c** - Top-level container with 8 fields
-- **Sprint__c** - Time-boxed iterations with 11 fields
-- **Feature__c** - Major functionality grouping with 5 fields
-- **User_Story__c** - User requirements with 20 fields (including new formality checklist fields)
-- **Task__c** - Developer work items with 14 fields
-- **Daily_Progress__c** - Progress logging with 6 fields
-- **Task_Checklist_Item__c** - Task checklists with 6 fields
-- **Task_Dependency__c** - Task dependencies with 5 fields
+### 1. Custom Objects (7 Total)
+| Object | Fields | Purpose |
+|--------|--------|---------|
+| `Project__c` | 8 | Top-level container |
+| `Sprint__c` | 11 | Time-boxed iterations |
+| `Feature__c` | 5 | Feature grouping |
+| `User_Story__c` | **26** (v2) | User requirements with full lifecycle |
+| `Task__c` | 14 | Developer work items |
+| `Daily_Progress__c` | 6 | Progress logging |
+| `Task_Dependency__c` | 5 | Task dependencies |
 
-**Total Fields Created:** 75+ custom fields across all objects
+### 2. User_Story__c — v2 Fields (26 total)
+**Core:** Story_Title, Sprint, Feature, Status (14-value picklist), Priority, Story_Points, Estimated_Hours, Story_Progress, Assigned_To, Description, Acceptance_Criteria, QA_Notes, Rejection_Reason, Pending_Reason
 
-### 2. **Validation Rules (18 Total)** ✅
-- Progress limits (5 rules - cannot exceed 100%)
-- Closed sprint protection
-- Mandatory checklist enforcement (3 rules)
-- **NEW:** Pre-SIT formalities validation
-- Date validation (2 rules)
-- Historical progress protection
-- Data integrity rules (5 rules)
+**Gate & Dev Checklist:**
+- `Story_Info_Verified__c` — NEW: gate for New → Dev In Progress
+- `Unit_Testing_Complete__c` — gate for Dev Completed
 
-### 3. **Apex Services (3 Core + 4 Controllers)** ✅
-**Core Services:**
-- **ProgressCalculationService** - Weighted average calculations
-- **ChecklistService** - Checklist management with auto-creation
-- **StatusManagementService** - QA/SIT workflow automation
-- **NotificationService** - Bell and email notifications
+**Story Readiness Checklist (6 items → gate for Completed - SIT Ready):**
+- `Unit_Test_Sheet_Complete__c`
+- `Manual_Deployment_Steps_Complete__c`
+- `Business_Dependency_Complete__c`
+- `AC_Update_Complete__c`
+- `Peer_Review_Complete__c`
+- `Translations_Sheet_Complete__c` — NEW
 
-**Controllers:**
-- DailyProgressController
-- SprintDashboardController  
-- ChecklistManagerController
-- DailyNotificationScheduler
+**PR & SIT Gates:**
+- `PR_Creation_Complete__c` — NEW: gate for Sent to SIT; auto-advance trigger
+- `Smoke_Test_SIT_Complete__c` — NEW: gate for Successfully Deployed to SIT; auto-advance trigger
+- `All_Formalities_Complete__c` — Formula (AND of all 6 readiness items)
 
-**Test Classes:** 6 test classes with 75%+ coverage
-
-### 4. **Triggers (6 Total)** ✅
-- DailyProgressTrigger - Progress cascade
-- TaskTrigger - Checklist creation + notifications
-- TaskChecklistItemTrigger - Checklist status updates
-- UserStoryTrigger - Feature/Sprint progress + QA notifications
-- FeatureTrigger - Sprint progress updates
-- SprintTrigger - Project progress updates
-
-**Automation Flow:** Daily Progress → Task → Story → Feature → Sprint → Project (real-time cascade)
-
-### 5. **Permission Sets (6 Roles)** ✅
-1. **ADM_Admin** - Full access with special permissions
-2. **ADM_Lead** - Team lead with Edit_Historical_Progress
-3. **ADM_Developer_Pro** - Senior dev with extended permissions
-4. **ADM_Developer** - Standard dev (own tasks only)
-5. **ADM_QA** - QA specialist with story approval powers
-6. **ADM_Manager** - Read-only executive view
-
-### 6. **Lightning Web Components (3 Core)** ✅
-1. **dailyProgressModal** - Daily progress logging modal
-2. **sprintDashboard** - Real-time sprint metrics with 4 key cards
-3. **checklistManager** - Interactive task checklist with progress bar
-
-All components are mobile-responsive with SLDS styling
-
-### 7. **Notification System** ✅
-**NotificationService with 10 methods:**
-- Bell notifications (Salesforce in-app)
-- Email notifications
-- Task assignment alerts
-- QA workflow notifications
-- Daily reminders
-- Overdue task alerts
-- Sprint ending alerts
-
-**3 Email Templates** + **Custom Notification Type**
-
-### 8. **Updated Story Development Lifecycle** ✅ ⭐ NEW
-**Enhanced Status Picklist (12 statuses):**
+### 3. Status Picklist — 14 Values
 1. New
 2. Dev In Progress
-3. Pending (with Pending_Reason__c field)
+3. Pending
 4. Dev Completed
 5. Formalities InProgress
 6. Completed - SIT Ready
 7. PR InProgress
 8. Sent to SIT
-9. Sent to QA
-10. Sent to UAT
-11. Done
-12. Rejected
+9. **Successfully Deployed to SIT** ← NEW
+10. Sent to QA
+11. Sent to UAT
+12. **Sent to Prod** ← NEW
+13. Done
+14. Rejected
 
-**Pre-SIT Formalities Checklist (5 items):**
-- ✓ Unit Test Sheet
-- ✓ Manual Deployment Steps
-- ✓ Business Dependency
-- ✓ AC Update (Acceptance Criteria)
-- ✓ Peer Review
+### 4. Validation Rules (9 on User_Story__c)
+| Rule | Gate |
+|------|------|
+| `Story_Info_Must_Be_Verified_Before_Dev_Start` | NEW |
+| `Unit_Test_Required_Before_Dev_Complete` | Existing |
+| `Dev_Tasks_Must_Be_Complete_Before_Dev_Completed` | NEW |
+| `All_Readiness_Required_Before_SIT_Ready` | Replaces old VR |
+| `Translations_Required_Before_SIT_Ready` | NEW |
+| `PR_Required_Before_Sent_To_SIT` | NEW |
+| `Smoke_Test_Required_Before_Successfully_Deployed` | NEW |
+| `QA_Gate_Before_Sent_To_Prod` | NEW |
+| `Progress_Cannot_Exceed_100` | Existing |
 
-**Formula Field:** All_Formalities_Complete__c (checks all 5)
-**Validation Rule:** Blocks "Completed - SIT Ready" until all formalities complete
+### 5. Apex Classes (17 total)
+**Service Classes:**
+| Class | Purpose |
+|-------|---------|
+| `FormalitiesService` | Lifecycle activity tasks + 10-field bi-directional sync + auto-status engine |
+| `TaskActivitySyncService` | **NEW**: Mirrors every Task__c as Activity Task; bi-directional status sync |
+| `SITDeploymentEmailQueueable` | **NEW**: Batch email to all ADM users on SIT deployment |
+| `StatusManagementService` | Task/story/feature auto-status (updated for new lifecycle) |
+| `ProgressCalculationService` | Weighted progress cascade |
+| `NotificationService` | Bell + email notifications |
+| `DailyProgressController` | Daily progress modal controller |
+| `SprintDashboardController` | Sprint dashboard metrics |
+| `DailyNotificationScheduler` | Scheduled daily reminders |
 
-### 9. **Scheduled Apex** ✅
-**DailyNotificationScheduler** - Runs daily at 5 PM
-- Sends daily progress reminders
-- Notifies overdue tasks
-- Alerts on sprints ending soon
+**Test Classes:** DailyNotificationSchedulerTest, NotificationServiceTest, ProgressCalculationServiceTest, StatusManagementServiceTest, TriggerTestHelper, TriggerTests (all updated for v2 lifecycle)
 
-### 10. **Documentation** ✅
-- **README.md** - Project overview and features
-- **DEPLOYMENT_GUIDE.md** - Step-by-step deployment instructions
-- **PROJECT_SUMMARY.md** - This comprehensive summary
+### 6. Apex Triggers (6 total)
+| Trigger | Changes in v2 |
+|---------|--------------|
+| `UserStoryTrigger` | Added New stage, 10-field checkbox sync, Successfully Deployed, Sent to Prod, PR status sync |
+| `TaskTrigger` | **NEW**: Creates Activity Task for every Task__c insert; syncs updates |
+| `ActivityTaskTrigger` | **NEW**: PR Creation In Progress sync + Task__c mirror sync + checkbox sync |
+| `DailyProgressTrigger` | Unchanged |
+| `FeatureTrigger` | Unchanged |
+| `SprintTrigger` | Unchanged |
 
----
+### 7. Permission Sets (6) — Updated for v2
+All 6 permission sets updated with FLS for 5 new fields:
+- `Story_Info_Verified__c`
+- `Translations_Sheet_Complete__c`
+- `PR_Creation_Complete__c`
+- `Smoke_Test_SIT_Complete__c`
+- `Unit_Testing_Complete__c` (was missing)
 
-## 🎯 Key Features Implemented
+New class accesses added: `FormalitiesService`, `TaskActivitySyncService`, `SITDeploymentEmailQueueable`
 
-### Progress Calculation Logic
-✅ **Task Progress** = Sum of daily progress / Estimated hours  
-✅ **Story Progress** = Weighted average using Estimated Hours  
-✅ **Feature Progress** = Average of story progress  
-✅ **Sprint Progress** = Weighted average using Story Points  
-✅ **Project Progress** = Average of sprint progress  
+### 8. Quick Actions
+| Action | Change |
+|--------|--------|
+| `Update_Readiness_Checklist` | Renamed from "Complete Formalities"; now shows all 10 checklist fields |
+| `Update_Status` | Unchanged |
+| `New_Task` | Unchanged |
 
-### Automation Highlights
-✅ Auto-creates default checklists based on task type  
-✅ Auto-calculates progress up entire hierarchy in real-time  
-✅ Auto-transitions statuses (Task → Story → Feature)  
-✅ Auto-sends notifications for assignments, QA, rejections  
-✅ Daily scheduled reminders at 5 PM  
+### 9. Page Layout (User Story)
+| Section | Change |
+|---------|--------|
+| **Story Readiness Checklist** | Renamed from "Pre-SIT Formalities"; added Translations Sheet |
+| **Dev Checklist** | New section with Unit Testing Complete |
+| **PR & SIT** | New section with PR_Creation_Complete, Smoke_Test_SIT_Complete |
+| Story Information | Added Story_Info_Verified checkbox |
 
-### Governance & Compliance
-✅ Mandatory checklist before task completion  
-✅ **NEW:** Mandatory pre-SIT formalities before SIT deployment  
-✅ Cannot exceed 100% progress at any level  
-✅ Cannot edit historical progress (older than 2 days) without permission  
-✅ Cannot modify closed sprints without admin permission  
-✅ Sprint cannot close with incomplete work  
-
-### QA & SIT Workflow
-✅ Story auto-moves to "Ready for QA" when all tasks complete  
-✅ **NEW:** Formalities InProgress → Completed - SIT Ready workflow  
-✅ **NEW:** Pre-SIT checklist enforcement  
-✅ QA team gets bell notifications  
-✅ QA can approve/reject with notes  
-✅ Developer notified on rejection  
-✅ Full audit trail of approvals and rejections  
-
----
-
-## 📊 Statistics
-
-- **Objects:** 8
-- **Custom Fields:** 75+
-- **Validation Rules:** 18
-- **Apex Classes:** 15 (including tests)
-- **Triggers:** 6
-- **Lightning Web Components:** 3
-- **Permission Sets:** 6
-- **Email Templates:** 3
-- **Notification Types:** 1
-- **Scheduled Jobs:** 1
-- **Lines of Code:** ~5,000+
+### 10. LWC — Developer Process Guide
+Updated to 14-step developer workflow covering the full new lifecycle.
 
 ---
 
-## 🚀 Next Steps
+## 🎯 Automation Flow (v2)
 
-### Immediate (Post-Deployment)
-1. ✅ Deploy to Salesforce org using DEPLOYMENT_GUIDE.md
-2. ✅ Assign permission sets to users
-3. ✅ Schedule the DailyNotificationScheduler Apex job
-4. ✅ Create reports and dashboards (documented in DEPLOYMENT_GUIDE)
-5. ✅ Configure page layouts and tabs
-6. ✅ Add LWC components to record pages
-7. ✅ Create sample data for testing
+```
+Story Created (New)
+  → "Verify Story Info" Activity Task created
+  → Story_Info_Verified__c = TRUE (closes activity, syncs checkbox)
+  → Status can now move to Dev In Progress
 
-### Future Enhancements (Phase 2)
-- 🔄 Kanban Board LWC component
-- 🔄 Burn Down Chart LWC component  
-- 🔄 Jira Integration
-- 🔄 Azure DevOps Integration
-- 🔄 GitHub PR sync
-- 🔄 AI-generated sprint summaries
-- 🔄 AI sprint estimation
-- 🔄 Slack/MS Teams integration
-- 🔄 Release object for version tracking
-- 🔄 Team/Squad object for multi-team support
+Dev In Progress
+  → "Write Code", "Write Unit Tests", "Unit Testing" Activity Tasks created
+  → All Task__c records auto-mirrored as Activity Tasks
+  → Task__c status ↔ Activity Task status sync (both directions)
 
----
+Dev Completed (requires Unit Testing done + all Task__c Completed)
+  → 6 Story Readiness Activity Tasks created
+  → Each completed (either side) ticks checkbox / closes activity
+  → Auto-advances: some done → Formalities InProgress
+  → Auto-advances: all 6 done → Completed - SIT Ready
 
-## 🎉 Project Highlights
+Completed - SIT Ready
+  → "PR Creation" Activity Task created
+  → PR Creation → In Progress → story auto-moves to PR InProgress
+  → PR Creation completed → story auto-moves to Sent to SIT
 
-### What Makes This Special
-1. **Complete Hierarchy** - Full cascade from daily progress to project level
-2. **Enterprise-Ready** - Scalable, bulkified, with comprehensive security
-3. **Real-Time** - Progress and status updates propagate instantly
-4. **User-Friendly** - Modern LWC components with responsive design
-5. **Governed** - Multiple validation layers ensure data quality
-6. **Auditable** - Complete change tracking and approval history
-7. **Automated** - Minimal manual intervention required
-8. **Flexible** - Supports multiple workflows and team structures
-9. **Comprehensive** - Covers entire agile delivery lifecycle from planning to UAT
-10. ****NEW:** Pre-SIT Formalities** - Ensures proper documentation before deployment
+Sent to SIT
+  → "Smoke Test SIT" Activity Task created
+  → Smoke Test completed → story auto-moves to Successfully Deployed to SIT
+  → SITDeploymentEmailQueueable fires → email to ALL ADM users
 
-### Technical Excellence
-- ✅ Follows Salesforce best practices
-- ✅ Bulkified for governor limits
-- ✅ Comprehensive test coverage (75%+)
-- ✅ Mobile-responsive UI
-- ✅ Accessibility compliant
-- ✅ Well-documented code
-- ✅ Modular and maintainable
-- ✅ Production-ready
+Successfully Deployed to SIT → Sent to QA → Sent to UAT → Sent to Prod → Done
+
+Rejected (any stage)
+  → "Fix Issues: [Story] - [Rejection Reason]" Activity Task created
+```
 
 ---
 
-## 🙏 Thank You!
+## 📊 Statistics — v2
 
-Your Salesforce Agile Delivery Management System is **complete and ready for deployment**!
+| Metric | Count |
+|--------|-------|
+| Custom Objects | 7 |
+| Custom Fields (User Story) | 26 |
+| Validation Rules (User Story) | 9 |
+| Apex Classes | 17 |
+| Apex Triggers | 6 |
+| Lightning Web Components | 3 |
+| Permission Sets | 6 |
+| Quick Actions | 10 |
+| Email Templates | 3 + SIT email (queueable) |
+| Lines of Code | ~7,000+ |
 
-This is a **production-grade enterprise system** that will help your development teams:
-- Track work more efficiently
-- Maintain high quality standards
-- Meet sprint commitments
-- Improve team productivity
-- Ensure proper governance
-- **Ensure proper documentation before SIT deployment**
+---
 
-**Version:** 1.0.0  
-**Status:** ✅ Complete  
-**Date:** May 27, 2026  
+**Version:** 2.0.0
+**Status:** ✅ Complete
+**Date:** May 2026
 **Salesforce API Version:** 60.0
-
----
-
-For deployment instructions, see **DEPLOYMENT_GUIDE.md**
+**Repository:** https://github.com/sourav98hazra/ADM-Repo

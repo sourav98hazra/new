@@ -128,7 +128,7 @@ public without sharing class StatusManagementService {
                 if (story.Status__c != 'Done') {
                     allCompleted = false;
                 }
-                if (story.Status__c == 'In Progress' || story.Status__c == 'In QA') {
+                if (story.Status__c == 'Dev In Progress' || story.Status__c == 'Formalities InProgress') {
                     anyInProgress = true;
                 }
             }
@@ -155,7 +155,8 @@ public without sharing class StatusManagementService {
     }
     
     /**
-     * @description Handle QA approval process
+     * @description Handle QA approval process.
+     * Moves story from Sent to QA to Sent to UAT (approved) or Rejected (rejected).
      */
     public static void handleQAApproval(Id storyId, Boolean approved, String notes) {
         User_Story__c story = [
@@ -164,20 +165,21 @@ public without sharing class StatusManagementService {
             WHERE Id = :storyId
             LIMIT 1
         ];
-        
+
         if (approved) {
-            story.Status__c = 'QA Approved';
+            story.Status__c = 'Sent to UAT';
             story.QA_Notes__c = notes;
         } else {
             story.Status__c = 'Rejected';
             story.Rejection_Reason__c = notes;
         }
-        
+
         update story;
     }
-    
+
     /**
-     * @description Handle SIT approval process
+     * @description Handle SIT approval process.
+     * Moves story from Successfully Deployed to SIT to Sent to QA (approved) or Rejected.
      */
     public static void handleSITApproval(Id storyId, Boolean approved, String notes) {
         User_Story__c story = [
@@ -186,19 +188,19 @@ public without sharing class StatusManagementService {
             WHERE Id = :storyId
             LIMIT 1
         ];
-        
+
         if (approved) {
-            story.Status__c = 'SIT Approved';
+            story.Status__c = 'Sent to QA';
         } else {
             story.Status__c = 'Rejected';
             story.Rejection_Reason__c = notes;
         }
-        
+
         update story;
     }
-    
+
     /**
-     * @description Reopen story (QA rejection)
+     * @description Reopen story after rejection — moves back to Dev In Progress.
      */
     public static void reopenStory(Id storyId, String rejectionReason) {
         User_Story__c story = [
@@ -207,10 +209,10 @@ public without sharing class StatusManagementService {
             WHERE Id = :storyId
             LIMIT 1
         ];
-        
-        story.Status__c = 'In Progress';
+
+        story.Status__c = 'Dev In Progress';
         story.Rejection_Reason__c = rejectionReason;
-        
+
         update story;
     }
     

@@ -31,13 +31,13 @@ private class NotificationServiceTest {
     @isTest
     static void testNotifyStoryReadyForQA() {
         User_Story__c story = [SELECT Id FROM User_Story__c LIMIT 1];
-        story.Status__c = 'Ready for QA';
+        story.Status__c = 'Sent to QA';
         update story;
-        
+
         Test.startTest();
         NotificationService.notifyStoryReadyForQA(story.Id);
         Test.stopTest();
-        
+
         // Verify no exceptions thrown
         System.assertNotEquals(null, story.Id, 'Story should exist');
     }

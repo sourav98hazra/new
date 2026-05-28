@@ -45,7 +45,10 @@ public class TriggerTestHelper {
             Feature__c = featureId,
             Status__c = 'New',
             Story_Points__c = 5,
-            Estimated_Hours__c = 40
+            Estimated_Hours__c = 40,
+            // Pre-verify so tests can freely change status without hitting
+            // the Story_Info_Must_Be_Verified_Before_Dev_Start validation rule
+            Story_Info_Verified__c = true
         );
         insert story;
         return story;

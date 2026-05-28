@@ -10,8 +10,8 @@
 
 ### Step 1: Clone the Repository
 ```bash
-git clone https://github.com/sourav98hazra/new.git
-cd new
+git clone https://github.com/sourav98hazra/ADM-Repo.git
+cd ADM-Repo
 ```
 
 ### Step 2: Authenticate with Salesforce
@@ -30,18 +30,17 @@ sfdx force:source:deploy -p force-app -u MyOrgAlias
 ```
 
 This deploys:
-- 8 Custom Objects with 75+ fields
-- 18 Validation Rules
-- 15 Apex Classes (including test classes)
+- 7 Custom Objects with 26 User Story fields
+- 9 Validation Rules on User Story
+- 17 Apex Classes (including test classes)
 - 6 Apex Triggers
 - 3 Lightning Web Components
-- 6 Permission Sets
+- 6 Permission Sets with full FLS for all v2 fields
 - 2 Custom Permissions
-- 8 Page Layouts (auto-applied)
-- 7 Reports (pre-built, ready to use)
-- 3 Dashboards (pre-built, ready to use)
+- 7 Page Layouts (auto-applied)
 - 3 Email Templates
 - 1 Custom Notification Type
+- 10 Quick Actions
 
 If deployment fails due to dependencies, deploy in this order:
 ```bash
@@ -267,84 +266,92 @@ All 8 page layouts are deployed and assigned automatically:
 | Project__c | Project Layout | Project Info, Progress & Metrics, Related: Sprints |
 | Sprint__c | Sprint Layout | Sprint Info, Progress & Metrics, Retrospective, Related: Stories, Features |
 | Feature__c | Feature Layout | Feature Info, Progress, Related: User Stories |
-| User_Story__c | User Story Layout | Story Info, Estimation, Details, **Pre-SIT Formalities**, QA/SIT, Related: Tasks |
-| Task__c | Task Layout | Task Info, Progress, Details, Related: Daily Progress, Checklist Items |
+| User_Story__c | User Story Layout | Story Info, Estimation, Details, **Story Readiness Checklist**, PR & SIT, QA/SIT, Related: Tasks |
+| Task__c | Task Layout | Task Info, Progress, Details, Related: Daily Progress |
 | Daily_Progress__c | Daily Progress Layout | Progress Entry, Notes |
-| Task_Checklist_Item__c | Task Checklist Item Layout | Checklist Item, Completion Info |
 | Task_Dependency__c | Task Dependency Layout | Dependency, Notes |
 
 ---
 
-## 🔄 Story Development Lifecycle
-
-The User Story object follows this 12-status lifecycle:
+## 🔄 Story Development Lifecycle (v2 — 14 statuses)
 
 ```
 New
- |-- Dev In Progress
-      |-- Pending (blocked/waiting - capture reason in Pending_Reason__c)
-      |-- Dev Completed
-           |-- Formalities InProgress
-                |-- Completed - SIT Ready (requires all 5 formalities checked)
-                     |-- PR InProgress
-                          |-- Sent to SIT
-                               |-- Sent to QA
-                                    |-- Sent to UAT
-                                         |-- Done
+ └── ⛔ Story_Info_Verified__c gate (Verify Story Info activity auto-created)
+Dev In Progress
+ └── Write Code, Write Unit Tests, Unit Testing activities auto-created
+     └── ⛔ Unit Testing Complete + all Task__c Completed required
+Dev Completed
+ └── 6 Story Readiness Checklist activities auto-created
+Formalities InProgress  (auto when some items done)
+Completed - SIT Ready   (auto when all 6 done) ← ⛔ All Readiness gate
+ └── PR Creation activity auto-created
+     → In Progress → story auto-moves to PR InProgress
+     → Completed → story auto-moves to Sent to SIT
+PR InProgress
+Sent to SIT  ← ⛔ PR_Creation_Complete__c gate
+ └── Smoke Test SIT activity auto-created
+     → Completed → story auto-moves to Successfully Deployed to SIT
+Successfully Deployed to SIT  → 📧 email to ALL ADM users
+Sent to QA → Sent to UAT ← ⛔ must pass QA before Sent to Prod
+Sent to Prod → Done
+Rejected → Fix Issues activity auto-created
 ```
 
-At any point a story can also be moved to: **Rejected** (with Rejection_Reason__c)
-
-**Pre-SIT Formalities (all 5 required before "Completed - SIT Ready"):**
+**Story Readiness Checklist (all 6 required before "Completed - SIT Ready"):**
 1. Unit Test Sheet Complete
 2. Manual Deployment Steps Complete
 3. Business Dependency Complete
-4. AC Update Complete (Acceptance Criteria)
+4. AC Update Complete
 5. Peer Review Complete
+6. Translations Sheet Complete ← NEW in v2
 
-Formula field `All_Formalities_Complete__c` checks all 5.
-Validation rule `Formalities_Required_Before_SIT_Ready` blocks the transition until all are checked.
+Formula field `All_Formalities_Complete__c` (label: "All Readiness Checklist Complete") checks all 6.
+Validation rule `All_Readiness_Required_Before_SIT_Ready` blocks transition until all are checked.
 
 ---
 
 ## ✅ Post-Deployment Checklist
 
-- [ ] All metadata deployed successfully (`sfdx force:source:deploy`)
+> See **POST_DEPLOYMENT_CHECKLIST.md** for the full detailed test procedure.
+
+- [ ] All metadata deployed (`sfdx force:source:deploy`)
 - [ ] All Apex tests pass (`sfdx force:apex:test:run`)
 - [ ] Permission sets assigned to all users
 - [ ] Scheduled job running (Setup > Scheduled Jobs)
-- [ ] LWC components added to record pages (Sprint, Task, Home)
-- [ ] Custom tabs created for all objects
-- [ ] Lightning App "Agile Delivery Management" created
-- [ ] Page layouts verified (check all sections visible)
-- [ ] Reports visible in ADM Reports folder
-- [ ] Dashboards visible in ADM Dashboards folder
-- [ ] Sample data created and tested
-- [ ] Daily progress flow tested (log progress > verify cascade)
-- [ ] Pre-SIT formalities workflow tested
-- [ ] Notification test (assign task > verify bell/email)
-- [ ] Validation rules tested (try exceeding 100%, modifying closed sprint)
-- [ ] Permission restrictions verified (developer can't edit others' progress)
+- [ ] Sprint Dashboard LWC added to Sprint record page
+- [ ] ADM Home Page activated (Home tab shows Developer Process Guide)
+- [ ] Custom tabs and Lightning App verified
+- [ ] Sample data created and end-to-end lifecycle tested
+- [ ] Story Info Verification gate tested (New → Dev In Progress)
+- [ ] Task__c ↔ Activity Task sync tested (bi-directional)
+- [ ] Story Readiness Checklist tested (all 6 items + auto SIT Ready)
+- [ ] PR Creation auto-status tested
+- [ ] Smoke Test auto-status tested
+- [ ] SIT deployment email received by all ADM users
+- [ ] "Update Readiness Checklist" button visible on User Story
+- [ ] Notification test (assign task → bell notification + email)
 
 ---
 
 ## 🧪 Testing Workflow
 
-### Quick Smoke Test (5 minutes)
-1. Create a Project > Sprint > User Story > Task
-2. Log Daily Progress on the task
-3. Verify Task Progress, Story Progress, Sprint Progress, Project Progress all update
-4. Complete all checklist items > mark task complete
-5. Check the story auto-moves status
-6. Check all 5 Pre-SIT formalities > move to "Completed - SIT Ready"
-7. Run Sprint Story Status Report > verify data appears
+### Quick Smoke Test (10 minutes)
+1. Create a Project > Sprint > User Story (Story_Info_Verified = false) > Task
+2. Try moving story to Dev In Progress → verify validation error fires ✓
+3. Verify "Verify Story Info" activity was auto-created ✓
+4. Close the activity → Story_Info_Verified ticks ✓ → move to Dev In Progress ✓
+5. Verify Task__c has a mirrored Activity Task ✓
+6. Update Task__c status to In Progress → mirrored Activity Task updates ✓
+7. Log Daily Progress → verify progress cascade to Sprint ✓
 
-### Full Regression Test (30 minutes)
-1. Test all 12 status transitions
-2. Test validation rules (progress > 100%, closed sprint edit, historical progress edit)
-3. Test permission restrictions (developer vs lead vs QA)
-4. Test notification triggers (task assignment, QA ready, rejection)
-5. Test progress calculation with multiple tasks and stories
+### Full Lifecycle Test (20 minutes)
+1. Complete Unit Testing → move to Dev Completed → 6 readiness activities created ✓
+2. Complete all 6 readiness items → story auto-moves to Completed - SIT Ready ✓
+3. PR Creation activity In Progress → story auto-moves to PR InProgress ✓
+4. Close PR Creation → story auto-moves to Sent to SIT ✓
+5. Close Smoke Test → story auto-moves to Successfully Deployed to SIT ✓
+6. Verify email received by all ADM users ✓
 6. Test sprint closure with incomplete stories (should block)
 7. Verify all reports show correct data
 8. Verify all dashboards render
@@ -387,7 +394,7 @@ For issues or questions, contact your Salesforce administrator.
 
 ---
 
-**Version:** 1.1.0
+**Version:** 2.0.0
 **Last Updated:** May 2026
 **Salesforce API Version:** 60.0
-**Repository:** https://github.com/sourav98hazra/new
+**Repository:** https://github.com/sourav98hazra/ADM-Repo
