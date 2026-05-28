@@ -67,7 +67,7 @@
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
 
-    <!-- Step 2: Show current task info + status picker + blocked reason -->
+    <!-- Step 2: Show status picker. Blocked Reason is shown and required by the user if needed. -->
     <screens>
         <name>Screen_UpdateStatus</name>
         <label>Update Task Status</label>
@@ -77,7 +77,7 @@
         <allowFinish>true</allowFinish>
         <allowPause>false</allowPause>
         <connector>
-            <targetReference>Check_Blocked_Reason</targetReference>
+            <targetReference>Update_Task</targetReference>
         </connector>
         <fields>
             <name>Info_Display</name>
@@ -105,7 +105,7 @@
             <defaultValue>
                 <elementReference>Get_Task.Blocked_Reason__c</elementReference>
             </defaultValue>
-            <fieldText>Blocked Reason (required if status is Blocked)</fieldText>
+            <fieldText>Blocked Reason (enter a reason if setting status to Blocked)</fieldText>
             <fieldType>LargeTextArea</fieldType>
             <isRequired>false</isRequired>
         </fields>
@@ -113,65 +113,12 @@
         <showHeader>true</showHeader>
     </screens>
 
-    <!-- Step 3: If Blocked + no reason → show error screen, otherwise save -->
-    <decisions>
-        <name>Check_Blocked_Reason</name>
-        <label>Blocked with no Reason?</label>
-        <locationX>176</locationX>
-        <locationY>330</locationY>
-        <defaultConnector>
-            <targetReference>Update_Task</targetReference>
-        </defaultConnector>
-        <defaultConnectorLabel>OK — proceed to save</defaultConnectorLabel>
-        <rules>
-            <name>Blocked_No_Reason</name>
-            <conditionLogic>and</conditionLogic>
-            <conditions>
-                <leftValueReference>varNewStatus</leftValueReference>
-                <operator>EqualTo</operator>
-                <rightValue>
-                    <stringValue>Blocked</stringValue>
-                </rightValue>
-            </conditions>
-            <conditions>
-                <leftValueReference>varBlockedReason</leftValueReference>
-                <operator>IsNull</operator>
-                <rightValue>
-                    <booleanValue>true</booleanValue>
-                </rightValue>
-            </conditions>
-            <connector>
-                <targetReference>Screen_BlockedError</targetReference>
-            </connector>
-            <label>Blocked with empty reason</label>
-        </rules>
-    </decisions>
-
-    <!-- Step 3a: Error screen if Blocked reason is missing -->
-    <screens>
-        <name>Screen_BlockedError</name>
-        <label>Blocked Reason Required</label>
-        <locationX>400</locationX>
-        <locationY>330</locationY>
-        <allowBack>true</allowBack>
-        <allowFinish>false</allowFinish>
-        <allowPause>false</allowPause>
-        <fields>
-            <name>Display_BlockedError</name>
-            <fieldText>&lt;p&gt;&lt;b style="color:#c23934;"&gt;Blocked Reason is required.&lt;/b&gt;&lt;/p&gt;
-&lt;p&gt;You selected &lt;b&gt;Blocked&lt;/b&gt; but did not enter a reason. Click Back and fill in the Blocked Reason field.&lt;/p&gt;</fieldText>
-            <fieldType>DisplayText</fieldType>
-        </fields>
-        <showFooter>true</showFooter>
-        <showHeader>true</showHeader>
-    </screens>
-
-    <!-- Step 4: Save the task -->
+    <!-- Step 3: Save the task -->
     <recordUpdates>
         <name>Update_Task</name>
         <label>Update Task Record</label>
         <locationX>176</locationX>
-        <locationY>450</locationY>
+        <locationY>340</locationY>
         <filterLogic>and</filterLogic>
         <filters>
             <field>Id</field>

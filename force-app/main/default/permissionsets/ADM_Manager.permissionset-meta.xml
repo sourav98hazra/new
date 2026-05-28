@@ -270,11 +270,6 @@
     <!-- Task__c sync fields required by TaskActivitySyncService -->
     <fieldPermissions>
         <editable>false</editable>
-        <field>Task__c.Status__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
         <field>Task_Dependency__c.Dependency_Type__c</field>
         <readable>true</readable>
     </fieldPermissions>
