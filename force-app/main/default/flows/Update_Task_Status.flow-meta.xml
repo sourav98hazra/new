@@ -108,7 +108,7 @@
         <allowFinish>true</allowFinish>
         <allowPause>false</allowPause>
         <connector>
-            <targetReference>Update_Task</targetReference>
+            <targetReference>Check_Blocked_Reason</targetReference>
         </connector>
         <fields>
             <name>Info_Display</name>
@@ -133,9 +133,64 @@
         <fields>
             <name>varBlockedReason</name>
             <dataType>String</dataType>
-            <fieldText>Blocked Reason (required if Blocked)</fieldText>
+            <defaultValue>
+                <elementReference>Get_Task.Blocked_Reason__c</elementReference>
+            </defaultValue>
+            <fieldText>Blocked Reason (required if status is Blocked)</fieldText>
             <fieldType>LargeTextArea</fieldType>
             <isRequired>false</isRequired>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+
+    <!-- BUG19 FIX: if status=Blocked but reason is blank, show error screen -->
+    <decisions>
+        <name>Check_Blocked_Reason</name>
+        <label>Blocked with no Reason?</label>
+        <locationX>176</locationX>
+        <locationY>310</locationY>
+        <defaultConnector>
+            <targetReference>Update_Task</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>OK — save</defaultConnectorLabel>
+        <rules>
+            <name>Blocked_No_Reason</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>varNewStatus</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <stringValue>Blocked</stringValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>varBlockedReason</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Screen_BlockedError</targetReference>
+            </connector>
+            <label>Blocked with empty reason</label>
+        </rules>
+    </decisions>
+
+    <screens>
+        <name>Screen_BlockedError</name>
+        <label>Blocked Reason Required</label>
+        <locationX>400</locationX>
+        <locationY>310</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>false</allowFinish>
+        <allowPause>false</allowPause>
+        <fields>
+            <name>Display_BlockedError</name>
+            <fieldText>&lt;p&gt;&lt;b style="color:#c23934;"&gt;Blocked Reason is required.&lt;/b&gt;&lt;/p&gt;
+&lt;p&gt;You selected &lt;b&gt;Blocked&lt;/b&gt; status but did not enter a reason. Click Back and fill in the Blocked Reason field.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
         </fields>
         <showFooter>true</showFooter>
         <showHeader>true</showHeader>

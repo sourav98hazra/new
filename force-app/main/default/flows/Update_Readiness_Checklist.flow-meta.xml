@@ -15,7 +15,7 @@
         <isOutput>false</isOutput>
     </variables>
 
-    <!-- ─── Step 1: Fetch current story values ─────────────────────── -->
+    <!-- Step 1: Fetch current story values -->
     <recordLookups>
         <name>Get_Story</name>
         <label>Get User Story</label>
@@ -23,7 +23,7 @@
         <locationY>100</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
         <connector>
-            <targetReference>Screen_Checklist</targetReference>
+            <targetReference>Check_Story_Found</targetReference>
         </connector>
         <filterLogic>and</filterLogic>
         <filters>
@@ -35,6 +35,50 @@
         <object>User_Story__c</object>
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
+
+    <!-- Guard: if story not found, show error screen instead of blanking all checkboxes -->
+    <decisions>
+        <name>Check_Story_Found</name>
+        <label>Story Found?</label>
+        <locationX>176</locationX>
+        <locationY>160</locationY>
+        <defaultConnector>
+            <targetReference>Screen_NotFound</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Story Not Found</defaultConnectorLabel>
+        <rules>
+            <name>Story_Found</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Story.Id</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Screen_Checklist</targetReference>
+            </connector>
+            <label>Yes</label>
+        </rules>
+    </decisions>
+
+    <screens>
+        <name>Screen_NotFound</name>
+        <label>Story Not Found</label>
+        <locationX>400</locationX>
+        <locationY>160</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <fields>
+            <name>Display_NotFound</name>
+            <fieldText>&lt;p&gt;&lt;b style="color:#c23934;"&gt;Error:&lt;/b&gt; The User Story record could not be found. Please close this window and try again from the correct record.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
 
     <!-- ─── Step 2: Screen with 4 sections ─────────────────────────── -->
     <screens>

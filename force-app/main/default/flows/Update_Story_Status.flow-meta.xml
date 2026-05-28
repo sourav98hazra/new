@@ -132,7 +132,7 @@
         <allowFinish>true</allowFinish>
         <allowPause>false</allowPause>
         <connector>
-            <targetReference>Update_Story</targetReference>
+            <targetReference>Status_Changed</targetReference>
         </connector>
 
         <fields>
@@ -200,7 +200,31 @@
         <showHeader>true</showHeader>
     </screens>
 
-    <!-- Step 3: Update the User Story -->
+    <!-- Step 3: Only update if status actually changed (avoid unnecessary DML) -->
+    <decisions>
+        <name>Status_Changed</name>
+        <label>Status Changed?</label>
+        <locationX>176</locationX>
+        <locationY>310</locationY>
+        <defaultConnector>
+            <targetReference>Update_Story</targetReference>
+        </defaultConnector>
+        <defaultConnectorLabel>Status Changed</defaultConnectorLabel>
+        <rules>
+            <name>No_Change</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>fNewStatus</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <elementReference>Get_Story.Status__c</elementReference>
+                </rightValue>
+            </conditions>
+            <label>No Change — skip DML</label>
+        </rules>
+    </decisions>
+
+    <!-- Step 4: Update the User Story -->
     <recordUpdates>
         <name>Update_Story</name>
         <label>Update Story Status</label>

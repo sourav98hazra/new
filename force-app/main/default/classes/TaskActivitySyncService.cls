@@ -34,6 +34,7 @@ public without sharing class TaskActivitySyncService {
     };
 
     private static final Map<String, String> ACTIVITY_TO_CUSTOM_STATUS = new Map<String, String>{
+        'Not Started'             => 'New',
         'In Progress'             => 'In Progress',
         'Waiting on someone else' => 'Pending',
         'Completed'               => 'Completed'

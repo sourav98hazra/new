@@ -90,19 +90,73 @@ private class TriggerTests {
         User_Story__c story = TriggerTestHelper.createUserStory(sprint.Id, null);
 
         Test.startTest();
-        // Move story to Dev In Progress - should auto-create Unit Testing activity
         story.Status__c = 'Dev In Progress';
         update story;
         Test.stopTest();
 
-        // Verify Unit Testing activity was created
         List<Task> activities = [
             SELECT Id, Subject FROM Task
-            WHERE WhatId = :story.Id
-            AND Status != 'Completed'
+            WHERE WhatId = :story.Id AND Status != 'Completed'
         ];
-        System.assert(activities.size() > 0, 'Unit Testing activity should be auto-created');
-        System.assert(activities[0].Subject.contains('Unit Testing'), 'Activity should be for Unit Testing');
+        Boolean hasWriteCode = false, hasWriteUnitTests = false, hasUnitTesting = false;
+        for (Task t : activities) {
+            if (t.Subject != null) {
+                if (t.Subject.startsWith('Write Code'))       hasWriteCode = true;
+                if (t.Subject.startsWith('Write Unit Tests')) hasWriteUnitTests = true;
+                if (t.Subject.startsWith('Unit Testing'))     hasUnitTesting = true;
+            }
+        }
+        System.assert(hasWriteCode,       'Write Code activity should be created');
+        System.assert(hasWriteUnitTests,  'Write Unit Tests activity should be created');
+        System.assert(hasUnitTesting,     'Unit Testing activity should be created');
+    }
+
+    @isTest
+    static void testStoryInfoVerifiedGate() {
+        Project__c project = TriggerTestHelper.createProject();
+        Sprint__c sprint = TriggerTestHelper.createSprint(project.Id);
+
+        // Story created WITHOUT Story_Info_Verified__c — trigger should create Verify Story Info activity
+        User_Story__c story = new User_Story__c(
+            Story_Title__c = 'Gate Test Story',
+            Sprint__c      = sprint.Id,
+            Status__c      = 'New',
+            Story_Points__c    = 3,
+            Estimated_Hours__c = 8,
+            Story_Info_Verified__c = false
+        );
+        insert story;
+
+        List<Task> verifyActivities = [SELECT Subject FROM Task WHERE WhatId = :story.Id AND Subject LIKE 'Verify Story Info%'];
+        System.assertEquals(1, verifyActivities.size(), 'Verify Story Info activity should be auto-created for unverified story');
+
+        // Close the activity — checkbox should tick
+        Test.startTest();
+        verifyActivities[0].Status = 'Completed';  // Direct activity update not going through trigger helper
+        // Instead simulate via FormalitiesService directly
+        FormalitiesService.syncTaskCompletionToStory(verifyActivities);
+        Test.stopTest();
+
+        User_Story__c updated = [SELECT Story_Info_Verified__c FROM User_Story__c WHERE Id = :story.Id];
+        System.assertEquals(true, updated.Story_Info_Verified__c, 'Story_Info_Verified__c should be ticked when Verify Story Info activity completed');
+    }
+
+    @isTest
+    static void testTaskMirrorCreatedOnTaskInsert() {
+        Project__c project = TriggerTestHelper.createProject();
+        Sprint__c sprint = TriggerTestHelper.createSprint(project.Id);
+        User_Story__c story = TriggerTestHelper.createUserStory(sprint.Id, null);
+
+        Test.startTest();
+        Task__c task = TriggerTestHelper.createTask(story.Id);
+        Test.stopTest();
+
+        List<Task> mirrored = [
+            SELECT Subject FROM Task
+            WHERE WhatId = :story.Id
+            AND Subject = :('Test Task' + TaskActivitySyncService.TASK_SUBJECT_SUFFIX)
+        ];
+        System.assertEquals(1, mirrored.size(), 'Mirrored Activity Task should be created for new Task__c (Option A)');
     }
 
     @isTest

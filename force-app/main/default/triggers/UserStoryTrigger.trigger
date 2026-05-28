@@ -40,23 +40,21 @@ trigger UserStoryTrigger on User_Story__c (after insert, after update, after del
         List<User_Story__c> movedToSuccessfullyDeploy= new List<User_Story__c>();
         List<User_Story__c> movedToRejected          = new List<User_Story__c>();
         List<User_Story__c> statusChanged            = new List<User_Story__c>();
+        Boolean             anyCheckboxChanged       = false; // BUG1 fix: collect outside loop
 
         for (User_Story__c story : Trigger.new) {
             if (story.Feature__c != null) featureIds.add(story.Feature__c);
             if (story.Sprint__c  != null) sprintIds.add(story.Sprint__c);
 
             if (Trigger.isInsert) {
-                // Every new story gets a "Verify Story Info" activity
                 movedToNew.add(story);
 
             } else {
                 User_Story__c old = Trigger.oldMap.get(story.Id);
 
-                // Track old feature/sprint for cascade
                 if (old.Feature__c != null && old.Feature__c != story.Feature__c) featureIds.add(old.Feature__c);
                 if (old.Sprint__c  != null && old.Sprint__c  != story.Sprint__c)  sprintIds.add(old.Sprint__c);
 
-                // ── Status transition routing ──────────────────────────────
                 if (story.Status__c != old.Status__c) {
                     statusChanged.add(story);
 
@@ -85,11 +83,17 @@ trigger UserStoryTrigger on User_Story__c (after insert, after update, after del
                         when 'Sent to QA' {
                             NotificationService.notifyStoryReadyForQA(story.Id);
                         }
+                        when 'Sent to UAT' {
+                            NotificationService.notifyStoryReadyForQA(story.Id); // reuses QA notification for UAT
+                        }
+                        when 'Sent to Prod' {
+                            NotificationService.notifyStoryReadyForQA(story.Id); // reuses QA notification for Prod
+                        }
                     }
                 }
 
-                // ── Checkbox sync: any of the 10 fields false→true ─────────
-                Boolean checkboxChanged = (
+                // BUG1 FIX: just flag — don't call sync inside the loop
+                if (!anyCheckboxChanged && (
                     story.Story_Info_Verified__c            != old.Story_Info_Verified__c            ||
                     story.Unit_Testing_Complete__c          != old.Unit_Testing_Complete__c          ||
                     story.Unit_Test_Sheet_Complete__c       != old.Unit_Test_Sheet_Complete__c       ||
@@ -100,11 +104,15 @@ trigger UserStoryTrigger on User_Story__c (after insert, after update, after del
                     story.Translations_Sheet_Complete__c    != old.Translations_Sheet_Complete__c    ||
                     story.PR_Creation_Complete__c           != old.PR_Creation_Complete__c           ||
                     story.Smoke_Test_SIT_Complete__c        != old.Smoke_Test_SIT_Complete__c
-                );
-                if (checkboxChanged) {
-                    FormalitiesService.syncCheckboxToActivityTask(Trigger.new, Trigger.oldMap);
+                )) {
+                    anyCheckboxChanged = true;
                 }
             }
+        }
+
+        // BUG1 FIX: call ONCE outside the loop after all records processed
+        if (anyCheckboxChanged && !FormalitiesService.isSyncRunning) {
+            FormalitiesService.syncCheckboxToActivityTask(Trigger.new, Trigger.oldMap);
         }
 
         // ── Create Activity Tasks per stage ────────────────────────────────

@@ -24,8 +24,9 @@ trigger ActivityTaskTrigger on Task (after update) {
     for (Task t : Trigger.new) {
         Task old = Trigger.oldMap.get(t.Id);
 
-        // Bucket 1: newly completed (any activity)
-        if (t.Status == 'Completed' && old.Status != 'Completed') {
+        // Bucket 1: newly completed LIFECYCLE activities (not mirrored Task__c records)
+        if (t.Status == 'Completed' && old.Status != 'Completed'
+            && (t.Subject == null || !t.Subject.endsWith(TaskActivitySyncService.TASK_SUBJECT_SUFFIX))) {
             justCompleted.add(t);
         }
 

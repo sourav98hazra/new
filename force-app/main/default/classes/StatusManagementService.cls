@@ -67,7 +67,7 @@ public without sharing class StatusManagementService {
         }
 
         for (User_Story__c story : [
-            SELECT Id, Status__c, Story_Progress__c, Unit_Testing_Complete__c
+            SELECT Id, Status__c, Story_Progress__c, Unit_Testing_Complete__c, Story_Info_Verified__c
             FROM User_Story__c
             WHERE Id IN :storyIds
         ]) {
@@ -86,8 +86,11 @@ public without sharing class StatusManagementService {
                 && (story.Status__c == 'Dev In Progress' || story.Status__c == 'Pending')) {
                 newStatus = 'Dev Completed';
             }
-            // Still in progress
-            else if (story.Story_Progress__c > 0 && story.Status__c == 'New') {
+            // BUG4 FIX: only auto-advance New→Dev In Progress when story info is verified
+            // Without this guard the VR fires with a confusing error when a dev just logs time
+            else if (story.Story_Progress__c > 0
+                     && story.Status__c == 'New'
+                     && story.Story_Info_Verified__c == true) {
                 newStatus = 'Dev In Progress';
             }
 
@@ -128,7 +131,17 @@ public without sharing class StatusManagementService {
                 if (story.Status__c != 'Done') {
                     allCompleted = false;
                 }
-                if (story.Status__c == 'Dev In Progress' || story.Status__c == 'Formalities InProgress') {
+                // BUG13 FIX: all active statuses count as in-progress for feature
+                if (story.Status__c == 'Dev In Progress'
+                    || story.Status__c == 'Formalities InProgress'
+                    || story.Status__c == 'Dev Completed'
+                    || story.Status__c == 'Completed - SIT Ready'
+                    || story.Status__c == 'PR InProgress'
+                    || story.Status__c == 'Sent to SIT'
+                    || story.Status__c == 'Successfully Deployed to SIT'
+                    || story.Status__c == 'Sent to QA'
+                    || story.Status__c == 'Sent to UAT'
+                    || story.Status__c == 'Sent to Prod') {
                     anyInProgress = true;
                 }
             }

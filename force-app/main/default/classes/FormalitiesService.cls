@@ -89,10 +89,15 @@ public without sharing class FormalitiesService {
         'Smoke_Test_SIT_Complete__c'
     };
 
+    // ─── Recursion guard ────────────────────────────────────────────────────
+    // Prevents re-entrant execution when our updates re-fire the trigger.
+    @TestVisible
+    private static Boolean isSyncRunning = false;
+
 
 
     // ═══════════════════════════════════════════════════════════════════════════
-    // PRIVATE HELPERS
+    // PRIVATE HELPERS — BULK-SAFE
     // ═══════════════════════════════════════════════════════════════════════════
 
     /** Match an Activity Task subject to its checkbox field using ordered prefix matching. */
@@ -104,11 +109,31 @@ public without sharing class FormalitiesService {
         return null;
     }
 
-    private static Boolean activityExists(Id whatId, String subjectPrefix) {
-        return [SELECT COUNT() FROM Task
-                WHERE WhatId = :whatId
-                AND Subject LIKE :(subjectPrefix + '%')
-                AND Status != 'Completed'] > 0;
+    /**
+     * Bulk-safe: returns a Map of storyId → Set<subjectPrefix> for open activities.
+     * Replaces the old per-story SOQL-in-loop activityExists() helper.
+     */
+    private static Map<Id, Set<String>> getExistingActivityPrefixes(Set<Id> storyIds) {
+        Map<Id, Set<String>> result = new Map<Id, Set<String>>();
+        for (Id sid : storyIds) result.put(sid, new Set<String>());
+        for (Task t : [
+            SELECT Subject, WhatId FROM Task
+            WHERE WhatId IN :storyIds AND Status != 'Completed'
+        ]) {
+            if (t.Subject == null) continue;
+            for (String[] pair : ORDERED_SUBJECT_FIELD_PAIRS) {
+                if (t.Subject.startsWith(pair[0])) {
+                    result.get(t.WhatId).add(pair[0]);
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    /** Legacy single-story helper kept for simple single-story create methods. */
+    private static Boolean activityPrefixExists(Set<String> existingPrefixes, String prefix) {
+        return existingPrefixes.contains(prefix);
     }
 
     private static Task buildTask(String subject, Id whatId, Id ownerId,
@@ -135,10 +160,15 @@ public without sharing class FormalitiesService {
      * Gate: story cannot move to Dev In Progress until this is checked.
      */
     public static void createStoryVerificationActivity(List<User_Story__c> stories) {
+        Set<Id> storyIds = new Set<Id>();
+        for (User_Story__c s : stories) if (s.Story_Info_Verified__c != true) storyIds.add(s.Id);
+        if (storyIds.isEmpty()) return;
+
+        Map<Id, Set<String>> existing = getExistingActivityPrefixes(storyIds);
         List<Task> toCreate = new List<Task>();
         for (User_Story__c story : stories) {
             if (story.Story_Info_Verified__c == true) continue;
-            if (activityExists(story.Id, 'Verify Story Info')) continue;
+            if (existing.get(story.Id).contains('Verify Story Info')) continue;
             toCreate.add(buildTask(
                 'Verify Story Info: ' + story.Story_Title__c,
                 story.Id, story.Assigned_To__c, 'Not Started', 'High', 1,
@@ -165,41 +195,32 @@ public without sharing class FormalitiesService {
      * Unit Testing is the gate for Dev Completed.
      */
     public static void createDevInProgressActivities(List<User_Story__c> stories) {
+        Set<Id> storyIds = new Set<Id>();
+        for (User_Story__c s : stories) storyIds.add(s.Id);
+        Map<Id, Set<String>> existing = getExistingActivityPrefixes(storyIds);
+
         List<Task> toCreate = new List<Task>();
         for (User_Story__c story : stories) {
             Id owner = story.Assigned_To__c;
+            Set<String> ex = existing.get(story.Id);
 
-            if (!activityExists(story.Id, 'Write Code')) {
-                toCreate.add(buildTask(
-                    'Write Code: ' + story.Story_Title__c,
-                    story.Id, owner, 'In Progress', 'High', 3,
-                    'Implement the feature described in story: ' + story.Story_Title__c +
-                    '.\nFollow acceptance criteria and coding standards.\n' +
-                    'This task mirrors your Task__c records — status updates sync both ways. ' +
-                    'Close when all development is complete.'
-                ));
+            if (!ex.contains('Write Code')) {
+                toCreate.add(buildTask('Write Code: ' + story.Story_Title__c, story.Id, owner,
+                    'In Progress', 'High', 3,
+                    'Implement the feature for: ' + story.Story_Title__c +
+                    '.\nThis mirrors your Task__c records — status updates sync both ways. Close when done.'));
             }
-
-            if (!activityExists(story.Id, 'Write Unit Tests')) {
-                toCreate.add(buildTask(
-                    'Write Unit Tests: ' + story.Story_Title__c,
-                    story.Id, owner, 'Not Started', 'High', 5,
+            if (!ex.contains('Write Unit Tests')) {
+                toCreate.add(buildTask('Write Unit Tests: ' + story.Story_Title__c, story.Id, owner,
+                    'Not Started', 'High', 5,
                     'Write unit tests for: ' + story.Story_Title__c +
-                    '.\nEnsure coverage meets the required threshold (typically ≥75%).\n' +
-                    'This task mirrors your Task__c records — status updates sync both ways. ' +
-                    'Close when all tests are written and passing.'
-                ));
+                    '.\nEnsure coverage ≥75%. This mirrors Task__c records — syncs both ways.'));
             }
-
-            if (story.Unit_Testing_Complete__c != true && !activityExists(story.Id, 'Unit Testing')) {
-                toCreate.add(buildTask(
-                    'Unit Testing: ' + story.Story_Title__c,
-                    story.Id, owner, 'Not Started', 'High', 5,
+            if (story.Unit_Testing_Complete__c != true && !ex.contains('Unit Testing')) {
+                toCreate.add(buildTask('Unit Testing: ' + story.Story_Title__c, story.Id, owner,
+                    'Not Started', 'High', 5,
                     'Run and verify all unit tests for: ' + story.Story_Title__c +
-                    '.\nAll tests must pass before Dev Completed.\n' +
-                    'Close this task OR tick "Unit Testing Complete" on the story — both sync automatically.\n' +
-                    'REQUIRED before story can move to "Dev Completed".'
-                ));
+                    '.\nClose this task OR tick "Unit Testing Complete" — both sync.\nREQUIRED before Dev Completed.'));
             }
         }
         if (!toCreate.isEmpty()) insert toCreate;
@@ -218,27 +239,17 @@ public without sharing class FormalitiesService {
      * When all 6 are complete → story auto-advances to "Completed - SIT Ready".
      */
     public static void createFormalityActivitiesIfNeeded(List<User_Story__c> stories) {
+        Set<Id> storyIds = new Set<Id>();
+        for (User_Story__c s : stories) storyIds.add(s.Id);
+        Map<Id, Set<String>> existing = getExistingActivityPrefixes(storyIds);
+
         List<Task> tasksToCreate = new List<Task>();
-
         for (User_Story__c story : stories) {
-            // Fetch existing open activity subjects to avoid duplicates
-            Set<String> existingPrefixes = new Set<String>();
-            for (Task t : [SELECT Subject FROM Task WHERE WhatId = :story.Id AND Status != 'Completed']) {
-                for (String[] pair : ORDERED_SUBJECT_FIELD_PAIRS) {
-                    if (t.Subject != null && t.Subject.startsWith(pair[0])) {
-                        existingPrefixes.add(pair[0]);
-                        break;
-                    }
-                }
-            }
-
+            Set<String> ex = existing.get(story.Id);
             for (String fieldName : READINESS_FIELDS) {
-                Boolean isComplete = (Boolean) story.get(fieldName);
-                if (isComplete == true) continue;
-
+                if ((Boolean) story.get(fieldName) == true) continue;
                 String prefix = FIELD_TO_SUBJECT.get(fieldName);
-                if (existingPrefixes.contains(prefix)) continue;
-
+                if (ex.contains(prefix)) continue;
                 tasksToCreate.add(new Task(
                     Subject      = prefix + ': ' + story.Story_Title__c,
                     WhatId       = story.Id,
@@ -246,14 +257,11 @@ public without sharing class FormalitiesService {
                     Status       = 'Not Started',
                     Priority     = 'Normal',
                     ActivityDate = Date.today().addDays(3),
-                    Description  = 'Complete Story Readiness item "' + prefix + '" for story: ' +
-                                   story.Story_Title__c + '.\n' +
-                                   'Close this task OR tick the checkbox on the story — both sync automatically.\n' +
-                                   'All 6 readiness items must be complete before moving to "Completed - SIT Ready".'
+                    Description  = 'Complete "' + prefix + '" for: ' + story.Story_Title__c +
+                                   '.\nClose OR tick the checkbox — both sync. All 6 items needed before Completed - SIT Ready.'
                 ));
             }
         }
-
         if (!tasksToCreate.isEmpty()) insert tasksToCreate;
     }
 
@@ -267,22 +275,20 @@ public without sharing class FormalitiesService {
      * When PR_Creation_Complete__c is ticked → story auto-moves to Sent to SIT.
      */
     public static void createPRCreationActivity(List<User_Story__c> stories) {
+        Set<Id> storyIds = new Set<Id>();
+        for (User_Story__c s : stories) if (s.PR_Creation_Complete__c != true) storyIds.add(s.Id);
+        if (storyIds.isEmpty()) return;
+        Map<Id, Set<String>> existing = getExistingActivityPrefixes(storyIds);
+
         List<Task> toCreate = new List<Task>();
         for (User_Story__c story : stories) {
             if (story.PR_Creation_Complete__c == true) continue;
-            if (activityExists(story.Id, 'PR Creation')) continue;
+            if (existing.get(story.Id).contains('PR Creation')) continue;
             toCreate.add(buildTask(
-                'PR Creation: ' + story.Story_Title__c,
-                story.Id, story.Assigned_To__c, 'Not Started', 'High', 1,
-                'Create and manage the Pull Request for: ' + story.Story_Title__c + '.\n\n' +
-                '1. Raise the PR in your version control system\n' +
-                '2. When you start working on it, set this activity to "In Progress" ' +
-                '   — the story will automatically move to "PR InProgress"\n' +
-                '3. Address all review comments\n' +
-                '4. Once PR is approved and merged, close this task ' +
-                '   — "PR Creation Complete" checkbox ticks automatically ' +
-                '   and the story moves to "Sent to SIT".\n\n' +
-                'Gate: story cannot move to "Sent to SIT" without this being complete.'
+                'PR Creation: ' + story.Story_Title__c, story.Id, story.Assigned_To__c,
+                'Not Started', 'High', 1,
+                '1. Raise PR in version control\n2. Set activity to In Progress — story moves to PR InProgress\n' +
+                '3. Address all review comments\n4. Close when merged — PR Creation Complete ticks, story moves to Sent to SIT.'
             ));
         }
         if (!toCreate.isEmpty()) insert toCreate;
@@ -297,20 +303,20 @@ public without sharing class FormalitiesService {
      * When Smoke_Test_SIT_Complete__c is ticked → story auto-moves to Successfully Deployed to SIT.
      */
     public static void createSITSmokeTestActivity(List<User_Story__c> stories) {
+        Set<Id> storyIds = new Set<Id>();
+        for (User_Story__c s : stories) if (s.Smoke_Test_SIT_Complete__c != true) storyIds.add(s.Id);
+        if (storyIds.isEmpty()) return;
+        Map<Id, Set<String>> existing = getExistingActivityPrefixes(storyIds);
+
         List<Task> toCreate = new List<Task>();
         for (User_Story__c story : stories) {
             if (story.Smoke_Test_SIT_Complete__c == true) continue;
-            if (activityExists(story.Id, 'Smoke Test SIT')) continue;
+            if (existing.get(story.Id).contains('Smoke Test SIT')) continue;
             toCreate.add(buildTask(
-                'Smoke Test SIT: ' + story.Story_Title__c,
-                story.Id, story.Assigned_To__c, 'Not Started', 'Normal', 1,
-                'Perform smoke testing in the SIT environment for: ' + story.Story_Title__c + '.\n\n' +
-                '• Verify core functionality works as expected after deployment\n' +
-                '• Check critical user flows end-to-end\n' +
-                '• Confirm no regression in related areas\n\n' +
-                'Close this task OR tick "Smoke Test SIT Complete" on the story — ' +
-                'the story will automatically move to "Successfully Deployed to SIT" and ' +
-                'an email will be sent to all testers/stakeholders.'
+                'Smoke Test SIT: ' + story.Story_Title__c, story.Id, story.Assigned_To__c,
+                'Not Started', 'Normal', 1,
+                'Verify core functionality in SIT for: ' + story.Story_Title__c +
+                '.\nClose OR tick "Smoke Test SIT Complete" — story auto-moves to Successfully Deployed to SIT and batch email is sent.'
             ));
         }
         if (!toCreate.isEmpty()) insert toCreate;
@@ -321,21 +327,23 @@ public without sharing class FormalitiesService {
     // ═══════════════════════════════════════════════════════════════════════════
 
     public static void createFixIssuesActivity(List<User_Story__c> stories) {
+        Set<Id> storyIds = new Set<Id>();
+        for (User_Story__c s : stories) storyIds.add(s.Id);
+        Map<Id, Set<String>> existing = getExistingActivityPrefixes(storyIds);
+
         List<Task> toCreate = new List<Task>();
         for (User_Story__c story : stories) {
-            if (activityExists(story.Id, 'Fix Issues')) continue;
+            if (existing.get(story.Id).contains('Fix Issues')) continue;
             String reason = story.Rejection_Reason__c != null
                 ? story.Rejection_Reason__c : 'See QA / SIT notes on the story.';
+            // Include rejection reason in subject (truncate to avoid too-long subjects)
+            String subjectReason = reason.length() > 80 ? reason.substring(0, 80) + '...' : reason;
             toCreate.add(buildTask(
-                'Fix Issues: ' + story.Story_Title__c,
+                'Fix Issues: ' + story.Story_Title__c + ' — ' + subjectReason,
                 story.Id, story.Assigned_To__c, 'In Progress', 'High', 2,
-                'Address the following issues raised during QA/SIT review:\n\n' +
-                reason + '\n\n' +
-                'Steps:\n' +
-                '1. Fix all reported issues\n' +
-                '2. Re-run unit tests\n' +
-                '3. Update story status back to "Dev In Progress"\n' +
-                '4. Close this task when all fixes are ready for re-testing.'
+                'Issues raised during QA/SIT review:\n\n' + reason +
+                '\n\nSteps:\n1. Fix all reported issues\n2. Re-run unit tests\n' +
+                '3. Update story status back to "Dev In Progress"\n4. Close when fixes are ready for re-testing.'
             ));
         }
         if (!toCreate.isEmpty()) insert toCreate;
@@ -450,6 +458,9 @@ public without sharing class FormalitiesService {
      * Then recalculates status progressions.
      */
     public static void syncCheckboxToActivityTask(List<User_Story__c> stories, Map<Id, User_Story__c> oldMap) {
+        // Recursion guard — prevents re-entrant sync loop
+        if (isSyncRunning) return;
+
         Map<Id, Set<String>> storyChangedSubjects = new Map<Id, Set<String>>();
 
         for (User_Story__c story : stories) {
@@ -491,8 +502,13 @@ public without sharing class FormalitiesService {
         }
         if (!tasksToClose.isEmpty()) update tasksToClose;
 
-        // Re-query and recalculate status (never DML on Trigger.new directly)
-        recalculateStatusByIds(storyChangedSubjects.keySet());
+        // Re-query and recalculate status — guard against re-entry
+        isSyncRunning = true;
+        try {
+            recalculateStatusByIds(storyChangedSubjects.keySet());
+        } finally {
+            isSyncRunning = false;
+        }
     }
 
 
@@ -521,9 +537,8 @@ public without sharing class FormalitiesService {
             return story;
         }
 
-        // Rule 2: PR Creation complete → Sent to SIT
-        if (story.PR_Creation_Complete__c == true
-            && (s == 'PR InProgress' || s == 'Completed - SIT Ready')) {
+        // Rule 2: PR Creation complete → Sent to SIT (only from PR InProgress)
+        if (story.PR_Creation_Complete__c == true && s == 'PR InProgress') {
             story.Status__c = 'Sent to SIT';
             return story;
         }
