@@ -7,9 +7,7 @@
     <status>Active</status>
     <environments>Default</environments>
 
-    <!-- ═══════════════════════════════════════════
-         STATUS CHOICES — all 14 lifecycle values
-    ═══════════════════════════════════════════ -->
+    <!-- All 14 status choices -->
     <choices>
         <name>choiceNew</name>
         <choiceText>New</choiceText>
@@ -95,9 +93,6 @@
         <value><stringValue>Rejected</stringValue></value>
     </choices>
 
-    <!-- ═══════════════════════════════════════════
-         VARIABLES
-    ═══════════════════════════════════════════ -->
     <variables>
         <name>recordId</name>
         <dataType>String</dataType>
@@ -105,38 +100,8 @@
         <isInput>true</isInput>
         <isOutput>false</isOutput>
     </variables>
-    <variables>
-        <name>varNewStatus</name>
-        <dataType>String</dataType>
-        <isCollection>false</isCollection>
-        <isInput>false</isInput>
-        <isOutput>false</isOutput>
-    </variables>
-    <variables>
-        <name>varPendingReason</name>
-        <dataType>String</dataType>
-        <isCollection>false</isCollection>
-        <isInput>false</isInput>
-        <isOutput>false</isOutput>
-    </variables>
-    <variables>
-        <name>varQANotes</name>
-        <dataType>String</dataType>
-        <isCollection>false</isCollection>
-        <isInput>false</isInput>
-        <isOutput>false</isOutput>
-    </variables>
-    <variables>
-        <name>varRejectionReason</name>
-        <dataType>String</dataType>
-        <isCollection>false</isCollection>
-        <isInput>false</isInput>
-        <isOutput>false</isOutput>
-    </variables>
 
-    <!-- ═══════════════════════════════════════════
-         STEP 1: Get the User Story
-    ═══════════════════════════════════════════ -->
+    <!-- Step 1: Get the User Story -->
     <recordLookups>
         <name>Get_Story</name>
         <label>Get User Story</label>
@@ -157,10 +122,7 @@
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
 
-    <!-- ═══════════════════════════════════════════
-         STEP 2: Screen — show current status + context,
-                 pick new status, enter optional fields
-    ═══════════════════════════════════════════ -->
+    <!-- Step 2: Screen — pick status + contextual fields -->
     <screens>
         <name>Screen_UpdateStatus</name>
         <label>Update Story Status</label>
@@ -173,21 +135,17 @@
             <targetReference>Update_Story</targetReference>
         </connector>
 
-        <!-- Story context header -->
         <fields>
             <name>Display_StoryInfo</name>
             <fieldText>&lt;p&gt;&lt;strong&gt;Story:&lt;/strong&gt; {!Get_Story.Story_Title__c}&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Current Status:&lt;/strong&gt; {!Get_Story.Status__c}&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Sprint:&lt;/strong&gt; {!Get_Story.Sprint__c}&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Assigned To:&lt;/strong&gt; {!Get_Story.Assigned_To__c}&lt;/p&gt;
 &lt;hr/&gt;
-&lt;p&gt;&lt;em&gt;⚠️ Validation rules enforce lifecycle gates — e.g. Story Info must be verified before Dev In Progress, all Readiness Checklist items required before Completed - SIT Ready.&lt;/em&gt;&lt;/p&gt;</fieldText>
+&lt;p&gt;&lt;em&gt;Note: Validation rules enforce lifecycle gates (e.g. Story Info must be verified before Dev In Progress, all Readiness items required before Completed - SIT Ready).&lt;/em&gt;&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
         </fields>
 
-        <!-- Status radio buttons — all 14 values -->
         <fields>
-            <name>varNewStatus</name>
+            <name>fNewStatus</name>
             <choiceReferences>choiceNew</choiceReferences>
             <choiceReferences>choiceDevInProgress</choiceReferences>
             <choiceReferences>choicePending</choiceReferences>
@@ -211,33 +169,28 @@
             <isRequired>true</isRequired>
         </fields>
 
-        <!-- Contextual fields shown below -->
         <fields>
-            <name>varPendingReason</name>
+            <name>fPendingReason</name>
             <dataType>String</dataType>
-            <defaultValue>
-                <elementReference>Get_Story.Pending_Reason__c</elementReference>
-            </defaultValue>
+            <defaultValue><elementReference>Get_Story.Pending_Reason__c</elementReference></defaultValue>
             <fieldText>Pending Reason (fill in if moving to Pending)</fieldText>
             <fieldType>LargeTextArea</fieldType>
             <isRequired>false</isRequired>
         </fields>
+
         <fields>
-            <name>varQANotes</name>
+            <name>fQANotes</name>
             <dataType>String</dataType>
-            <defaultValue>
-                <elementReference>Get_Story.QA_Notes__c</elementReference>
-            </defaultValue>
+            <defaultValue><elementReference>Get_Story.QA_Notes__c</elementReference></defaultValue>
             <fieldText>QA Notes (fill in if moving to Sent to QA / Sent to UAT)</fieldText>
             <fieldType>LargeTextArea</fieldType>
             <isRequired>false</isRequired>
         </fields>
+
         <fields>
-            <name>varRejectionReason</name>
+            <name>fRejectionReason</name>
             <dataType>String</dataType>
-            <defaultValue>
-                <elementReference>Get_Story.Rejection_Reason__c</elementReference>
-            </defaultValue>
+            <defaultValue><elementReference>Get_Story.Rejection_Reason__c</elementReference></defaultValue>
             <fieldText>Rejection Reason (required if moving to Rejected)</fieldText>
             <fieldType>LargeTextArea</fieldType>
             <isRequired>false</isRequired>
@@ -247,9 +200,7 @@
         <showHeader>true</showHeader>
     </screens>
 
-    <!-- ═══════════════════════════════════════════
-         STEP 3: Update the User Story record
-    ═══════════════════════════════════════════ -->
+    <!-- Step 3: Update the User Story -->
     <recordUpdates>
         <name>Update_Story</name>
         <label>Update Story Status</label>
@@ -263,26 +214,23 @@
         </filters>
         <inputAssignments>
             <field>Status__c</field>
-            <value><elementReference>varNewStatus</elementReference></value>
+            <value><elementReference>fNewStatus</elementReference></value>
         </inputAssignments>
         <inputAssignments>
             <field>Pending_Reason__c</field>
-            <value><elementReference>varPendingReason</elementReference></value>
+            <value><elementReference>fPendingReason</elementReference></value>
         </inputAssignments>
         <inputAssignments>
             <field>QA_Notes__c</field>
-            <value><elementReference>varQANotes</elementReference></value>
+            <value><elementReference>fQANotes</elementReference></value>
         </inputAssignments>
         <inputAssignments>
             <field>Rejection_Reason__c</field>
-            <value><elementReference>varRejectionReason</elementReference></value>
+            <value><elementReference>fRejectionReason</elementReference></value>
         </inputAssignments>
         <object>User_Story__c</object>
     </recordUpdates>
 
-    <!-- ═══════════════════════════════════════════
-         START
-    ═══════════════════════════════════════════ -->
     <start>
         <locationX>50</locationX>
         <locationY>0</locationY>

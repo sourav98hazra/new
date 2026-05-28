@@ -9,7 +9,7 @@
     Business_Dependency_Complete__c,
     AC_Update_Complete__c,
     Peer_Review_Complete__c,
-    Story_Verified__c
+    Translations_Sheet_Complete__c
 )</formula>
     <trackHistory>false</trackHistory>
     <type>Checkbox</type>

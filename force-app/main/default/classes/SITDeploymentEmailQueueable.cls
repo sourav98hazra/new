@@ -105,9 +105,9 @@ public class SITDeploymentEmailQueueable implements Queueable {
             // We chunk at 500 to stay safely within limits.
             Integer chunkSize = 500;
             for (Integer i = 0; i < allEmails.size(); i += chunkSize) {
-                Integer end = Math.min(i + chunkSize, allEmails.size());
+                Integer chunkEnd = Math.min(i + chunkSize, allEmails.size());
                 List<String> chunk = new List<String>();
-                for (Integer j = i; j < end; j++) chunk.add(allEmails[j]);
+                for (Integer j = i; j < chunkEnd; j++) chunk.add(allEmails[j]);
 
                 Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
                 mail.setToAddresses(chunk);

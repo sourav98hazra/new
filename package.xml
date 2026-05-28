@@ -156,14 +156,14 @@
         <members>Feature__c.Progress_Cannot_Exceed_100</members>
         <!-- User Story — lifecycle gates -->
         <members>User_Story__c.Progress_Cannot_Exceed_100</members>
-        <members>User_Story__c.Story_Info_Must_Be_Verified_Before_Dev_Start</members>
+        <members>User_Story__c.Story_Info_Verified_Before_Dev_Start</members>
         <members>User_Story__c.Unit_Test_Required_Before_Dev_Complete</members>
-        <members>User_Story__c.Dev_Tasks_Must_Be_Complete_Before_Dev_Completed</members>
+        <members>User_Story__c.Dev_Tasks_Complete_Before_Dev_Done</members>
         <members>User_Story__c.QA_Gate_Before_Sent_To_Prod</members>
         <members>User_Story__c.All_Readiness_Required_Before_SIT_Ready</members>
         <members>User_Story__c.Translations_Required_Before_SIT_Ready</members>
         <members>User_Story__c.PR_Required_Before_Sent_To_SIT</members>
-        <members>User_Story__c.Smoke_Test_Required_Before_Successfully_Deployed</members>
+        <members>User_Story__c.Smoke_Test_Required_Before_SIT_Done</members>
         <!-- Task -->
         <members>Task__c.Progress_Cannot_Exceed_100</members>
         <members>Task__c.Cannot_Complete_Blocked_Task</members>

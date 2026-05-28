@@ -93,11 +93,23 @@
     
     <!-- Apex Class Access -->
     <classAccesses>
+        <apexClass>FormalitiesService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>ProgressCalculationService</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>SITDeploymentEmailQueueable</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>StatusManagementService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
+        <apexClass>TaskActivitySyncService</apexClass>
         <enabled>true</enabled>
     </classAccesses>
     
@@ -410,16 +422,4 @@
         <field>User_Story__c.Unit_Testing_Complete__c</field>
         <readable>true</readable>
     </fieldPermissions>
-    <classAccesses>
-        <apexClass>FormalitiesService</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>TaskActivitySyncService</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
-    <classAccesses>
-        <apexClass>SITDeploymentEmailQueueable</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
 </PermissionSet>

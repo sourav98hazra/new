@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Dev_Tasks_Complete_Before_Dev_Done</fullName>
+    <active>true</active>
+    <description>Unit Testing must be completed (and all dev tasks Completed) before moving to Dev Completed</description>
+    <errorConditionFormula>AND(
+    ISPICKVAL(Status__c, "Dev Completed"),
+    ISCHANGED(Status__c),
+    Unit_Testing_Complete__c = FALSE
+)</errorConditionFormula>
+    <errorDisplayField>Status__c</errorDisplayField>
+    <errorMessage>Unit Testing must be completed and all Tasks marked Completed before moving to "Dev Completed". Please close the Unit Testing Activity Task or tick "Unit Testing Complete" first.</errorMessage>
+</ValidationRule>
