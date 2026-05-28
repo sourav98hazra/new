@@ -82,8 +82,8 @@ public without sharing class StatusManagementService {
 
         List<User_Story__c> toUpdate = new List<User_Story__c>();
         for (User_Story__c story : [
-            SELECT Id, Status__c, Story_Progress__c, Unit_Testing_Complete__c, Story_Info_Verified__c,
-                   Story_Title__c, Assigned_To__c
+            SELECT Id, Status__c, Story_Progress__c, Unit_Testing_Complete__c,
+                   Story_Info_Verified__c, Story_Title__c, Assigned_To__c
             FROM User_Story__c WHERE Id IN :storyIds
         ]) {
             Integer total     = totalByStory.containsKey(story.Id)     ? totalByStory.get(story.Id)     : 0;
@@ -97,17 +97,16 @@ public without sharing class StatusManagementService {
             } else if (story.Story_Progress__c != null && story.Story_Progress__c > 0
                        && story.Status__c == 'New') {
                 if (story.Story_Info_Verified__c == true) {
-                    // Story is verified — auto-advance to Dev In Progress
                     newStatus = 'Dev In Progress';
                 } else {
-                    // Story is NOT verified — notify the developer instead of silently skipping
+                    // Option A: notify dev — story stays New until verified
                     if (story.Assigned_To__c != null) {
                         NotificationService.sendBellNotification(
                             story.Assigned_To__c,
                             '⚠️ Story Not Verified: ' + story.Story_Title__c,
-                            'Your task is now In Progress, but this story has not been verified yet. ' +
-                            'Please close the "Verify Story Info" activity task (or tick "Story Info Verified" on the story) ' +
-                            'before the story can move to Dev In Progress.',
+                            'Progress has been logged but story "' + story.Story_Title__c
+                            + '" is not verified yet. Tick "Story Info Verified" or close the '
+                            + '"Verify Story Info" activity task so the story can move to Dev In Progress.',
                             story.Id
                         );
                     }

@@ -58,7 +58,7 @@
                 <field>Actual_Hours__c</field>
             </layoutItems>
             <layoutItems>
-                <behavior>Edit</behavior>
+                <behavior>Readonly</behavior>
                 <field>Task_Progress__c</field>
             </layoutItems>
         </layoutColumns>

@@ -40,8 +40,8 @@ trigger TaskTrigger on Task__c (after insert, after update, after delete) {
             }
         }
 
-        // If any task went In Progress, check if the parent story is verified
-        // If not — notify the developer (story stays New but dev knows they need to verify)
+        // Option A: Task goes In Progress freely.
+        // If story not yet verified, send bell notification to developer.
         if (!justWentInProgressStoryIds.isEmpty()) {
             for (User_Story__c story : [
                 SELECT Id, Story_Title__c, Story_Info_Verified__c, Assigned_To__c, Status__c
@@ -54,10 +54,10 @@ trigger TaskTrigger on Task__c (after insert, after update, after delete) {
                     NotificationService.sendBellNotification(
                         story.Assigned_To__c,
                         '⚠️ Story Not Verified: ' + story.Story_Title__c,
-                        'Your task is now In Progress, but story "' + story.Story_Title__c
+                        'Your task is In Progress, but story "' + story.Story_Title__c
                         + '" has not been verified yet. Please close the "Verify Story Info" '
-                        + 'activity task (or tick "Story Info Verified") before the story '
-                        + 'can move to Dev In Progress.',
+                        + 'activity task (or tick Story Info Verified) so the story can '
+                        + 'auto-advance to Dev In Progress.',
                         story.Id
                     );
                 }

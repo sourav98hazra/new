@@ -5,37 +5,51 @@
 public without sharing class ProgressCalculationService {
     
     /**
-     * @description Task_Progress__c is now a MANUAL field — developers enter it directly.
-     * This method still updates Actual_Hours__c from Daily Progress logs,
-     * but does NOT overwrite Task_Progress__c.
+     * @description Calculates Task_Progress__c as the SUM of all
+     * Daily_Progress__c.Progress_Percentage__c entries for the task, capped at 100.
+     * Also updates Actual_Hours__c from Hours_Worked__c sum.
+     *
+     * Example: dev logs 30% on Day 1 + 40% on Day 2 = Task Progress 70%.
+     *          dev logs 30% + 40% + 40% = capped at 100%.
      */
     public static void calculateTaskProgress(Set<Id> taskIds) {
         if (taskIds == null || taskIds.isEmpty()) return;
 
-        List<Task__c> tasksToUpdate = new List<Task__c>();
+        Map<Id, Decimal> progressByTask = new Map<Id, Decimal>();
+        Map<Id, Decimal> hoursByTask    = new Map<Id, Decimal>();
 
-        Map<Id, Decimal> hoursByTask = new Map<Id, Decimal>();
         for (AggregateResult ar : [
-            SELECT Task__c, SUM(Hours_Worked__c) totalHours
+            SELECT Task__c,
+                   SUM(Progress_Percentage__c) totalProgress,
+                   SUM(Hours_Worked__c)        totalHours
             FROM Daily_Progress__c
             WHERE Task__c IN :taskIds
             GROUP BY Task__c
         ]) {
-            hoursByTask.put((Id)ar.get('Task__c'), (Decimal)ar.get('totalHours'));
+            Id taskId = (Id) ar.get('Task__c');
+            Decimal progress = ar.get('totalProgress') != null ? (Decimal) ar.get('totalProgress') : 0;
+            Decimal hours    = ar.get('totalHours')    != null ? (Decimal) ar.get('totalHours')    : 0;
+            // Cap progress at 100
+            progressByTask.put(taskId, Math.min(progress, 100));
+            hoursByTask.put(taskId, hours);
         }
 
+        List<Task__c> toUpdate = new List<Task__c>();
         for (Task__c task : [
-            SELECT Id, Actual_Hours__c
+            SELECT Id, Task_Progress__c, Actual_Hours__c
             FROM Task__c WHERE Id IN :taskIds
         ]) {
-            Decimal newActualHours = hoursByTask.containsKey(task.Id) ? hoursByTask.get(task.Id) : 0;
-            if (task.Actual_Hours__c != newActualHours) {
-                task.Actual_Hours__c = newActualHours.setScale(2);
-                tasksToUpdate.add(task);
+            Decimal newProgress    = progressByTask.containsKey(task.Id) ? progressByTask.get(task.Id) : 0;
+            Decimal newActualHours = hoursByTask.containsKey(task.Id)    ? hoursByTask.get(task.Id)    : 0;
+
+            if (task.Task_Progress__c != newProgress || task.Actual_Hours__c != newActualHours) {
+                task.Task_Progress__c = newProgress.setScale(2);
+                task.Actual_Hours__c  = newActualHours.setScale(2);
+                toUpdate.add(task);
             }
         }
 
-        if (!tasksToUpdate.isEmpty()) update tasksToUpdate;
+        if (!toUpdate.isEmpty()) update toUpdate;
     }
     
     /**

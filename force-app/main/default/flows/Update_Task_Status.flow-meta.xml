@@ -99,16 +99,6 @@
         </fields>
 
         <fields>
-            <name>varProgress</name>
-            <dataType>Number</dataType>
-            <defaultValue><elementReference>Get_Task.Task_Progress__c</elementReference></defaultValue>
-            <fieldText>Task Progress % (0–100, manual entry)</fieldText>
-            <fieldType>InputField</fieldType>
-            <scale>0</scale>
-            <isRequired>false</isRequired>
-        </fields>
-
-        <fields>
             <name>varPendingReason</name>
             <dataType>String</dataType>
             <defaultValue><elementReference>Get_Task.Pending_Reason__c</elementReference></defaultValue>
@@ -136,10 +126,6 @@
         <inputAssignments>
             <field>Status__c</field>
             <value><elementReference>varNewStatus</elementReference></value>
-        </inputAssignments>
-        <inputAssignments>
-            <field>Task_Progress__c</field>
-            <value><elementReference>varProgress</elementReference></value>
         </inputAssignments>
         <inputAssignments>
             <field>Pending_Reason__c</field>
