@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Story_Info_Must_Be_Verified_Before_Dev_Start</fullName>
+    <active>true</active>
+    <description>Story information must be verified by the developer before moving to Dev In Progress</description>
+    <errorConditionFormula>AND(
+    ISPICKVAL(Status__c, "Dev In Progress"),
+    ISCHANGED(Status__c),
+    Story_Info_Verified__c = FALSE
+)</errorConditionFormula>
+    <errorDisplayField>Status__c</errorDisplayField>
+    <errorMessage>Story information must be verified before starting development. Please complete the "Verify Story Info" Activity Task and tick the "Story Info Verified" checkbox first.</errorMessage>
+</ValidationRule>

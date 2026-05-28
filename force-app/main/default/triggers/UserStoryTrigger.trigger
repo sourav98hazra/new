@@ -1,43 +1,64 @@
 /**
- * @description Trigger for User_Story__c object
- * Handles story progress, feature/sprint cascades, formality sync,
- * and auto-creation of Activity Tasks at each story stage.
+ * @description Trigger for User_Story__c object.
  *
  * ACTIVITY TASK LIFECYCLE (auto-created at each stage):
- *   Dev In Progress    → Write Code, Write Unit Tests, Unit Testing
- *   Dev Completed      → Unit Test Sheet, Manual Deploy Sheet, Business Dep Sheet, AC Update, Peer Review
- *   Completed-SIT Ready→ Raise PR
- *   Sent to SIT        → Smoke Test SIT
- *   Rejected           → Fix Issues (with rejection reason)
+ * ─────────────────────────────────────────────────────
+ *   New                       → "Verify Story Info: [Story]"           (gate checkbox)
+ *   Dev In Progress           → "Write Code: [Story]"
+ *                               "Write Unit Tests: [Story]"
+ *                               "Unit Testing: [Story]"                 (gate checkbox)
+ *   Dev Completed             → "Unit Test Sheet: [Story]"
+ *                               "Manual Deployment Steps Sheet: [Story]"
+ *                               "Business Dependency Sheet: [Story]"
+ *                               "AC Update: [Story]"
+ *                               "Peer Review: [Story]"
+ *                               "Translations Sheet: [Story]"           (new)
+ *   Completed - SIT Ready     → "PR Creation: [Story]"                  (gate + auto PR InProgress)
+ *   Sent to SIT               → "Smoke Test SIT: [Story]"               (gate + auto Successfully Deployed)
+ *   Successfully Deployed to SIT → batch email via SITDeploymentEmailQueueable
+ *   Rejected                  → "Fix Issues: [Story] - [Rejection Reason]"
+ *
+ * BI-DIRECTIONAL CHECKBOX SYNC (10 fields):
+ *   Story checkbox ticked → matching Activity Task auto-closed
+ *   Story status changes  → PR Creation Activity Task status synced
+ *
+ * CASCADES:
+ *   All story changes → Feature/Sprint progress + Feature status recalculation
  */
 trigger UserStoryTrigger on User_Story__c (after insert, after update, after delete) {
+
     Set<Id> featureIds = new Set<Id>();
     Set<Id> sprintIds  = new Set<Id>();
 
     if (Trigger.isInsert || Trigger.isUpdate) {
 
-        List<User_Story__c> movedToDevInProgress  = new List<User_Story__c>();
-        List<User_Story__c> movedToDevCompleted   = new List<User_Story__c>();
-        List<User_Story__c> movedToSITReady       = new List<User_Story__c>();
-        List<User_Story__c> movedToSentToSIT      = new List<User_Story__c>();
-        List<User_Story__c> movedToRejected       = new List<User_Story__c>();
+        List<User_Story__c> movedToNew               = new List<User_Story__c>();
+        List<User_Story__c> movedToDevInProgress     = new List<User_Story__c>();
+        List<User_Story__c> movedToDevCompleted      = new List<User_Story__c>();
+        List<User_Story__c> movedToSITReady          = new List<User_Story__c>();
+        List<User_Story__c> movedToSentToSIT         = new List<User_Story__c>();
+        List<User_Story__c> movedToSuccessfullyDeploy= new List<User_Story__c>();
+        List<User_Story__c> movedToRejected          = new List<User_Story__c>();
+        List<User_Story__c> statusChanged            = new List<User_Story__c>();
 
         for (User_Story__c story : Trigger.new) {
             if (story.Feature__c != null) featureIds.add(story.Feature__c);
-            sprintIds.add(story.Sprint__c);
+            if (story.Sprint__c  != null) sprintIds.add(story.Sprint__c);
 
-            if (Trigger.isUpdate) {
-                User_Story__c oldStory = Trigger.oldMap.get(story.Id);
+            if (Trigger.isInsert) {
+                // Every new story gets a "Verify Story Info" activity
+                movedToNew.add(story);
 
-                if (oldStory.Feature__c != null && oldStory.Feature__c != story.Feature__c) {
-                    featureIds.add(oldStory.Feature__c);
-                }
-                if (oldStory.Sprint__c != story.Sprint__c) {
-                    sprintIds.add(oldStory.Sprint__c);
-                }
+            } else {
+                User_Story__c old = Trigger.oldMap.get(story.Id);
 
-                // Detect status transitions - create Activity Tasks at each stage
-                if (story.Status__c != oldStory.Status__c) {
+                // Track old feature/sprint for cascade
+                if (old.Feature__c != null && old.Feature__c != story.Feature__c) featureIds.add(old.Feature__c);
+                if (old.Sprint__c  != null && old.Sprint__c  != story.Sprint__c)  sprintIds.add(old.Sprint__c);
+
+                // ── Status transition routing ──────────────────────────────
+                if (story.Status__c != old.Status__c) {
+                    statusChanged.add(story);
 
                     switch on story.Status__c {
                         when 'Dev In Progress' {
@@ -52,6 +73,9 @@ trigger UserStoryTrigger on User_Story__c (after insert, after update, after del
                         when 'Sent to SIT' {
                             movedToSentToSIT.add(story);
                         }
+                        when 'Successfully Deployed to SIT' {
+                            movedToSuccessfullyDeploy.add(story);
+                        }
                         when 'Rejected' {
                             movedToRejected.add(story);
                             if (story.Rejection_Reason__c != null) {
@@ -64,22 +88,29 @@ trigger UserStoryTrigger on User_Story__c (after insert, after update, after del
                     }
                 }
 
-                // Bi-directional sync: only when a formality checkbox actually changed
-                Boolean formalityCheckboxChanged = (
-                    story.Unit_Testing_Complete__c          != oldStory.Unit_Testing_Complete__c ||
-                    story.Unit_Test_Sheet_Complete__c       != oldStory.Unit_Test_Sheet_Complete__c ||
-                    story.Manual_Deployment_Steps_Complete__c != oldStory.Manual_Deployment_Steps_Complete__c ||
-                    story.Business_Dependency_Complete__c   != oldStory.Business_Dependency_Complete__c ||
-                    story.AC_Update_Complete__c             != oldStory.AC_Update_Complete__c ||
-                    story.Peer_Review_Complete__c           != oldStory.Peer_Review_Complete__c
+                // ── Checkbox sync: any of the 10 fields false→true ─────────
+                Boolean checkboxChanged = (
+                    story.Story_Info_Verified__c            != old.Story_Info_Verified__c            ||
+                    story.Unit_Testing_Complete__c          != old.Unit_Testing_Complete__c          ||
+                    story.Unit_Test_Sheet_Complete__c       != old.Unit_Test_Sheet_Complete__c       ||
+                    story.Manual_Deployment_Steps_Complete__c != old.Manual_Deployment_Steps_Complete__c ||
+                    story.Business_Dependency_Complete__c   != old.Business_Dependency_Complete__c   ||
+                    story.AC_Update_Complete__c             != old.AC_Update_Complete__c             ||
+                    story.Peer_Review_Complete__c           != old.Peer_Review_Complete__c           ||
+                    story.Translations_Sheet_Complete__c    != old.Translations_Sheet_Complete__c    ||
+                    story.PR_Creation_Complete__c           != old.PR_Creation_Complete__c           ||
+                    story.Smoke_Test_SIT_Complete__c        != old.Smoke_Test_SIT_Complete__c
                 );
-                if (formalityCheckboxChanged) {
+                if (checkboxChanged) {
                     FormalitiesService.syncCheckboxToActivityTask(Trigger.new, Trigger.oldMap);
                 }
             }
         }
 
-        // Create Activity Tasks for each stage transition
+        // ── Create Activity Tasks per stage ────────────────────────────────
+        if (!movedToNew.isEmpty()) {
+            FormalitiesService.createStoryVerificationActivity(movedToNew);
+        }
         if (!movedToDevInProgress.isEmpty()) {
             FormalitiesService.createDevInProgressActivities(movedToDevInProgress);
         }
@@ -87,23 +118,37 @@ trigger UserStoryTrigger on User_Story__c (after insert, after update, after del
             FormalitiesService.createFormalityActivitiesIfNeeded(movedToDevCompleted);
         }
         if (!movedToSITReady.isEmpty()) {
-            FormalitiesService.createRaisePRActivity(movedToSITReady);
+            FormalitiesService.createPRCreationActivity(movedToSITReady);
         }
         if (!movedToSentToSIT.isEmpty()) {
             FormalitiesService.createSITSmokeTestActivity(movedToSentToSIT);
         }
+
+        // ── Successfully Deployed to SIT: trigger batch email ─────────────
+        if (!movedToSuccessfullyDeploy.isEmpty()) {
+            Set<Id> deployedIds = new Set<Id>();
+            for (User_Story__c s : movedToSuccessfullyDeploy) deployedIds.add(s.Id);
+            System.enqueueJob(new SITDeploymentEmailQueueable(deployedIds));
+        }
+
         if (!movedToRejected.isEmpty()) {
             FormalitiesService.createFixIssuesActivity(movedToRejected);
+        }
+
+        // ── Story status → PR Creation activity task status sync ───────────
+        if (!statusChanged.isEmpty()) {
+            FormalitiesService.syncStoryStatusToActivityTasks(statusChanged, Trigger.oldMap);
         }
     }
 
     if (Trigger.isDelete) {
         for (User_Story__c story : Trigger.old) {
             if (story.Feature__c != null) featureIds.add(story.Feature__c);
-            sprintIds.add(story.Sprint__c);
+            if (story.Sprint__c  != null) sprintIds.add(story.Sprint__c);
         }
     }
 
+    // ── Cascade to Feature + Sprint ────────────────────────────────────────
     if (!featureIds.isEmpty()) {
         StatusManagementService.updateFeatureStatus(featureIds);
         ProgressCalculationService.calculateFeatureProgress(featureIds);

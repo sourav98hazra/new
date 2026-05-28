@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>PR_Required_Before_Sent_To_SIT</fullName>
+    <active>true</active>
+    <description>PR Creation must be complete before the story can be sent to SIT</description>
+    <errorConditionFormula>AND(
+    ISPICKVAL(Status__c, "Sent to SIT"),
+    ISCHANGED(Status__c),
+    PR_Creation_Complete__c = FALSE
+)</errorConditionFormula>
+    <errorDisplayField>Status__c</errorDisplayField>
+    <errorMessage>PR Creation must be completed and the PR approved before moving to "Sent to SIT". Please tick the PR Creation Complete checkbox first.</errorMessage>
+</ValidationRule>

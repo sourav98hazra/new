@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>PR_Creation_Complete__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>Story Readiness: Pull Request has been created and approved</description>
+    <label>PR Creation Complete</label>
+    <trackHistory>false</trackHistory>
+    <type>Checkbox</type>
+</CustomField>

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
-    <!-- Custom Objects -->
+
+    <!-- ═══════════════════════════════════════════════════════════
+         CUSTOM OBJECTS
+    ═══════════════════════════════════════════════════════════ -->
     <types>
         <members>Project__c</members>
         <members>Sprint__c</members>
@@ -12,8 +15,11 @@
         <name>CustomObject</name>
     </types>
 
-    <!-- Custom Fields -->
+    <!-- ═══════════════════════════════════════════════════════════
+         CUSTOM FIELDS
+    ═══════════════════════════════════════════════════════════ -->
     <types>
+        <!-- Project -->
         <members>Project__c.Project_Manager__c</members>
         <members>Project__c.Overall_Progress__c</members>
         <members>Project__c.Start_Date__c</members>
@@ -22,6 +28,7 @@
         <members>Project__c.Total_Story_Points__c</members>
         <members>Project__c.Status__c</members>
         <members>Project__c.Description__c</members>
+        <!-- Sprint -->
         <members>Sprint__c.Project__c</members>
         <members>Sprint__c.Status__c</members>
         <members>Sprint__c.Start_Date__c</members>
@@ -33,11 +40,13 @@
         <members>Sprint__c.Velocity__c</members>
         <members>Sprint__c.Days_Remaining__c</members>
         <members>Sprint__c.Retrospective_Notes__c</members>
+        <!-- Feature -->
         <members>Feature__c.Sprint__c</members>
         <members>Feature__c.Status__c</members>
         <members>Feature__c.Priority__c</members>
         <members>Feature__c.Feature_Progress__c</members>
         <members>Feature__c.Description__c</members>
+        <!-- User Story — core -->
         <members>User_Story__c.Sprint__c</members>
         <members>User_Story__c.Feature__c</members>
         <members>User_Story__c.Status__c</members>
@@ -52,13 +61,21 @@
         <members>User_Story__c.QA_Notes__c</members>
         <members>User_Story__c.Rejection_Reason__c</members>
         <members>User_Story__c.Pending_Reason__c</members>
+        <!-- User Story — gate & dev checklist -->
+        <members>User_Story__c.Story_Info_Verified__c</members>
         <members>User_Story__c.Unit_Testing_Complete__c</members>
+        <!-- User Story — Story Readiness Checklist (6 items) -->
         <members>User_Story__c.Unit_Test_Sheet_Complete__c</members>
         <members>User_Story__c.Manual_Deployment_Steps_Complete__c</members>
         <members>User_Story__c.Business_Dependency_Complete__c</members>
         <members>User_Story__c.AC_Update_Complete__c</members>
         <members>User_Story__c.Peer_Review_Complete__c</members>
+        <members>User_Story__c.Translations_Sheet_Complete__c</members>
+        <!-- User Story — formula & PR/SIT gates -->
         <members>User_Story__c.All_Formalities_Complete__c</members>
+        <members>User_Story__c.PR_Creation_Complete__c</members>
+        <members>User_Story__c.Smoke_Test_SIT_Complete__c</members>
+        <!-- Task -->
         <members>Task__c.User_Story__c</members>
         <members>Task__c.Status__c</members>
         <members>Task__c.Priority__c</members>
@@ -72,12 +89,14 @@
         <members>Task__c.Description__c</members>
         <members>Task__c.Blocked_Reason__c</members>
         <members>Task__c.Is_Overdue__c</members>
+        <!-- Daily Progress -->
         <members>Daily_Progress__c.Task__c</members>
         <members>Daily_Progress__c.Progress_Date__c</members>
         <members>Daily_Progress__c.Hours_Worked__c</members>
         <members>Daily_Progress__c.Progress_Percentage__c</members>
         <members>Daily_Progress__c.Notes__c</members>
         <members>Daily_Progress__c.Developer__c</members>
+        <!-- Task Dependency -->
         <members>Task_Dependency__c.Predecessor_Task__c</members>
         <members>Task_Dependency__c.Successor_Task__c</members>
         <members>Task_Dependency__c.Dependency_Type__c</members>
@@ -86,7 +105,9 @@
         <name>CustomField</name>
     </types>
 
-    <!-- Apex Classes -->
+    <!-- ═══════════════════════════════════════════════════════════
+         APEX CLASSES
+    ═══════════════════════════════════════════════════════════ -->
     <types>
         <members>ProgressCalculationService</members>
         <members>ProgressCalculationServiceTest</members>
@@ -95,6 +116,8 @@
         <members>NotificationService</members>
         <members>NotificationServiceTest</members>
         <members>FormalitiesService</members>
+        <members>TaskActivitySyncService</members>
+        <members>SITDeploymentEmailQueueable</members>
         <members>DailyProgressController</members>
         <members>SprintDashboardController</members>
         <members>DailyNotificationScheduler</members>
@@ -104,7 +127,9 @@
         <name>ApexClass</name>
     </types>
 
-    <!-- Apex Triggers -->
+    <!-- ═══════════════════════════════════════════════════════════
+         APEX TRIGGERS
+    ═══════════════════════════════════════════════════════════ -->
     <types>
         <members>DailyProgressTrigger</members>
         <members>TaskTrigger</members>
@@ -115,30 +140,44 @@
         <name>ApexTrigger</name>
     </types>
 
-    <!-- Validation Rules -->
+    <!-- ═══════════════════════════════════════════════════════════
+         VALIDATION RULES
+    ═══════════════════════════════════════════════════════════ -->
     <types>
+        <!-- Project -->
         <members>Project__c.Progress_Cannot_Exceed_100</members>
         <members>Project__c.End_Date_After_Start_Date</members>
+        <!-- Sprint -->
         <members>Sprint__c.Progress_Cannot_Exceed_100</members>
         <members>Sprint__c.End_Date_After_Start_Date</members>
         <members>Sprint__c.Closed_Sprint_Cannot_Be_Modified</members>
         <members>Sprint__c.Cannot_Close_With_Incomplete_Stories</members>
+        <!-- Feature -->
         <members>Feature__c.Progress_Cannot_Exceed_100</members>
+        <!-- User Story — lifecycle gates -->
         <members>User_Story__c.Progress_Cannot_Exceed_100</members>
-        <members>User_Story__c.Checklist_Required_Before_QA</members>
-        <members>User_Story__c.Checklist_Required_Before_SIT</members>
-        <members>User_Story__c.Formalities_Required_Before_SIT_Ready</members>
+        <members>User_Story__c.Story_Info_Must_Be_Verified_Before_Dev_Start</members>
         <members>User_Story__c.Unit_Test_Required_Before_Dev_Complete</members>
+        <members>User_Story__c.Dev_Tasks_Must_Be_Complete_Before_Dev_Completed</members>
+        <members>User_Story__c.All_Readiness_Required_Before_SIT_Ready</members>
+        <members>User_Story__c.Translations_Required_Before_SIT_Ready</members>
+        <members>User_Story__c.PR_Required_Before_Sent_To_SIT</members>
+        <members>User_Story__c.Smoke_Test_Required_Before_Successfully_Deployed</members>
+        <!-- Task -->
         <members>Task__c.Progress_Cannot_Exceed_100</members>
         <members>Task__c.Cannot_Complete_Blocked_Task</members>
+        <!-- Daily Progress -->
         <members>Daily_Progress__c.Hours_Worked_Must_Be_Valid</members>
         <members>Daily_Progress__c.Cannot_Edit_Historical_Progress</members>
         <members>Daily_Progress__c.Progress_Percentage_Range</members>
+        <!-- Task Dependency -->
         <members>Task_Dependency__c.Cannot_Depend_On_Self</members>
         <name>ValidationRule</name>
     </types>
 
-    <!-- Lightning Web Components -->
+    <!-- ═══════════════════════════════════════════════════════════
+         LIGHTNING WEB COMPONENTS
+    ═══════════════════════════════════════════════════════════ -->
     <types>
         <members>dailyProgressModal</members>
         <members>sprintDashboard</members>
@@ -146,7 +185,9 @@
         <name>LightningComponentBundle</name>
     </types>
 
-    <!-- Permission Sets -->
+    <!-- ═══════════════════════════════════════════════════════════
+         PERMISSION SETS
+    ═══════════════════════════════════════════════════════════ -->
     <types>
         <members>ADM_Admin</members>
         <members>ADM_Lead</members>
@@ -157,14 +198,18 @@
         <name>PermissionSet</name>
     </types>
 
-    <!-- Custom Permissions -->
+    <!-- ═══════════════════════════════════════════════════════════
+         CUSTOM PERMISSIONS
+    ═══════════════════════════════════════════════════════════ -->
     <types>
         <members>Modify_Closed_Sprints</members>
         <members>Edit_Historical_Progress</members>
         <name>CustomPermission</name>
     </types>
 
-    <!-- Page Layouts -->
+    <!-- ═══════════════════════════════════════════════════════════
+         PAGE LAYOUTS
+    ═══════════════════════════════════════════════════════════ -->
     <types>
         <members>Project__c-Project Layout</members>
         <members>Sprint__c-Sprint Layout</members>
@@ -176,13 +221,17 @@
         <name>Layout</name>
     </types>
 
-    <!-- Custom Notification Types -->
+    <!-- ═══════════════════════════════════════════════════════════
+         CUSTOM NOTIFICATION TYPES
+    ═══════════════════════════════════════════════════════════ -->
     <types>
         <members>ADM_Task_Notification</members>
         <name>CustomNotificationType</name>
     </types>
 
-    <!-- Email Templates -->
+    <!-- ═══════════════════════════════════════════════════════════
+         EMAIL TEMPLATES
+    ═══════════════════════════════════════════════════════════ -->
     <types>
         <members>ADM_Email_Templates</members>
         <members>ADM_Email_Templates/Task_Assignment_Notification</members>
@@ -191,7 +240,9 @@
         <name>EmailTemplate</name>
     </types>
 
-    <!-- Custom Tabs -->
+    <!-- ═══════════════════════════════════════════════════════════
+         CUSTOM TABS
+    ═══════════════════════════════════════════════════════════ -->
     <types>
         <members>Project__c</members>
         <members>Sprint__c</members>
@@ -202,13 +253,17 @@
         <name>CustomTab</name>
     </types>
 
-    <!-- Custom Application -->
+    <!-- ═══════════════════════════════════════════════════════════
+         CUSTOM APPLICATION
+    ═══════════════════════════════════════════════════════════ -->
     <types>
         <members>Agile_Delivery_Management</members>
         <name>CustomApplication</name>
     </types>
 
-    <!-- Quick Actions -->
+    <!-- ═══════════════════════════════════════════════════════════
+         QUICK ACTIONS
+    ═══════════════════════════════════════════════════════════ -->
     <types>
         <members>Project__c.New_Sprint</members>
         <members>Project__c.Update_Status</members>
@@ -217,19 +272,23 @@
         <members>Sprint__c.Update_Status</members>
         <members>User_Story__c.New_Task</members>
         <members>User_Story__c.Update_Status</members>
-        <members>User_Story__c.Complete_Formalities</members>
+        <members>User_Story__c.Update_Readiness_Checklist</members>
         <members>Task__c.Log_Progress</members>
         <members>Task__c.Update_Status</members>
         <name>QuickAction</name>
     </types>
 
-    <!-- Flows -->
+    <!-- ═══════════════════════════════════════════════════════════
+         FLOWS
+    ═══════════════════════════════════════════════════════════ -->
     <types>
         <members>Update_Task_Status</members>
         <name>Flow</name>
     </types>
 
-    <!-- FlexiPages -->
+    <!-- ═══════════════════════════════════════════════════════════
+         FLEXI PAGES
+    ═══════════════════════════════════════════════════════════ -->
     <types>
         <members>ADM_Home_Page</members>
         <name>FlexiPage</name>

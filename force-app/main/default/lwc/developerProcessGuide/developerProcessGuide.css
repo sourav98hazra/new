@@ -85,6 +85,11 @@
     letter-spacing: 0.5px;
 }
 
+.phase-badge[data-phase="preparation"] {
+    background-color: #f3e5f5;
+    color: #4a148c;
+}
+
 .phase-badge[data-phase="development"] {
     background-color: #e1f5fe;
     color: #01579b;

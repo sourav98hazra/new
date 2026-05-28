@@ -51,6 +51,11 @@
                 <label>Sent to SIT</label>
             </value>
             <value>
+                <fullName>Successfully Deployed to SIT</fullName>
+                <default>false</default>
+                <label>Successfully Deployed to SIT</label>
+            </value>
+            <value>
                 <fullName>Sent to QA</fullName>
                 <default>false</default>
                 <label>Sent to QA</label>
@@ -59,6 +64,11 @@
                 <fullName>Sent to UAT</fullName>
                 <default>false</default>
                 <label>Sent to UAT</label>
+            </value>
+            <value>
+                <fullName>Sent to Prod</fullName>
+                <default>false</default>
+                <label>Sent to Prod</label>
             </value>
             <value>
                 <fullName>Done</fullName>
