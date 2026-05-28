@@ -163,5 +163,16 @@ trigger UserStoryTrigger on User_Story__c (after insert, after update, after del
     }
     if (!sprintIds.isEmpty()) {
         ProgressCalculationService.calculateSprintProgress(sprintIds);
+        // Auto-close sprint when all stories Done; auto-complete project
+        StatusManagementService.updateSprintStatus(sprintIds);
+        // Cascade to project progress
+        Set<Id> projectIds = new Set<Id>();
+        for (Sprint__c s : [SELECT Project__c FROM Sprint__c WHERE Id IN :sprintIds AND Project__c != null]) {
+            projectIds.add(s.Project__c);
+        }
+        if (!projectIds.isEmpty()) {
+            ProgressCalculationService.calculateProjectProgress(projectIds);
+            StatusManagementService.updateProjectStatus(projectIds);
+        }
     }
 }

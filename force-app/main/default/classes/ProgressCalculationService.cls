@@ -5,62 +5,37 @@
 public without sharing class ProgressCalculationService {
     
     /**
-     * @description Calculate task progress from daily progress entries
-     * Task Progress = Sum of all daily progress percentages
+     * @description Task_Progress__c is now a MANUAL field — developers enter it directly.
+     * This method still updates Actual_Hours__c from Daily Progress logs,
+     * but does NOT overwrite Task_Progress__c.
      */
     public static void calculateTaskProgress(Set<Id> taskIds) {
         if (taskIds == null || taskIds.isEmpty()) return;
-        
+
         List<Task__c> tasksToUpdate = new List<Task__c>();
-        
-        // Aggregate daily progress by task
-        Map<Id, AggregateResult> progressByTask = new Map<Id, AggregateResult>();
+
+        Map<Id, Decimal> hoursByTask = new Map<Id, Decimal>();
         for (AggregateResult ar : [
-            SELECT Task__c, 
-                   SUM(Hours_Worked__c) totalHours,
-                   SUM(Progress_Percentage__c) totalProgress
+            SELECT Task__c, SUM(Hours_Worked__c) totalHours
             FROM Daily_Progress__c
             WHERE Task__c IN :taskIds
             GROUP BY Task__c
         ]) {
-            progressByTask.put((Id)ar.get('Task__c'), ar);
+            hoursByTask.put((Id)ar.get('Task__c'), (Decimal)ar.get('totalHours'));
         }
-        
-        // Query tasks with their estimated hours
+
         for (Task__c task : [
-            SELECT Id, Task_Progress__c, Actual_Hours__c, Estimated_Hours__c
-            FROM Task__c
-            WHERE Id IN :taskIds
+            SELECT Id, Actual_Hours__c
+            FROM Task__c WHERE Id IN :taskIds
         ]) {
-            Decimal newProgress = 0;
-            Decimal newActualHours = 0;
-            
-            if (progressByTask.containsKey(task.Id)) {
-                AggregateResult ar = progressByTask.get(task.Id);
-                newActualHours = (Decimal)ar.get('totalHours');
-                
-                // Calculate progress based on actual vs estimated hours
-                if (task.Estimated_Hours__c != null && task.Estimated_Hours__c > 0) {
-                    newProgress = (newActualHours / task.Estimated_Hours__c) * 100;
-                    // Cap at 100%
-                    newProgress = Math.min(newProgress, 100);
-                } else {
-                    // If no estimate, use sum of progress percentages (legacy method)
-                    newProgress = (Decimal)ar.get('totalProgress');
-                    newProgress = Math.min(newProgress, 100);
-                }
-            }
-            
-            if (task.Task_Progress__c != newProgress || task.Actual_Hours__c != newActualHours) {
-                task.Task_Progress__c = newProgress.setScale(2);
+            Decimal newActualHours = hoursByTask.containsKey(task.Id) ? hoursByTask.get(task.Id) : 0;
+            if (task.Actual_Hours__c != newActualHours) {
                 task.Actual_Hours__c = newActualHours.setScale(2);
                 tasksToUpdate.add(task);
             }
         }
-        
-        if (!tasksToUpdate.isEmpty()) {
-            update tasksToUpdate;
-        }
+
+        if (!tasksToUpdate.isEmpty()) update tasksToUpdate;
     }
     
     /**

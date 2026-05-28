@@ -46,6 +46,8 @@
         <members>Feature__c.Priority__c</members>
         <members>Feature__c.Feature_Progress__c</members>
         <members>Feature__c.Description__c</members>
+        <members>Feature__c.Pending_Reason__c</members>
+        <members>Feature__c.Current_Org__c</members>
         <!-- User Story — core -->
         <members>User_Story__c.Sprint__c</members>
         <members>User_Story__c.Feature__c</members>
@@ -89,6 +91,7 @@
         <members>Task__c.Description__c</members>
         <members>Task__c.Blocked_Reason__c</members>
         <members>Task__c.Is_Overdue__c</members>
+        <members>Task__c.Pending_Reason__c</members>
         <!-- Daily Progress -->
         <members>Daily_Progress__c.Task__c</members>
         <members>Daily_Progress__c.Progress_Date__c</members>
@@ -268,6 +271,7 @@
     <types>
         <members>Project__c.New_Sprint</members>
         <members>Project__c.Update_Status</members>
+        <members>Project__c.Activate</members>
         <members>Sprint__c.New_Story</members>
         <members>Sprint__c.New_Feature</members>
         <members>Sprint__c.Update_Status</members>

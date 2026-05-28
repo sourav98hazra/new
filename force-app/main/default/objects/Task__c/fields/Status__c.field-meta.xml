@@ -21,6 +21,11 @@
                 <label>In Progress</label>
             </value>
             <value>
+                <fullName>Pending</fullName>
+                <default>false</default>
+                <label>Pending</label>
+            </value>
+            <value>
                 <fullName>Blocked</fullName>
                 <default>false</default>
                 <label>Blocked</label>

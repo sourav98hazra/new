@@ -58,7 +58,7 @@
                 <field>Actual_Hours__c</field>
             </layoutItems>
             <layoutItems>
-                <behavior>Readonly</behavior>
+                <behavior>Edit</behavior>
                 <field>Task_Progress__c</field>
             </layoutItems>
         </layoutColumns>
@@ -85,6 +85,10 @@
             <layoutItems>
                 <behavior>Edit</behavior>
                 <field>Blocked_Reason__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Pending_Reason__c</field>
             </layoutItems>
         </layoutColumns>
         <style>TwoColumnsLeftToRight</style>

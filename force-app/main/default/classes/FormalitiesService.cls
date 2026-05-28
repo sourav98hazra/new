@@ -356,13 +356,13 @@ public without sharing class FormalitiesService {
     // ═══════════════════════════════════════════════════════════════════════════
 
     /**
-     * When a Salesforce Activity Task is completed, tick the matching checkbox on the User Story.
-     * Also handles auto-status progressions:
-     *   - PR_Creation_Complete__c = true  → story → Sent to SIT
-     *   - Smoke_Test_SIT_Complete__c = true → story → Successfully Deployed to SIT
-     *   - All readiness fields complete → story → Completed - SIT Ready
+     * Called from ActivityTaskTrigger when any lifecycle Activity Task changes status.
+     * - Completed   → tick the matching checkbox on the User Story
+     * - Not Started / In Progress (i.e. reopened) → untick the matching checkbox
+     * Also handles auto-status progressions.
      */
     public static void syncTaskCompletionToStory(List<Task> completedTasks) {
+        // completedTasks actually contains ALL status-changed lifecycle tasks now
         Map<Id, Map<String, Boolean>> storyFieldUpdates = new Map<Id, Map<String, Boolean>>();
 
         Set<Id> whatIds = new Set<Id>();
@@ -370,7 +370,6 @@ public without sharing class FormalitiesService {
             if (t.WhatId != null) whatIds.add(t.WhatId);
         }
 
-        // Only process User Story WhatIds
         Set<Id> userStoryIds = new Set<Id>();
         for (User_Story__c us : [SELECT Id FROM User_Story__c WHERE Id IN :whatIds]) {
             userStoryIds.add(us.Id);
@@ -384,7 +383,8 @@ public without sharing class FormalitiesService {
             if (!storyFieldUpdates.containsKey(t.WhatId)) {
                 storyFieldUpdates.put(t.WhatId, new Map<String, Boolean>());
             }
-            storyFieldUpdates.get(t.WhatId).put(matchedField, true);
+            // Completed → true; anything else (Not Started, In Progress) → false (reopen)
+            storyFieldUpdates.get(t.WhatId).put(matchedField, t.Status == 'Completed');
         }
 
         if (storyFieldUpdates.isEmpty()) return;
@@ -454,58 +454,85 @@ public without sharing class FormalitiesService {
     // ═══════════════════════════════════════════════════════════════════════════
 
     /**
-     * When a checkbox is ticked on the User Story, close the matching Activity Task.
+     * When a checkbox changes on the User Story, sync the matching Activity Task:
+     *   true  → close Activity Task (Completed)
+     *   false → reopen Activity Task (Not Started)   ← REVERSE SYNC
      * Then recalculates status progressions.
      */
     public static void syncCheckboxToActivityTask(List<User_Story__c> stories, Map<Id, User_Story__c> oldMap) {
-        // Recursion guard — prevents re-entrant sync loop
         if (isSyncRunning) return;
 
-        Map<Id, Set<String>> storyChangedSubjects = new Map<Id, Set<String>>();
+        // Maps: storyId → Set of subject prefixes to CLOSE (ticked true)
+        Map<Id, Set<String>> toClose  = new Map<Id, Set<String>>();
+        // Maps: storyId → Set of subject prefixes to REOPEN (unticked false)
+        Map<Id, Set<String>> toReopen = new Map<Id, Set<String>>();
 
         for (User_Story__c story : stories) {
             User_Story__c oldStory = oldMap.get(story.Id);
-            Set<String> changedSubjects = new Set<String>();
+            Set<String> closeSubjects  = new Set<String>();
+            Set<String> reopenSubjects = new Set<String>();
 
             for (String fieldName : ALL_CHECKBOX_FIELDS) {
                 Boolean newVal = (Boolean) story.get(fieldName);
                 Boolean oldVal = (Boolean) oldStory.get(fieldName);
+                String subjectPrefix = FIELD_TO_SUBJECT.get(fieldName);
+                if (subjectPrefix == null) continue;
+
                 if (newVal == true && oldVal != true) {
-                    String subjectPrefix = FIELD_TO_SUBJECT.get(fieldName);
-                    if (subjectPrefix != null) changedSubjects.add(subjectPrefix);
+                    closeSubjects.add(subjectPrefix);   // false → true: close activity
+                } else if (newVal != true && oldVal == true) {
+                    reopenSubjects.add(subjectPrefix);  // true → false: reopen activity
                 }
             }
 
-            if (!changedSubjects.isEmpty()) {
-                storyChangedSubjects.put(story.Id, changedSubjects);
-            }
+            if (!closeSubjects.isEmpty())  toClose.put(story.Id, closeSubjects);
+            if (!reopenSubjects.isEmpty()) toReopen.put(story.Id, reopenSubjects);
         }
 
-        if (storyChangedSubjects.isEmpty()) return;
+        if (toClose.isEmpty() && toReopen.isEmpty()) return;
 
-        // Close matching open Activity Tasks
-        List<Task> tasksToClose = new List<Task>();
+        // Collect all affected story IDs
+        Set<Id> allStoryIds = new Set<Id>();
+        allStoryIds.addAll(toClose.keySet());
+        allStoryIds.addAll(toReopen.keySet());
+
+        List<Task> tasksToUpdate = new List<Task>();
         for (Task t : [
-            SELECT Id, Subject, WhatId FROM Task
-            WHERE WhatId IN :storyChangedSubjects.keySet() AND Status != 'Completed'
+            SELECT Id, Subject, WhatId, Status FROM Task
+            WHERE WhatId IN :allStoryIds
         ]) {
             if (t.Subject == null) continue;
-            Set<String> subjects = storyChangedSubjects.get(t.WhatId);
-            if (subjects == null) continue;
-            for (String prefix : subjects) {
-                if (t.Subject.startsWith(prefix)) {
-                    t.Status = 'Completed';
-                    tasksToClose.add(t);
-                    break;
+
+            // Close (ticked true → Completed)
+            Set<String> closeSet = toClose.get(t.WhatId);
+            if (closeSet != null && t.Status != 'Completed') {
+                for (String prefix : closeSet) {
+                    if (t.Subject.startsWith(prefix)) {
+                        t.Status = 'Completed';
+                        tasksToUpdate.add(t);
+                        break;
+                    }
+                }
+            }
+
+            // Reopen (unticked false → Not Started)
+            Set<String> reopenSet = toReopen.get(t.WhatId);
+            if (reopenSet != null && t.Status == 'Completed') {
+                for (String prefix : reopenSet) {
+                    if (t.Subject.startsWith(prefix)) {
+                        t.Status = 'Not Started';
+                        tasksToUpdate.add(t);
+                        break;
+                    }
                 }
             }
         }
-        if (!tasksToClose.isEmpty()) update tasksToClose;
+        if (!tasksToUpdate.isEmpty()) update tasksToUpdate;
 
         // Re-query and recalculate status — guard against re-entry
         isSyncRunning = true;
         try {
-            recalculateStatusByIds(storyChangedSubjects.keySet());
+            recalculateStatusByIds(allStoryIds);
         } finally {
             isSyncRunning = false;
         }

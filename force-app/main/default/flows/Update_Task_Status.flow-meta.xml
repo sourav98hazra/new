@@ -20,16 +20,16 @@
         <value><stringValue>In Progress</stringValue></value>
     </choices>
     <choices>
-        <name>choiceBlocked</name>
-        <choiceText>Blocked</choiceText>
-        <dataType>String</dataType>
-        <value><stringValue>Blocked</stringValue></value>
-    </choices>
-    <choices>
         <name>choicePending</name>
         <choiceText>Pending</choiceText>
         <dataType>String</dataType>
         <value><stringValue>Pending</stringValue></value>
+    </choices>
+    <choices>
+        <name>choiceBlocked</name>
+        <choiceText>Blocked</choiceText>
+        <dataType>String</dataType>
+        <value><stringValue>Blocked</stringValue></value>
     </choices>
     <choices>
         <name>choiceCompleted</name>
@@ -46,16 +46,14 @@
         <isOutput>false</isOutput>
     </variables>
 
-    <!-- Step 1: Get the Task__c record -->
+    <!-- Step 1: Get the Task -->
     <recordLookups>
         <name>Get_Task</name>
         <label>Get Task Record</label>
         <locationX>176</locationX>
         <locationY>100</locationY>
         <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
-        <connector>
-            <targetReference>Screen_UpdateStatus</targetReference>
-        </connector>
+        <connector><targetReference>Screen_UpdateStatus</targetReference></connector>
         <filterLogic>and</filterLogic>
         <filters>
             <field>Id</field>
@@ -67,7 +65,7 @@
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
 
-    <!-- Step 2: Show status picker. Blocked Reason is shown and required by the user if needed. -->
+    <!-- Step 2: Screen — status picker + progress + pending/blocked reason -->
     <screens>
         <name>Screen_UpdateStatus</name>
         <label>Update Task Status</label>
@@ -76,49 +74,59 @@
         <allowBack>false</allowBack>
         <allowFinish>true</allowFinish>
         <allowPause>false</allowPause>
-        <connector>
-            <targetReference>Update_Task</targetReference>
-        </connector>
+        <connector><targetReference>Update_Task</targetReference></connector>
+
         <fields>
             <name>Info_Display</name>
             <fieldText>&lt;p&gt;&lt;b&gt;Task:&lt;/b&gt; {!Get_Task.Task_Title__c}&lt;/p&gt;
 &lt;p&gt;&lt;b&gt;Current Status:&lt;/b&gt; {!Get_Task.Status__c}&lt;/p&gt;
-&lt;p&gt;&lt;b&gt;Progress:&lt;/b&gt; {!Get_Task.Task_Progress__c}%&lt;/p&gt;</fieldText>
+&lt;p&gt;&lt;b&gt;Current Progress:&lt;/b&gt; {!Get_Task.Task_Progress__c}%&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
         </fields>
+
         <fields>
             <name>varNewStatus</name>
             <choiceReferences>choiceNew</choiceReferences>
             <choiceReferences>choiceInProgress</choiceReferences>
-            <choiceReferences>choiceBlocked</choiceReferences>
             <choiceReferences>choicePending</choiceReferences>
+            <choiceReferences>choiceBlocked</choiceReferences>
             <choiceReferences>choiceCompleted</choiceReferences>
             <dataType>String</dataType>
-            <defaultSelectedChoiceReference>choiceInProgress</defaultSelectedChoiceReference>
-            <fieldText>Select New Status</fieldText>
+            <defaultValue><elementReference>Get_Task.Status__c</elementReference></defaultValue>
+            <fieldText>New Status</fieldText>
             <fieldType>RadioButtons</fieldType>
             <isRequired>true</isRequired>
         </fields>
+
         <fields>
-            <name>varBlockedReason</name>
+            <name>varProgress</name>
+            <dataType>Number</dataType>
+            <defaultValue><elementReference>Get_Task.Task_Progress__c</elementReference></defaultValue>
+            <fieldText>Task Progress % (0–100, manual entry)</fieldText>
+            <fieldType>InputField</fieldType>
+            <scale>0</scale>
+            <isRequired>false</isRequired>
+        </fields>
+
+        <fields>
+            <name>varPendingReason</name>
             <dataType>String</dataType>
-            <defaultValue>
-                <elementReference>Get_Task.Blocked_Reason__c</elementReference>
-            </defaultValue>
-            <fieldText>Blocked Reason (enter a reason if setting status to Blocked)</fieldText>
+            <defaultValue><elementReference>Get_Task.Pending_Reason__c</elementReference></defaultValue>
+            <fieldText>Pending / Blocked Reason (required if status is Pending or Blocked)</fieldText>
             <fieldType>LargeTextArea</fieldType>
             <isRequired>false</isRequired>
         </fields>
+
         <showFooter>true</showFooter>
         <showHeader>true</showHeader>
     </screens>
 
-    <!-- Step 3: Save the task -->
+    <!-- Step 3: Save -->
     <recordUpdates>
         <name>Update_Task</name>
         <label>Update Task Record</label>
         <locationX>176</locationX>
-        <locationY>340</locationY>
+        <locationY>360</locationY>
         <filterLogic>and</filterLogic>
         <filters>
             <field>Id</field>
@@ -130,8 +138,12 @@
             <value><elementReference>varNewStatus</elementReference></value>
         </inputAssignments>
         <inputAssignments>
-            <field>Blocked_Reason__c</field>
-            <value><elementReference>varBlockedReason</elementReference></value>
+            <field>Task_Progress__c</field>
+            <value><elementReference>varProgress</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Pending_Reason__c</field>
+            <value><elementReference>varPendingReason</elementReference></value>
         </inputAssignments>
         <object>Task__c</object>
     </recordUpdates>
@@ -139,8 +151,6 @@
     <start>
         <locationX>50</locationX>
         <locationY>0</locationY>
-        <connector>
-            <targetReference>Get_Task</targetReference>
-        </connector>
+        <connector><targetReference>Get_Task</targetReference></connector>
     </start>
 </Flow>
