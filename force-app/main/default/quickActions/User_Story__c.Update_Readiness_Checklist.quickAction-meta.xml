@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <QuickAction xmlns="http://soap.sforce.com/2006/04/metadata">
     <actionSubtype>ScreenAction</actionSubtype>
-    <description>Update Story Readiness Checklist — tick checkboxes across all 4 sections. Each save auto-closes matching Activity Tasks and triggers auto-status progressions (e.g. all 6 readiness items done → Completed - SIT Ready, Smoke Test done → Successfully Deployed).</description>
+    <description>Update Story Readiness Checklist — 4 sections: Story Verification, Dev Checklist, Readiness (6 items → SIT Ready), PR and SIT Gates. Saves auto-close Activity Tasks and trigger status progressions.</description>
     <label>Update Readiness Checklist</label>
     <optionsCreateFeedItem>false</optionsCreateFeedItem>
     <quickActionLayout>
