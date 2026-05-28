@@ -28,7 +28,10 @@ export default class DeveloperProcessGuide extends LightningElement {
                 'Status changes on either side sync the other automatically:\n' +
                 '• Task__c In Progress ↔ Activity Task In Progress\n' +
                 '• Task__c Pending ↔ Activity Task Waiting on someone else\n' +
-                '• Task__c Completed ↔ Activity Task Completed'
+                '• Task__c Blocked ↔ Activity Task Waiting on someone else\n' +
+                '• Task__c Completed ↔ Activity Task Completed\n\n' +
+                'Use "Update Status" on the Task to set Pending or Blocked — you\'ll be prompted to enter a Pending/Blocked Reason.\n\n' +
+                '⚠️ NOTE: If your task goes In Progress but the parent story has not been verified yet, you\'ll receive a bell notification reminding you to close the "Verify Story Info" activity first.'
         },
         {
             id: 3, number: '3', phase: 'development',
@@ -158,19 +161,31 @@ export default class DeveloperProcessGuide extends LightningElement {
             id: 1, number: '1', phase: 'planning',
             title: 'Create Project',
             icon: 'standard:account',
-            description: 'Create a Project record with name, start/end dates, and project manager. Status starts as Active.'
+            description: 'Create a Project record with name, start/end dates, and project manager. Status starts as Planning.\n\n' +
+                'Use the "Activate Project" button to set it Active once the team is ready to start work.\n\n' +
+                '⚡ AUTO: When all sprints in the project are Closed → Project auto-moves to Completed.'
         },
         {
             id: 2, number: '2', phase: 'planning',
             title: 'Plan Sprint',
             icon: 'standard:date_input',
-            description: 'Create a Sprint under the Project. Set sprint goal, start/end dates (2-week sprints recommended). Sprint Progress auto-calculates from story completion.'
+            description: 'Create a Sprint under the Project. Set sprint goal, start/end dates (2-week sprints recommended).\n\n' +
+                'Sprint statuses: Planning → Active → On Hold → Closed\n\n' +
+                '⚡ AUTO: Sprint auto-activates when any of its Features moves to "In Progress".\n' +
+                '⚡ AUTO: Sprint auto-closes when ALL child stories reach "Done".\n' +
+                '⚠️ NOTIFICATION: If a sprint activates but the Project is not Active, the Project Manager receives a bell notification + email to activate the project.'
         },
         {
             id: 3, number: '3', phase: 'planning',
             title: 'Create Features',
             icon: 'standard:custom_component_task',
-            description: 'Group related stories into Features within the Sprint. Feature Progress auto-calculates from its child stories.'
+            description: 'Group related stories into Features within the Sprint. Feature Progress auto-calculates from its child stories.\n\n' +
+                'Feature statuses: Not Started → In Progress → Pending → Completed\n\n' +
+                '⚡ AUTO: Feature moves to "In Progress" when any child story starts active work.\n' +
+                '⚡ AUTO: Feature moves to "Pending" when ALL child stories are Pending (auto-reason set).\n' +
+                '⚡ AUTO: Feature moves to "Completed" when ALL child stories are Done.\n' +
+                '📍 Current Org/Environment field auto-derives from story statuses:\n' +
+                '   Development → SIT → QA → UAT → Production → On Hold'
         },
         {
             id: 4, number: '4', phase: 'planning',
@@ -185,13 +200,17 @@ export default class DeveloperProcessGuide extends LightningElement {
             icon: 'standard:task',
             description: 'Create Task__c records under each story. Set type, estimated hours, due date, and assignee.\n\n' +
                 'Each Task__c automatically gets a mirrored Activity Task in the story\'s Activity section.\n' +
-                'Status syncs bi-directionally between Task__c and its Activity Task.'
+                'Status syncs bi-directionally between Task__c and its Activity Task.\n\n' +
+                'Task statuses: New → In Progress → Pending → Blocked → Completed\n' +
+                'Use "Update Status" on the Task to set Pending or Blocked — enter a reason so the team knows why.'
         },
         {
             id: 6, number: '6', phase: 'execution',
             title: 'Activate Sprint',
             icon: 'standard:activations',
-            description: 'Change Sprint status to Active. Developers can now pick up stories. Monitor the Sprint Dashboard for real-time burndown and velocity.'
+            description: 'Change Sprint status to Active (or use the Activate button on the Project to activate the project first).\n\n' +
+                'Monitor the Sprint Dashboard for real-time burndown and velocity.\n\n' +
+                '⚡ AUTO: Sprint also auto-activates when any Feature moves to In Progress.'
         },
         {
             id: 7, number: '7', phase: 'execution',
@@ -215,20 +234,25 @@ export default class DeveloperProcessGuide extends LightningElement {
             icon: 'standard:deployment_unit',
             description: 'When a story is "Sent to SIT", the developer does smoke testing.\n\n' +
                 'Once smoke test passes → story auto-moves to "Successfully Deployed to SIT" → email sent to all ADM users automatically.\n\n' +
-                'Assign QA to test → story moves to "Sent to QA".'
+                '📍 Feature\'s "Current Org" field automatically updates to show "SIT", "QA", "UAT", or "Production" based on story statuses.'
         },
         {
             id: 10, number: '10', phase: 'execution',
             title: 'Manage QA, UAT and Prod',
             icon: 'standard:test',
             description: 'Track stories through:\n• Sent to QA → QA testing\n• Sent to UAT → stakeholder sign-off\n• Sent to Prod → production deployment\n• Done → complete\n\n' +
-                'If rejected at any stage, a "Fix Issues" activity is auto-created for the developer with the rejection reason.'
+                'If rejected at any stage, a "Fix Issues" activity is auto-created for the developer with the rejection reason.\n\n' +
+                '⚡ AUTO: Once ALL stories in a sprint are Done → Sprint auto-closes.\n' +
+                '⚡ AUTO: Once ALL sprints in a project are Closed → Project auto-completes.'
         },
         {
             id: 11, number: '11', phase: 'closure',
-            title: 'Close Sprint',
+            title: 'Sprint Auto-Closes → Project Auto-Completes',
             icon: 'standard:thanks',
-            description: 'When all stories reach "Done", close the Sprint. Add Retrospective Notes. Review velocity vs estimate.'
+            description: 'When all stories reach "Done" the sprint auto-closes. Add Retrospective Notes. Review velocity vs estimate.\n\n' +
+                '⚡ AUTO: Sprint closes automatically when all child stories are Done.\n' +
+                '⚡ AUTO: Project marks Completed when all its sprints are Closed.\n\n' +
+                'You can also put a sprint "On Hold" if work must pause — note that sprints with stories in active SIT/QA/UAT/Prod cannot be put On Hold (validation rule prevents it).'
         }
     ];
 
@@ -244,7 +268,10 @@ export default class DeveloperProcessGuide extends LightningElement {
             id: 2, number: '2', phase: 'task',
             title: 'Task Progress Auto-Calculates',
             icon: 'standard:task',
-            description: 'Task_Progress__c = (Total Hours Worked ÷ Estimated Hours) × 100.\nRead-only, updates instantly when a Daily Progress log is saved.'
+            description: 'Task_Progress__c = SUM of all Daily Progress Percentage entries for this task, capped at 100.\n\n' +
+                'Example: log 30% on Day 1 + 40% on Day 2 = Task Progress 70%.\n' +
+                'Actual_Hours__c also updates automatically from the sum of all Hours_Worked__c entries.\n' +
+                'Both fields are read-only — updated instantly when a Daily Progress record is saved.'
         },
         {
             id: 3, number: '3', phase: 'story',

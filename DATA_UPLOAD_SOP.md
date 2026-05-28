@@ -236,7 +236,7 @@ Use Data Loader when you have more than 50,000 records or need to automate the p
 - Requires Projects to already exist
 - `Project__c` matches by Project Name
 - All date and name fields are required
-- Valid Status values: Planning, Active, Closed
+- Valid Status values: Planning, Active, **On Hold**, Closed
 - Start_Date__c must be before End_Date__c
 
 **Verification:** Open each Sprint and confirm the Project lookup is correctly populated.
@@ -248,8 +248,10 @@ Use Data Loader when you have more than 50,000 records or need to automate the p
 
 - Requires Sprints to already exist
 - `Sprint__c` matches by Sprint Name
-- Valid Status values: Not Started, In Progress, Completed
+- Valid Status values: Not Started, In Progress, **Pending**, Completed
 - Valid Priority values: Critical, High, Medium, Low
+- `Pending_Reason__c` is only required when Status is "Pending"
+- `Current_Org__c` is read-only — auto-derived from child story statuses; do not upload this field
 
 **Verification:** Open each Feature and confirm the Sprint lookup is correct.
 
@@ -293,7 +295,8 @@ Use Data Loader when you have more than 50,000 records or need to automate the p
 - Requires User Stories to exist
 - `User_Story__c` matches by Story Title (`Story_Title__c`)
 - `Blocked_Reason__c` is only required when Status is "Blocked"
-- Valid Status values: New, In Progress, Blocked, Completed
+- `Pending_Reason__c` is only required when Status is "Pending"
+- Valid Status values: New, In Progress, **Pending**, Blocked, Completed
 - Valid Task_Type values: Development, Bug Fix, Testing, Documentation, Code Review, Deployment
 - Valid Priority values: Critical, High, Medium, Low
 
@@ -350,6 +353,7 @@ Use Data Loader when you have more than 50,000 records or need to automate the p
 | Status__c | Status__c | Yes | Picklist | Not Started, In Progress, Completed |
 | Priority__c | Priority__c | No | Picklist | Critical, High, Medium, Low |
 | Description__c | Description__c | No | Long Text | Feature description |
+| Pending_Reason__c | Pending_Reason__c | No | Long Text | Required only when Status = Pending |
 
 ### 5.4 User_Story__c
 
@@ -381,6 +385,7 @@ Use Data Loader when you have more than 50,000 records or need to automate the p
 | Due_Date__c | Due_Date__c | No | Date | Format: YYYY-MM-DD |
 | Description__c | Description__c | No | Long Text | Task description |
 | Blocked_Reason__c | Blocked_Reason__c | No | Text | Required only when Status = Blocked |
+| Pending_Reason__c | Pending_Reason__c | No | Text | Required only when Status = Pending |
 
 ### 5.6 Daily_Progress__c
 
@@ -469,8 +474,8 @@ Project__r.Name         --> Matches Project by Name
 - Hours_Worked__c cannot exceed 24
 - Sprint End_Date must be after Start_Date
 - Blocked_Reason__c is required when Status = "Blocked"
-- Pending_Reason__c is required when Status = "Pending"
-- All Pre-SIT Formalities must be complete before Status = "Completed - SIT Ready"
+- Pending_Reason__c is required when Status = "Pending" (on Task and User Story)
+- All Story Readiness Checklist items must be complete before Status = "Completed - SIT Ready"
 - Cannot modify records in a Closed Sprint (without Modify_Closed_Sprints permission)
 
 **Solution:**
@@ -696,10 +701,10 @@ Before starting any bulk upload:
 | Object | Valid Statuses |
 |--------|---------------|
 | Project | Planning, Active, On Hold, Completed, Cancelled |
-| Sprint | Planning, Active, Closed |
-| Feature | Not Started, In Progress, Completed |
+| Sprint | Planning, Active, **On Hold**, Closed |
+| Feature | Not Started, In Progress, **Pending**, Completed |
 | User Story | New, Dev In Progress, Pending, Dev Completed, Formalities InProgress, Completed - SIT Ready, PR InProgress, Sent to SIT, Successfully Deployed to SIT, Sent to QA, Sent to UAT, Sent to Prod, Done, Rejected |
-| Task | New, In Progress, Blocked, Completed |
+| Task | New, In Progress, **Pending**, Blocked, Completed |
 
 ### Priority Values (All Objects)
 Critical, High, Medium, Low

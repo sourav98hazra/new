@@ -1,8 +1,8 @@
 # Salesforce Agile Delivery Management System — Project Summary
 
-## ✅ v2.0 COMPLETE
+## ✅ v3.0 COMPLETE
 
-Full lifecycle redesign with Story Info verification gate, Task__c↔Activity Task bi-directional sync, PR Creation auto-status, Smoke Test auto-status, SIT batch email, and all 10 checkboxes fully synced.
+Full lifecycle redesign with Story Info verification gate, Task↔Activity bi-directional sync (reverse sync included), PR/Smoke Test auto-status, SIT batch email, Feature auto-environment tracking, Sprint/Project auto-transitions, Pending status at all levels, and Task Progress auto-calculated from daily logs.
 
 ---
 
@@ -12,10 +12,10 @@ Full lifecycle redesign with Story Info verification gate, Task__c↔Activity Ta
 | Object | Fields | Purpose |
 |--------|--------|---------|
 | `Project__c` | 8 | Top-level container |
-| `Sprint__c` | 11 | Time-boxed iterations |
-| `Feature__c` | 5 | Feature grouping |
-| `User_Story__c` | **26** (v2) | User requirements with full lifecycle |
-| `Task__c` | 14 | Developer work items |
+| `Sprint__c` | 11 | Time-boxed iterations (Planning/Active/On Hold/Closed) |
+| `Feature__c` | **8** | Feature grouping with Pending status + Current Org tracking |
+| `User_Story__c` | **26** | User requirements with full lifecycle |
+| `Task__c` | **15** | Developer work items with Pending status + Pending Reason |
 | `Daily_Progress__c` | 6 | Progress logging |
 | `Task_Dependency__c` | 5 | Task dependencies |
 
@@ -55,18 +55,22 @@ Full lifecycle redesign with Story Info verification gate, Task__c↔Activity Ta
 13. Done
 14. Rejected
 
-### 4. Validation Rules (9 on User_Story__c)
+### 4. Validation Rules (7 on User_Story__c, 4 on Sprint, 2 on Task)
 | Rule | Gate |
 |------|------|
-| `Story_Info_Must_Be_Verified_Before_Dev_Start` | NEW |
-| `Unit_Test_Required_Before_Dev_Complete` | Existing |
-| `Dev_Tasks_Must_Be_Complete_Before_Dev_Completed` | NEW |
-| `All_Readiness_Required_Before_SIT_Ready` | Replaces old VR |
-| `Translations_Required_Before_SIT_Ready` | NEW |
-| `PR_Required_Before_Sent_To_SIT` | NEW |
-| `Smoke_Test_Required_Before_Successfully_Deployed` | NEW |
-| `QA_Gate_Before_Sent_To_Prod` | NEW |
-| `Progress_Cannot_Exceed_100` | Existing |
+| `Story_Info_Verified_Before_Dev_Start` | New → Dev In Progress |
+| `Unit_Test_Required_Before_Dev_Complete` | Unit Testing before Dev Completed |
+| `All_Readiness_Required_Before_SIT_Ready` | All 6 readiness items before SIT Ready |
+| `PR_Required_Before_Sent_To_SIT` | PR Creation before Sent to SIT |
+| `Smoke_Test_Required_Before_SIT_Done` | Smoke Test before Successfully Deployed |
+| `QA_Gate_Before_Sent_To_Prod` | Must pass QA before Sent to Prod |
+| `Progress_Cannot_Exceed_100` | User Story progress cap |
+| Sprint: `Cannot_Put_On_Hold_With_Active_SIT` | Sprint cannot go On Hold if stories in SIT/QA/UAT/Prod |
+| Sprint: `Cannot_Close_With_Incomplete_Stories` | Sprint cannot close with unfinished stories |
+| Sprint: `Closed_Sprint_Cannot_Be_Modified` | Closed sprint protection |
+| Sprint: `End_Date_After_Start_Date` | Date validation |
+| Task: `Cannot_Complete_Blocked_Task` | Blocked task gate |
+| Task: `Progress_Cannot_Exceed_100` | Task progress cap |
 
 ### 5. Apex Classes (17 total)
 **Service Classes:**
@@ -105,11 +109,15 @@ All 6 permission sets updated with FLS for 5 new fields:
 New class accesses added: `FormalitiesService`, `TaskActivitySyncService`, `SITDeploymentEmailQueueable`
 
 ### 8. Quick Actions
-| Action | Change |
-|--------|--------|
-| `Update_Readiness_Checklist` | Renamed from "Complete Formalities"; now shows all 10 checklist fields |
-| `Update_Status` | Unchanged |
-| `New_Task` | Unchanged |
+| Action | Notes |
+|--------|-------|
+| `Update_Readiness_Checklist` | All 10 checklist fields across 4 sections |
+| `Update_Status` (User Story) | Status + Pending/QA/Rejection reason |
+| `New_Task` | Create task for story |
+| `Feature__c.New_Story` | Create story from Feature |
+| `Project__c.Activate` | Activate Project (PM uses this after notification) |
+| `Project__c.New_Sprint` | Create sprint from Project |
+| Others | Sprint/Feature/Task actions |
 
 ### 9. Page Layout (User Story)
 | Section | Change |

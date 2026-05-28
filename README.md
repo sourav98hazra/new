@@ -5,14 +5,20 @@ A production-grade Salesforce-based Agile Delivery Management System covering th
 
 ## What's New in v2.0
 - **Story Info Verification gate** — every new story gets a "Verify Story Info" activity; story can't move to Dev In Progress until verified
-- **Task__c ↔ Activity Task bi-directional sync** — every custom Task__c automatically mirrors as a Salesforce Activity Task; status syncs in both directions
+- **Task__c ↔ Activity Task bi-directional sync** — every custom Task__c automatically mirrors as a Salesforce Activity Task; status syncs in both directions (including reverse sync — unticking a checkbox reopens the Activity Task)
 - **6-item Story Readiness Checklist** — added Translations Sheet (was 5 items)
 - **All 10 lifecycle checkboxes bi-directionally sync** with their corresponding Activity Tasks
 - **PR Creation auto-status** — PR Creation activity In Progress → story auto-moves to PR InProgress; complete → auto-moves to Sent to SIT
 - **Smoke Test SIT auto-status** — Smoke Test complete → story auto-moves to Successfully Deployed to SIT
 - **Batch SIT deployment email** — when any story reaches "Successfully Deployed to SIT", all ADM users get an email automatically
 - **14-status lifecycle** — added Successfully Deployed to SIT and Sent to Prod
-- **Updated Developer Process Guide** — reflects the full 14-step new lifecycle
+- **Task Pending status + reason** — Task has Pending status with `Pending_Reason__c` field; prompted on status change
+- **Feature Pending + Current Org** — Feature auto-goes Pending when all stories Pending; `Current_Org__c` field shows which environment (Development/SIT/QA/UAT/Production/On Hold)
+- **Sprint On Hold** — Sprint can be put On Hold; auto-activates when any Feature goes In Progress; auto-closes when all stories Done
+- **Project auto-complete** — Project auto-marks Completed when all sprints Closed
+- **Activate Project button** — PM notified when sprint activates but project is not Active; use Activate button to activate project
+- **Task Progress = sum of daily progress %** — `Task_Progress__c` auto-calculated as sum of all Daily Progress entries (capped at 100); read-only
+- **Updated Developer Process Guide** — reflects the full new lifecycle including auto-transitions
 
 ## Features
 - **Project & Sprint Management** — Organize work into projects and time-boxed sprints
@@ -83,13 +89,11 @@ Rejected  → Fix Issues activity auto-created with rejection reason
 
 | Rule | Gate |
 |------|------|
-| `Story_Info_Must_Be_Verified_Before_Dev_Start` | New → Dev In Progress requires Story_Info_Verified__c |
+| `Story_Info_Verified_Before_Dev_Start` | New → Dev In Progress requires Story_Info_Verified__c |
 | `Unit_Test_Required_Before_Dev_Complete` | Unit Testing Complete required before Dev Completed |
-| `Dev_Tasks_Must_Be_Complete_Before_Dev_Completed` | All Task__c must be Completed before Dev Completed |
 | `All_Readiness_Required_Before_SIT_Ready` | All 6 readiness items before Completed - SIT Ready |
-| `Translations_Required_Before_SIT_Ready` | Translations Sheet before Completed - SIT Ready |
 | `PR_Required_Before_Sent_To_SIT` | PR Creation Complete before Sent to SIT |
-| `Smoke_Test_Required_Before_Successfully_Deployed` | Smoke Test before Successfully Deployed to SIT |
+| `Smoke_Test_Required_Before_SIT_Done` | Smoke Test before Successfully Deployed to SIT |
 | `QA_Gate_Before_Sent_To_Prod` | Must pass QA before Sent to Prod |
 
 ## Installation
@@ -121,7 +125,8 @@ After deployment, follow **POST_DEPLOYMENT_CHECKLIST.md** to complete setup (~57
 | **Manager** | Read Only | Reports, dashboards, analytics |
 
 ## Progress Calculation
-- **Task Progress** = Total Hours Worked ÷ Estimated Hours × 100
+- **Task Progress** = Sum of all Daily Progress `Progress_Percentage__c` entries (capped at 100) — read-only, auto-calculated
+- **Actual Hours** = Sum of all Daily Progress `Hours_Worked__c` entries — read-only, auto-calculated
 - **Story Progress** = Weighted average of task progress (by Estimated Hours)
 - **Feature Progress** = Average of story progress
 - **Sprint Progress** = Weighted average of story progress (by Story Points)

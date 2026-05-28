@@ -30,17 +30,18 @@ sfdx force:source:deploy -p force-app -u MyOrgAlias
 ```
 
 This deploys:
-- 7 Custom Objects with 26 User Story fields
-- 9 Validation Rules on User Story
+- 7 Custom Objects with 26 User Story fields + new Feature/Task fields
+- 13+ Validation Rules across all objects
 - 17 Apex Classes (including test classes)
 - 6 Apex Triggers
 - 3 Lightning Web Components
-- 6 Permission Sets with full FLS for all v2 fields
+- 6 Permission Sets with full FLS for all v2/v3 fields
 - 2 Custom Permissions
 - 7 Page Layouts (auto-applied)
 - 3 Email Templates
 - 1 Custom Notification Type
-- 10 Quick Actions
+- 12 Quick Actions
+- 3 Screen Flows
 
 If deployment fails due to dependencies, deploy in this order:
 ```bash
@@ -111,16 +112,10 @@ Verify: **Setup > Scheduled Jobs** - should see "ADM Daily Notifications"
 3. Drag **"Sprint Dashboard"** component to the top
 4. Click **Save > Activate > Assign as Org Default > Save**
 
-#### Task Record Page:
-1. Navigate to any Task record
-2. Click gear icon > **Edit Page**
-3. Drag **"Checklist Manager"** component to the right sidebar
-4. Click **Save > Activate > Assign as Org Default > Save**
-
 #### Home Page:
 1. Go to Home tab
 2. Click gear icon > **Edit Page**
-3. Drag **"Daily Progress Modal"** component
+3. Verify **"Developer Process Guide"** component is present
 4. Click **Save > Activate > Assign as Org Default > Save**
 
 ### Step 8: Create Custom Tabs and App
@@ -364,6 +359,12 @@ Validation rule `All_Readiness_Required_Before_SIT_Ready` blocks transition unti
 
 **Issue**: `Custom Notification Type not found` in trigger error
 **Fix**: Go to Setup > Custom Notifications > verify "ADM Task Notification" exists. If not, create it manually (Desktop + Mobile enabled).
+
+**Issue**: Sprint auto-activation not working
+**Fix**: Verify FeatureTrigger is Active (Setup > Apex Triggers). The trigger calls `StatusManagementService.updateSprintStatus()` which auto-activates the sprint.
+
+**Issue**: Feature "Current Org" field not updating
+**Fix**: Verify UserStoryTrigger and FeatureTrigger are both Active. `StatusManagementService.updateFeatureStatus()` recalculates `Current_Org__c` based on child story statuses.
 
 **Issue**: Scheduled job not running
 **Fix**: Setup > Scheduled Jobs > check "ADM Daily Notifications". If missing, re-run the schedule Apex from Step 6.

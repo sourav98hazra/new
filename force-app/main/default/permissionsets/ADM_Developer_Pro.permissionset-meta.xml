@@ -94,6 +94,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>SITDeploymentEmailQueueable</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>StatusManagementService</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -161,6 +165,21 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Feature__c.Priority__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Feature__c.Current_Org__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Feature__c.Pending_Reason__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Task__c.Pending_Reason__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

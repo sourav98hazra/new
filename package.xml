@@ -157,6 +157,7 @@
         <members>Sprint__c.End_Date_After_Start_Date</members>
         <members>Sprint__c.Closed_Sprint_Cannot_Be_Modified</members>
         <members>Sprint__c.Cannot_Close_With_Incomplete_Stories</members>
+        <members>Sprint__c.Cannot_Put_On_Hold_With_Active_SIT</members>
         <!-- Feature -->
         <members>Feature__c.Progress_Cannot_Exceed_100</members>
         <!-- User Story — lifecycle gates -->

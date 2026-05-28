@@ -146,6 +146,50 @@ Run through this end-to-end test:
 1. Move story to "Rejected" and fill in Rejection Reason
 2. **Verify**: "Fix Issues: [Story] – [Rejection Reason]" Activity Task created ✓
 
+### 7i. Test New v3 Features
+
+#### Sprint On Hold + Auto-Active
+1. Create a Sprint with Status = "Planning"
+2. Create a Feature under it, move Feature to "In Progress"
+3. **Verify**: Sprint auto-moves to "Active" ✓
+4. Try to put Sprint "On Hold" while a story is in "Sent to SIT"
+5. **Verify**: Validation error fires — cannot put On Hold with active SIT stories ✓
+
+#### Feature Pending + Current Org
+1. Move all child stories of a Feature to "Pending"
+2. **Verify**: Feature auto-moves to "Pending" with Pending Reason set ✓
+3. Move a story to "Sent to SIT"
+4. **Verify**: Feature `Current_Org__c` = "SIT" ✓
+5. Move story to "Sent to QA"
+6. **Verify**: Feature `Current_Org__c` = "QA" ✓
+
+#### Auto-Close Sprint + Auto-Complete Project
+1. Move ALL stories in a sprint to "Done"
+2. **Verify**: Sprint auto-closes ✓
+3. Close all other sprints in the project
+4. **Verify**: Project auto-marks as "Completed" ✓
+
+#### Project Activate Notification
+1. Create a Project with Status = "Planning"
+2. Activate one of its Sprints
+3. **Verify**: Project Manager receives bell notification + email to activate the project ✓
+4. Click "Activate Project" button on the Project
+5. **Verify**: Project status moves to "Active" ✓
+
+#### Task Progress Calculation
+1. Create a Task and log Daily Progress with Progress_Percentage__c = 30%
+2. **Verify**: Task_Progress__c = 30% ✓
+3. Log another Daily Progress entry with Progress_Percentage__c = 40%
+4. **Verify**: Task_Progress__c = 70% (sum) ✓
+5. Log enough to exceed 100%
+6. **Verify**: Task_Progress__c capped at 100% ✓
+
+#### Reverse Checkbox Sync
+1. Tick a Story Readiness checkbox (e.g. Unit Test Sheet Complete)
+2. **Verify**: Matching Activity Task closes ✓
+3. Untick the same checkbox
+4. **Verify**: Activity Task reopens to "Not Started" ✓
+
 ---
 
 ## ✅ STEP 8: Verify "Update Readiness Checklist" Quick Action (2 min)
@@ -223,37 +267,42 @@ Run through this end-to-end test:
 
 ---
 
-## 🔑 What's Deployed — v2.0 Changes
+## 🔑 What's Deployed — v3.0 Changes
 
 | Feature | Status |
 |---------|--------|
 | 14-Status Story Lifecycle (New → Successfully Deployed to SIT → Sent to Prod → Done) | ✅ Deployed |
 | Story Info Verified gate (New → Dev In Progress requires verification) | ✅ Deployed |
-| Task__c ↔ Activity Task bi-directional status sync (Option A: every task mirrored) | ✅ Deployed |
-| 6 Story Readiness Checklist items (added Translations Sheet) | ✅ Deployed |
+| Task__c ↔ Activity Task bi-directional sync — including REVERSE (untick reopens activity) | ✅ Deployed |
+| 6 Story Readiness Checklist items (including Translations Sheet) | ✅ Deployed |
 | All 10 checkboxes bi-directionally synced with Activity Tasks | ✅ Deployed |
 | PR Creation activity → auto story status (Completed-SIT Ready → PR InProgress → Sent to SIT) | ✅ Deployed |
 | Smoke Test SIT → auto story status to "Successfully Deployed to SIT" | ✅ Deployed |
 | Batch email to all ADM users on "Successfully Deployed to SIT" | ✅ Deployed |
-| "Update Readiness Checklist" button (renamed from "Complete Formalities") | ✅ Deployed |
-| Story Readiness Checklist layout section (renamed from "Pre-SIT Formalities") | ✅ Deployed |
-| SITDeploymentEmailQueueable class (chunked batch email) | ✅ Deployed |
-| TaskActivitySyncService class | ✅ Deployed |
-| 7 Validation Rules on User_Story__c (lifecycle gates) | ✅ Deployed |
-| Updated Developer Process Guide LWC (14-step developer workflow) | ✅ Deployed |
+| "Update Readiness Checklist" button (4 sections, all 10 checkboxes) | ✅ Deployed |
+| Task Pending status + Pending_Reason__c field | ✅ Deployed |
+| Feature Pending status + Pending_Reason__c + auto-Pending when all stories Pending | ✅ Deployed |
+| Feature Current_Org__c field (auto-derives: Development/SIT/QA/UAT/Production/On Hold) | ✅ Deployed |
+| Sprint On Hold status + auto-activates when Feature goes In Progress | ✅ Deployed |
+| Sprint auto-closes when all stories Done | ✅ Deployed |
+| Project auto-completes when all Sprints Closed | ✅ Deployed |
+| Project Activate button + PM notification when Sprint activates but Project not Active | ✅ Deployed |
+| Task Progress = Sum of Daily Progress % entries (capped at 100) — read-only | ✅ Deployed |
+| New Story button on Feature layout | ✅ Deployed |
+| Sprint On Hold VR (cannot go On Hold with active SIT/QA/UAT stories) | ✅ Deployed |
 
 ---
 
 ## ⚠️ Known Limitations
 
 1. **Sprint Record Page FlexiPage**: Add `sprintDashboard` LWC manually via Lightning App Builder (Step 4).
-2. **Screen Flows**: "Update Task Status" flow must be created via Flow Builder.
-3. **Reports & Dashboards**: Must be created in the UI (Steps 9–10).
-4. **Scheduled Job**: Run anonymous Apex in Step 5 to enable daily email reminders.
-5. **SIT Email in Sandbox**: If email deliverability is set to "System email only" in your sandbox, the SIT deployment emails may not be delivered. Set to "All email" in Setup → Deliverability for testing.
+2. **Reports & Dashboards**: Must be created in the UI (Steps 9–10).
+3. **Scheduled Job**: Run anonymous Apex in Step 5 to enable daily email reminders.
+4. **SIT Email in Sandbox**: If email deliverability is set to "System email only" in your sandbox, the SIT deployment emails may not be delivered. Set to "All email" in Setup → Deliverability for testing.
+5. **Sprint On Hold VR**: The `Cannot_Put_On_Hold_With_Active_SIT` validation rule uses a subquery — if your org has more than 2,000 stories per sprint, test this VR under load first.
 
 ---
 
-*Generated for: Agile Delivery Management System v2.0*
+*Generated for: Agile Delivery Management System v3.0*
 *Repository: https://github.com/sourav98hazra/ADM-Repo*
 *Salesforce API Version: 60.0*

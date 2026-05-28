@@ -9,5 +9,5 @@
     All_Formalities_Complete__c = FALSE
 )</errorConditionFormula>
     <errorDisplayField>Status__c</errorDisplayField>
-    <errorMessage>All Story Readiness Checklist items must be completed before moving to "Completed - SIT Ready". Please ensure: Unit Test Sheet, Manual Deployment Steps, Business Dependency, AC Update, Peer Review, and Story Verified are all complete.</errorMessage>
+    <errorMessage>All Story Readiness Checklist items must be completed before moving to "Completed - SIT Ready". Please ensure all 6 items are complete: Unit Test Sheet, Manual Deployment Steps, Business Dependency, AC Update, Peer Review, and Translations Sheet.</errorMessage>
 </ValidationRule>

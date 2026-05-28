@@ -1,11 +1,11 @@
-Task_Title__c,User_Story__c,Status__c,Priority__c,Task_Type__c,Estimated_Hours__c,Assigned_To__c,Due_Date__c,Description__c,Blocked_Reason__c
-Setup biometric SDK integration,Implement Biometric Login,Completed,Critical,Development,4,John Smith,2024-02-02,Integrate biometric SDK for iOS and Android platforms with proper error handling,
-Implement fingerprint auth flow,Implement Biometric Login,In Progress,Critical,Development,6,John Smith,2024-02-05,Build the complete fingerprint authentication flow including fallback to PIN,
-Write unit tests for biometric module,Implement Biometric Login,New,High,Testing,4,John Smith,2024-02-07,Create comprehensive unit tests covering all biometric authentication scenarios,
-Code review for biometric implementation,Implement Biometric Login,New,Medium,Code Review,2,Emily Davis,2024-02-08,Peer review of biometric authentication code for security and best practices,
-Design SMS verification UI,Add MFA SMS Verification,Blocked,High,Development,3,Emily Davis,2024-02-04,Create the SMS code entry screen with countdown timer and resend button,Waiting for UX mockups from design team - expected by Feb 3
-Build dashboard API endpoint,Design Account Dashboard,Completed,High,Development,5,Alex Rodriguez,2024-02-03,Create REST API endpoint that aggregates account balances from multiple sources,
-Implement dashboard frontend,Design Account Dashboard,Completed,High,Development,4,Alex Rodriguez,2024-02-06,Build responsive dashboard UI component with real-time balance display,
-Write API documentation,Build Transaction History API,Completed,Medium,Documentation,2,John Smith,2024-02-04,Document transaction history API with Swagger/OpenAPI specification,
-Deploy rate limiter to staging,Implement API Rate Limiting,In Progress,Critical,Deployment,3,Michael Chen,2024-02-10,Deploy and configure rate limiting rules in staging environment,
-Setup automated load tests,Implement API Rate Limiting,New,Medium,Testing,4,Michael Chen,2024-02-12,Create JMeter load test scripts to validate rate limiting under stress,
+Task_Title__c,User_Story__c,Status__c,Priority__c,Task_Type__c,Estimated_Hours__c,Assigned_To__c,Due_Date__c,Description__c,Blocked_Reason__c,Pending_Reason__c
+Setup biometric SDK integration,Implement Biometric Login,Completed,Critical,Development,4,John Smith,2024-02-02,Integrate biometric SDK for iOS and Android platforms with proper error handling,,
+Implement fingerprint auth flow,Implement Biometric Login,In Progress,Critical,Development,6,John Smith,2024-02-05,Build the complete fingerprint authentication flow including fallback to PIN,,
+Write unit tests for biometric module,Implement Biometric Login,New,High,Testing,4,John Smith,2024-02-07,Create comprehensive unit tests covering all biometric authentication scenarios,,
+Code review for biometric implementation,Implement Biometric Login,New,Medium,Code Review,2,Emily Davis,2024-02-08,Peer review of biometric authentication code for security and best practices,,
+Design SMS verification UI,Add MFA SMS Verification,Pending,High,Development,3,Emily Davis,2024-02-04,Create the SMS code entry screen with countdown timer and resend button,,Waiting for UX mockups from design team - expected by Feb 3
+Build dashboard API endpoint,Design Account Dashboard,Completed,High,Development,5,Alex Rodriguez,2024-02-03,Create REST API endpoint that aggregates account balances from multiple sources,,
+Implement dashboard frontend,Design Account Dashboard,Completed,High,Development,4,Alex Rodriguez,2024-02-06,Build responsive dashboard UI component with real-time balance display,,
+Write API documentation,Build Transaction History API,Completed,Medium,Documentation,2,John Smith,2024-02-04,Document transaction history API with Swagger/OpenAPI specification,,
+Deploy rate limiter to staging,Implement API Rate Limiting,In Progress,Critical,Deployment,3,Michael Chen,2024-02-10,Deploy and configure rate limiting rules in staging environment,,
+Setup automated load tests,Implement API Rate Limiting,Blocked,Medium,Testing,4,Michael Chen,2024-02-12,Create JMeter load test scripts to validate rate limiting under stress,Staging environment down for maintenance - ETA Feb 11,
