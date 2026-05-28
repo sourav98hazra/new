@@ -1,9 +1,76 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <QuickAction xmlns="http://soap.sforce.com/2006/04/metadata">
     <actionSubtype>ScreenAction</actionSubtype>
-    <description>Update Story Readiness Checklist — all 10 checkboxes pre-populated. Saving auto-closes matching Activity Tasks and triggers auto-status progressions.</description>
+    <description>Update Story Readiness Checklist — tick checkboxes across all 4 sections. Each save auto-closes matching Activity Tasks and triggers auto-status progressions (e.g. all 6 readiness items done → Completed - SIT Ready, Smoke Test done → Successfully Deployed).</description>
     <label>Update Readiness Checklist</label>
     <optionsCreateFeedItem>false</optionsCreateFeedItem>
-    <flowDefinition>Update_Readiness_Checklist</flowDefinition>
-    <type>Flow</type>
+    <quickActionLayout>
+        <layoutSectionStyle>TwoColumnsLeftToRight</layoutSectionStyle>
+        <quickActionLayoutColumns>
+            <!-- Section 1: Story Verification Gate -->
+            <quickActionLayoutItems>
+                <emptySpace>false</emptySpace>
+                <field>Story_Info_Verified__c</field>
+                <uiBehavior>Edit</uiBehavior>
+            </quickActionLayoutItems>
+            <!-- Section 2: Dev Checklist -->
+            <quickActionLayoutItems>
+                <emptySpace>false</emptySpace>
+                <field>Unit_Testing_Complete__c</field>
+                <uiBehavior>Edit</uiBehavior>
+            </quickActionLayoutItems>
+            <!-- Section 3: Story Readiness Checklist -->
+            <quickActionLayoutItems>
+                <emptySpace>false</emptySpace>
+                <field>Unit_Test_Sheet_Complete__c</field>
+                <uiBehavior>Edit</uiBehavior>
+            </quickActionLayoutItems>
+            <quickActionLayoutItems>
+                <emptySpace>false</emptySpace>
+                <field>Manual_Deployment_Steps_Complete__c</field>
+                <uiBehavior>Edit</uiBehavior>
+            </quickActionLayoutItems>
+            <quickActionLayoutItems>
+                <emptySpace>false</emptySpace>
+                <field>Business_Dependency_Complete__c</field>
+                <uiBehavior>Edit</uiBehavior>
+            </quickActionLayoutItems>
+            <quickActionLayoutItems>
+                <emptySpace>false</emptySpace>
+                <field>Translations_Sheet_Complete__c</field>
+                <uiBehavior>Edit</uiBehavior>
+            </quickActionLayoutItems>
+        </quickActionLayoutColumns>
+        <quickActionLayoutColumns>
+            <quickActionLayoutItems>
+                <emptySpace>false</emptySpace>
+                <field>AC_Update_Complete__c</field>
+                <uiBehavior>Edit</uiBehavior>
+            </quickActionLayoutItems>
+            <quickActionLayoutItems>
+                <emptySpace>false</emptySpace>
+                <field>Peer_Review_Complete__c</field>
+                <uiBehavior>Edit</uiBehavior>
+            </quickActionLayoutItems>
+            <!-- Section 4: PR & SIT Gates -->
+            <quickActionLayoutItems>
+                <emptySpace>false</emptySpace>
+                <field>PR_Creation_Complete__c</field>
+                <uiBehavior>Edit</uiBehavior>
+            </quickActionLayoutItems>
+            <quickActionLayoutItems>
+                <emptySpace>false</emptySpace>
+                <field>Smoke_Test_SIT_Complete__c</field>
+                <uiBehavior>Edit</uiBehavior>
+            </quickActionLayoutItems>
+            <!-- Formula (read-only summary) -->
+            <quickActionLayoutItems>
+                <emptySpace>false</emptySpace>
+                <field>All_Formalities_Complete__c</field>
+                <uiBehavior>Readonly</uiBehavior>
+            </quickActionLayoutItems>
+        </quickActionLayoutColumns>
+    </quickActionLayout>
+    <targetObject>User_Story__c</targetObject>
+    <type>Update</type>
 </QuickAction>

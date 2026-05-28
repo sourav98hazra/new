@@ -15,7 +15,7 @@
         <isOutput>false</isOutput>
     </variables>
 
-    <!-- Step 1: Get the User Story to pre-populate current checkbox values -->
+    <!-- ─── Step 1: Fetch current story values ─────────────────────── -->
     <recordLookups>
         <name>Get_Story</name>
         <label>Get User Story</label>
@@ -36,7 +36,7 @@
         <storeOutputAutomatically>true</storeOutputAutomatically>
     </recordLookups>
 
-    <!-- Step 2: Screen — all 10 checklist fields, pre-populated -->
+    <!-- ─── Step 2: Screen with 4 sections ─────────────────────────── -->
     <screens>
         <name>Screen_Checklist</name>
         <label>Update Readiness Checklist</label>
@@ -49,13 +49,24 @@
             <targetReference>Update_Story</targetReference>
         </connector>
 
+        <!-- ── Story header ── -->
         <fields>
             <name>Display_Header</name>
-            <fieldText>&lt;p&gt;&lt;strong&gt;Story:&lt;/strong&gt; {!Get_Story.Story_Title__c}&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Status:&lt;/strong&gt; {!Get_Story.Status__c}&lt;/p&gt;
+            <fieldText>&lt;p&gt;&lt;b&gt;Story:&lt;/b&gt; {!Get_Story.Story_Title__c}&lt;/p&gt;
+&lt;p&gt;&lt;b&gt;Status:&lt;/b&gt; {!Get_Story.Status__c}&lt;/p&gt;
 &lt;hr/&gt;
-&lt;p&gt;Tick each item as you complete it. Saving auto-closes the matching Activity Task and triggers auto-status progressions.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;— Verification &amp; Dev Gate —&lt;/strong&gt;&lt;/p&gt;</fieldText>
+&lt;p&gt;Tick each item as you complete it. Each save auto-closes the matching Activity Task and triggers any auto-status progressions.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+
+        <!-- ══════════════════════════════════════════
+             SECTION 1 — Story Verification Gate
+             Required before Dev In Progress
+        ═══════════════════════════════════════════ -->
+        <fields>
+            <name>Display_Section1</name>
+            <fieldText>&lt;p&gt;&lt;b style="color:#0176d3;"&gt;SECTION 1 — Story Verification Gate&lt;/b&gt;&lt;/p&gt;
+&lt;p&gt;&lt;i&gt;Must be complete before moving to Dev In Progress.&lt;/i&gt;&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
         </fields>
 
@@ -63,23 +74,39 @@
             <name>fStoryInfoVerified</name>
             <dataType>Boolean</dataType>
             <defaultValue><elementReference>Get_Story.Story_Info_Verified__c</elementReference></defaultValue>
-            <fieldText>Story Info Verified (gate: required before Dev In Progress)</fieldText>
+            <fieldText>Story Info Verified — Story title, description, AC, tasks and estimates all confirmed</fieldText>
             <fieldType>InputField</fieldType>
-            <isRequired>false</isRequired>
+        </fields>
+
+        <!-- ══════════════════════════════════════════
+             SECTION 2 — Dev Checklist
+             Required before Dev Completed
+        ═══════════════════════════════════════════ -->
+        <fields>
+            <name>Display_Section2</name>
+            <fieldText>&lt;p&gt;&lt;b style="color:#0176d3;"&gt;SECTION 2 — Dev Checklist&lt;/b&gt;&lt;/p&gt;
+&lt;p&gt;&lt;i&gt;Must be complete before moving to Dev Completed.&lt;/i&gt;&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
         </fields>
 
         <fields>
             <name>fUnitTestingComplete</name>
             <dataType>Boolean</dataType>
             <defaultValue><elementReference>Get_Story.Unit_Testing_Complete__c</elementReference></defaultValue>
-            <fieldText>Unit Testing Complete (gate: required before Dev Completed)</fieldText>
+            <fieldText>Unit Testing Complete — All unit tests written, run, and passing</fieldText>
             <fieldType>InputField</fieldType>
-            <isRequired>false</isRequired>
         </fields>
 
+        <!-- ══════════════════════════════════════════
+             SECTION 3 — Story Readiness Checklist
+             All 6 required before Completed - SIT Ready.
+             Auto-progresses: some done → Formalities InProgress,
+             all 6 done → Completed - SIT Ready.
+        ═══════════════════════════════════════════ -->
         <fields>
-            <name>Display_ReadinessDivider</name>
-            <fieldText>&lt;p&gt;&lt;strong&gt;— Story Readiness Checklist (all 6 required before Completed - SIT Ready) —&lt;/strong&gt;&lt;/p&gt;</fieldText>
+            <name>Display_Section3</name>
+            <fieldText>&lt;p&gt;&lt;b style="color:#0176d3;"&gt;SECTION 3 — Story Readiness Checklist&lt;/b&gt;&lt;/p&gt;
+&lt;p&gt;&lt;i&gt;All 6 items required before Completed - SIT Ready. Story auto-advances when all are ticked.&lt;/i&gt;&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
         </fields>
 
@@ -89,7 +116,6 @@
             <defaultValue><elementReference>Get_Story.Unit_Test_Sheet_Complete__c</elementReference></defaultValue>
             <fieldText>Unit Test Sheet Complete</fieldText>
             <fieldType>InputField</fieldType>
-            <isRequired>false</isRequired>
         </fields>
 
         <fields>
@@ -98,7 +124,6 @@
             <defaultValue><elementReference>Get_Story.Manual_Deployment_Steps_Complete__c</elementReference></defaultValue>
             <fieldText>Manual Deployment Steps Sheet Complete</fieldText>
             <fieldType>InputField</fieldType>
-            <isRequired>false</isRequired>
         </fields>
 
         <fields>
@@ -107,16 +132,14 @@
             <defaultValue><elementReference>Get_Story.Business_Dependency_Complete__c</elementReference></defaultValue>
             <fieldText>Business Dependency Sheet Complete</fieldText>
             <fieldType>InputField</fieldType>
-            <isRequired>false</isRequired>
         </fields>
 
         <fields>
             <name>fACUpdate</name>
             <dataType>Boolean</dataType>
             <defaultValue><elementReference>Get_Story.AC_Update_Complete__c</elementReference></defaultValue>
-            <fieldText>AC Update Complete</fieldText>
+            <fieldText>AC Update Complete — Acceptance criteria updated and signed off</fieldText>
             <fieldType>InputField</fieldType>
-            <isRequired>false</isRequired>
         </fields>
 
         <fields>
@@ -125,21 +148,25 @@
             <defaultValue><elementReference>Get_Story.Peer_Review_Complete__c</elementReference></defaultValue>
             <fieldText>Peer Review Complete</fieldText>
             <fieldType>InputField</fieldType>
-            <isRequired>false</isRequired>
         </fields>
 
         <fields>
             <name>fTranslationsSheet</name>
             <dataType>Boolean</dataType>
             <defaultValue><elementReference>Get_Story.Translations_Sheet_Complete__c</elementReference></defaultValue>
-            <fieldText>Translations Sheet Complete</fieldText>
+            <fieldText>Translations Sheet Complete — All labels / UI text translations updated</fieldText>
             <fieldType>InputField</fieldType>
-            <isRequired>false</isRequired>
         </fields>
 
+        <!-- ══════════════════════════════════════════
+             SECTION 4 — PR & SIT Gates
+             PR Creation gate: required before Sent to SIT.
+             Smoke Test gate: completes → Successfully Deployed to SIT.
+        ═══════════════════════════════════════════ -->
         <fields>
-            <name>Display_PRSITDivider</name>
-            <fieldText>&lt;p&gt;&lt;strong&gt;— PR &amp; SIT Gates —&lt;/strong&gt;&lt;/p&gt;</fieldText>
+            <name>Display_Section4</name>
+            <fieldText>&lt;p&gt;&lt;b style="color:#0176d3;"&gt;SECTION 4 — PR &amp; SIT Gates&lt;/b&gt;&lt;/p&gt;
+&lt;p&gt;&lt;i&gt;PR Creation required before Sent to SIT. Smoke Test completion auto-moves story to Successfully Deployed to SIT and triggers a batch email to all ADM users.&lt;/i&gt;&lt;/p&gt;</fieldText>
             <fieldType>DisplayText</fieldType>
         </fields>
 
@@ -147,25 +174,23 @@
             <name>fPRCreation</name>
             <dataType>Boolean</dataType>
             <defaultValue><elementReference>Get_Story.PR_Creation_Complete__c</elementReference></defaultValue>
-            <fieldText>PR Creation Complete (gate: required before Sent to SIT — auto-moves story)</fieldText>
+            <fieldText>PR Creation Complete — PR raised, reviewed and merged</fieldText>
             <fieldType>InputField</fieldType>
-            <isRequired>false</isRequired>
         </fields>
 
         <fields>
             <name>fSmokeTestSIT</name>
             <dataType>Boolean</dataType>
             <defaultValue><elementReference>Get_Story.Smoke_Test_SIT_Complete__c</elementReference></defaultValue>
-            <fieldText>Smoke Test SIT Complete (auto-moves story to Successfully Deployed to SIT)</fieldText>
+            <fieldText>Smoke Test SIT Complete — Core functionality verified post-deployment in SIT</fieldText>
             <fieldType>InputField</fieldType>
-            <isRequired>false</isRequired>
         </fields>
 
         <showFooter>true</showFooter>
         <showHeader>true</showHeader>
     </screens>
 
-    <!-- Step 3: Save all 10 checkboxes — triggers UserStoryTrigger auto-logic -->
+    <!-- ─── Step 3: Save all 10 fields → triggers UserStoryTrigger ── -->
     <recordUpdates>
         <name>Update_Story</name>
         <label>Save Readiness Checklist</label>
